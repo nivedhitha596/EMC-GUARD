@@ -1,0 +1,82 @@
+{
+  "MutualInductance_nH": {
+    "status": "CALIBRATED",
+    "coverage_nominal": 0.9,
+    "coverage_empirical": 0.9873,
+    "q_hat": 2.34349,
+    "mean_interval_width": 4.686981,
+    "n_calib": 117,
+    "n_eval": 79,
+    "assumptions": [
+      "Exchangeability: calibration and new inputs share the same distribution.",
+      "Coverage is MARGINAL (averaged), not conditional on input value.",
+      "Intervals are symmetric \u2014 may undercover for skewed targets.",
+      "Valid only while data distribution matches training distribution.",
+      "SYNTHETIC data: these properties may not hold for real MATLAB data."
+    ]
+  },
+  "MutualCapacitance_pF": {
+    "status": "CALIBRATED",
+    "coverage_nominal": 0.9,
+    "coverage_empirical": 0.9747,
+    "q_hat": 3.817768,
+    "mean_interval_width": 7.635535,
+    "n_calib": 117,
+    "n_eval": 79,
+    "assumptions": [
+      "Exchangeability: calibration and new inputs share the same distribution.",
+      "Coverage is MARGINAL (averaged), not conditional on input value.",
+      "Intervals are symmetric \u2014 may undercover for skewed targets.",
+      "Valid only while data distribution matches training distribution.",
+      "SYNTHETIC data: these properties may not hold for real MATLAB data."
+    ]
+  },
+  "Victim_Voltage_V": {
+    "status": "CALIBRATED",
+    "coverage_nominal": 0.9,
+    "coverage_empirical": 0.8987,
+    "q_hat": 52.32008,
+    "mean_interval_width": 104.640161,
+    "n_calib": 117,
+    "n_eval": 79,
+    "assumptions": [
+      "Exchangeability: calibration and new inputs share the same distribution.",
+      "Coverage is MARGINAL (averaged), not conditional on input value.",
+      "Intervals are symmetric \u2014 may undercover for skewed targets.",
+      "Valid only while data distribution matches training distribution.",
+      "SYNTHETIC data: these properties may not hold for real MATLAB data."
+    ]
+  },
+  "Victim_RMS_V": {
+    "status": "CALIBRATED",
+    "coverage_nominal": 0.9,
+    "coverage_empirical": 0.9241,
+    "q_hat": 35.892738,
+    "mean_interval_width": 71.785477,
+    "n_calib": 117,
+    "n_eval": 79,
+    "assumptions": [
+      "Exchangeability: calibration and new inputs share the same distribution.",
+      "Coverage is MARGINAL (averaged), not conditional on input value.",
+      "Intervals are symmetric \u2014 may undercover for skewed targets.",
+      "Valid only while data distribution matches training distribution.",
+      "SYNTHETIC data: these properties may not hold for real MATLAB data."
+    ]
+  },
+  "Victim_PeakToPeak_V": {
+    "status": "CALIBRATED",
+    "coverage_nominal": 0.9,
+    "coverage_empirical": 0.9494,
+    "q_hat": 137.823412,
+    "mean_interval_width": 275.646823,
+    "n_calib": 117,
+    "n_eval": 79,
+    "assumptions": [
+      "Exchangeability: calibration and new inputs share the same distribution.",
+      "Coverage is MARGINAL (averaged), not conditional on input value.",
+      "Intervals are symmetric \u2014 may undercover for skewed targets.",
+      "Valid only while data distribution matches training distribution.",
+      "SYNTHETIC data: these properties may not hold for real MATLAB data."
+    ]
+  }
+}

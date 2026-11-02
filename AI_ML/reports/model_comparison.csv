@@ -1,0 +1,11 @@
+Target,Algorithm,MAE,RMSE,R2
+MutualInductance_nH,Random Forest,1.124012,3.172906,0.643232
+MutualInductance_nH,Extra Trees,0.770499,1.853127,0.878303
+MutualCapacitance_pF,Random Forest,1.021965,2.393923,0.682691
+MutualCapacitance_pF,Extra Trees,0.78702,1.733943,0.833532
+Victim_Voltage_V,Random Forest,22.293927,41.917237,0.731222
+Victim_Voltage_V,Extra Trees,20.429113,41.550096,0.73591
+Victim_RMS_V,Random Forest,16.204027,30.698834,0.704127
+Victim_RMS_V,Extra Trees,14.727345,30.078202,0.71597
+Victim_PeakToPeak_V,Random Forest,46.709845,87.860083,0.697258
+Victim_PeakToPeak_V,Extra Trees,44.275061,89.35004,0.686903

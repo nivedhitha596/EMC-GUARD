@@ -1,0 +1,32 @@
+{
+  "MutualInductance_nH": {
+    "best_algorithm": "Extra Trees",
+    "MAE": 0.770499,
+    "RMSE": 1.853127,
+    "R2": 0.878303
+  },
+  "MutualCapacitance_pF": {
+    "best_algorithm": "Extra Trees",
+    "MAE": 0.78702,
+    "RMSE": 1.733943,
+    "R2": 0.833532
+  },
+  "Victim_Voltage_V": {
+    "best_algorithm": "Extra Trees",
+    "MAE": 20.429113,
+    "RMSE": 41.550096,
+    "R2": 0.73591
+  },
+  "Victim_RMS_V": {
+    "best_algorithm": "Extra Trees",
+    "MAE": 14.727345,
+    "RMSE": 30.078202,
+    "R2": 0.71597
+  },
+  "Victim_PeakToPeak_V": {
+    "best_algorithm": "Random Forest",
+    "MAE": 46.709845,
+    "RMSE": 87.860083,
+    "R2": 0.697258
+  }
+}

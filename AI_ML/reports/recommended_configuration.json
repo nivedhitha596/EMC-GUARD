@@ -1,0 +1,31 @@
+{
+  "Separation_mm": 50.0,
+  "Overlap_mm": 100.0,
+  "Cable_Length_mm": 450.0,
+  "Frequency_Hz": 100000.0,
+  "Voltage_V": 24.0,
+  "Conductor_Radius_mm": 0.5,
+  "Dielectric_Constant": 2.3,
+  "Shield_Type": "Unshielded",
+  "Cable_Configuration": "Parallel",
+  "Candidate_ID": "CAND_032",
+  "_metadata": {
+    "primary_objective": "Victim_Voltage_V",
+    "predicted_value": 10.99370932,
+    "baseline_value": 39.22496956,
+    "relative_improvement_pct": 71.9727,
+    "risk_category": "HIGHER PREDICTED RISK",
+    "risk_reliability": "CAUTION",
+    "is_baseline_optimal": "False",
+    "dataset_type": "SYNTHETIC",
+    "disclaimer": "This recommendation is based on ML model predictions from SYNTHETIC DUMMY DATA. It is NOT a validated EMC measurement. Verify with MATLAB simulation before engineering use.",
+    "generated_at": "2026-11-02 11:07:25"
+  },
+  "_predictions": {
+    "MutualInductance_nH": 1.5753869,
+    "MutualCapacitance_pF": 1.87714052,
+    "Victim_Voltage_V": 10.99370932,
+    "Victim_RMS_V": 7.78845957,
+    "Victim_PeakToPeak_V": 44.31810648
+  }
+}

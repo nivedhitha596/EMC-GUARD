@@ -1,0 +1,305 @@
+====================================================================
+EMC-GUARD — MODULE 3 RISK ASSESSMENT REPORT
+Generated  : 2026-11-01 14:05:52
+Dataset    : SYNTHETIC
+====================================================================
+
+DISCLAIMER
+--------------------------------------------------------------------
+This report is produced by a PREDICTIVE DECISION-SUPPORT PROTOTYPE.
+Risk categories are DATASET-RELATIVE, derived from percentile
+boundaries of the training dataset. They are NOT certified EMC
+safety limits or compliance assessments.
+All predictions are based on SYNTHETIC DUMMY DATA and do not
+represent real electromagnetic measurements.
+
+====================================================================
+CONFIGURATION COMPARISON SUMMARY
+[SYNTHETIC DATA — dataset-relative risk categories]
+====================================================================
+
+Configurations analysed: 6
+Ranked by predicted Victim_Voltage_V (highest to lowest):
+
+  1. TC3_SmallSep_LongOvl | Victim_V=  141.7858 V | HIGHER PREDICTED RISK          | Sep=15.0 mm, Ovl=420.0 mm | Unshielded/Parallel | Reliability=ACCEPTABLE
+  2. TC2_ModerateSep_ModerateOvl | Victim_V=   11.3679 V | HIGHER PREDICTED RISK          | Sep=60.0 mm, Ovl=200.0 mm | Unshielded/Parallel | Reliability=ACCEPTABLE
+  3. TC6_OutOfDomain | Victim_V=   10.5915 V | HIGHER PREDICTED RISK          | Sep=5000.0 mm, Ovl=250.0 mm | Unshielded/Parallel | Reliability=CAUTION
+  4. TC5_Unshielded | Victim_V=    5.3415 V | HIGHER PREDICTED RISK          | Sep=40.0 mm, Ovl=250.0 mm | Unshielded/Perpendicular | Reliability=ACCEPTABLE
+  5. TC4_Shielded   | Victim_V=    1.4665 V | INTERMEDIATE PREDICTED RISK    | Sep=40.0 mm, Ovl=250.0 mm | Shielded/Perpendicular | Reliability=ACCEPTABLE
+  6. TC1_LargeSep_ShortOvl | Victim_V=    1.3617 V | INTERMEDIATE PREDICTED RISK    | Sep=150.0 mm, Ovl=50.0 mm | Unshielded/Parallel | Reliability=ACCEPTABLE
+
+Threshold basis: dataset-relative (P33/P67 of training dataset).
+NOT certified EMC safety thresholds.
+====================================================================
+
+====================================================================
+DETAILED CONFIGURATION ANALYSES
+====================================================================
+
+--- TC1_LargeSep_ShortOvl ---
+Timestamp   : 2026-11-01 14:05:47
+Overall Risk: INTERMEDIATE PREDICTED RISK
+Reliability : ACCEPTABLE
+
+Input Configuration:
+  Separation_mm             : 150.0
+  Overlap_mm                : 50.0
+  Cable_Length_mm           : 1000.0
+  Frequency_Hz              : 500000.0
+  Voltage_V                 : 48.0
+  Conductor_Radius_mm       : 1.5
+  Dielectric_Constant       : 3.5
+  Shield_Type               : Unshielded
+  Cable_Configuration       : Parallel
+
+Explanation:
+  This configuration shows INTERMEDIATE predicted electromagnetic coupling. Its predicted outputs fall within the middle range (between the 33rd and 67th percentiles) of the training dataset.
+  
+  Predicted electromagnetic outputs:
+    MutualInductance_nH: 0.524197  -> INTERMEDIATE PREDICTED RISK  (indicator=0.00/1.00)
+    MutualCapacitance_pF: 0.438957  -> INTERMEDIATE PREDICTED RISK  (indicator=0.00/1.00)
+    Victim_Voltage_V: 1.361663  -> LOWER PREDICTED RISK  (indicator=0.00/1.00)
+    Victim_RMS_V: 1.019169  -> LOWER PREDICTED RISK  (indicator=0.00/1.00)
+    Victim_PeakToPeak_V: 4.092499  -> LOWER PREDICTED RISK  (indicator=0.00/1.00)
+  
+  Cable geometry observations:
+    - Parallel overlap is 50.0 mm, which is relatively short. Shorter overlap typically limits the total coupling exposure within this dataset context.
+    - Cable arrangement is Parallel. In this dataset context, parallel arrangements tend to exhibit higher predicted coupling than perpendicular or crossed arrangements.
+    - Unshielded cables are used. In the training dataset, unshielded configurations showed higher predicted coupling than equivalent shielded arrangements.
+  
+  Prediction reliability: ACCEPTABLE
+    RMSE relative warnings:
+      MutualInductance_nH: RMSE=1.8531 is 353.5% of predicted value 0.5242
+      MutualCapacitance_pF: RMSE=1.7339 is 395.0% of predicted value 0.4390
+      Victim_Voltage_V: RMSE=41.5501 is 3051.4% of predicted value 1.3617
+      Victim_RMS_V: RMSE=30.0782 is 2951.2% of predicted value 1.0192
+      Victim_PeakToPeak_V: RMSE=87.8601 is 2146.9% of predicted value 4.0925
+    Prediction uncertainty is not yet calibrated. The RMSE from the test set is the best available proxy but is not a formal prediction interval.
+  
+  Threshold method: dataset_relative_percentile (P33 / P67 of EMC_GUARD_Physics_Dataset.csv [SYNTHETIC]).
+  IMPORTANT: This is a PREDICTIVE DECISION-SUPPORT PROTOTYPE. Risk categories are dataset-relative and are NOT certified EMC safety thresholds or compliance assessments.
+--------------------------------------------------------------------
+
+--- TC2_ModerateSep_ModerateOvl ---
+Timestamp   : 2026-11-01 14:05:48
+Overall Risk: HIGHER PREDICTED RISK
+Reliability : ACCEPTABLE
+
+Input Configuration:
+  Separation_mm             : 60.0
+  Overlap_mm                : 200.0
+  Cable_Length_mm           : 2000.0
+  Frequency_Hz              : 1000000.0
+  Voltage_V                 : 110.0
+  Conductor_Radius_mm       : 2.5
+  Dielectric_Constant       : 5.0
+  Shield_Type               : Unshielded
+  Cable_Configuration       : Parallel
+
+Explanation:
+  This configuration has relatively HIGHER predicted electromagnetic coupling. Its predicted outputs exceed the 67th percentile of the training dataset distribution.
+  
+  Predicted electromagnetic outputs:
+    MutualInductance_nH: 5.093139  -> HIGHER PREDICTED RISK  (indicator=0.03/1.00)
+    MutualCapacitance_pF: 4.260690  -> HIGHER PREDICTED RISK  (indicator=0.05/1.00)
+    Victim_Voltage_V: 11.367860  -> INTERMEDIATE PREDICTED RISK  (indicator=0.02/1.00)
+    Victim_RMS_V: 8.670043  -> INTERMEDIATE PREDICTED RISK  (indicator=0.02/1.00)
+    Victim_PeakToPeak_V: 29.975813  -> INTERMEDIATE PREDICTED RISK  (indicator=0.03/1.00)
+  
+  Cable geometry observations:
+    - Cable arrangement is Parallel. In this dataset context, parallel arrangements tend to exhibit higher predicted coupling than perpendicular or crossed arrangements.
+    - Unshielded cables are used. In the training dataset, unshielded configurations showed higher predicted coupling than equivalent shielded arrangements.
+  
+  Prediction reliability: ACCEPTABLE
+    RMSE relative warnings:
+      MutualInductance_nH: RMSE=1.8531 is 36.4% of predicted value 5.0931
+      MutualCapacitance_pF: RMSE=1.7339 is 40.7% of predicted value 4.2607
+      Victim_Voltage_V: RMSE=41.5501 is 365.5% of predicted value 11.3679
+      Victim_RMS_V: RMSE=30.0782 is 346.9% of predicted value 8.6700
+      Victim_PeakToPeak_V: RMSE=87.8601 is 293.1% of predicted value 29.9758
+    Prediction uncertainty is not yet calibrated. The RMSE from the test set is the best available proxy but is not a formal prediction interval.
+  
+  Threshold method: dataset_relative_percentile (P33 / P67 of EMC_GUARD_Physics_Dataset.csv [SYNTHETIC]).
+  IMPORTANT: This is a PREDICTIVE DECISION-SUPPORT PROTOTYPE. Risk categories are dataset-relative and are NOT certified EMC safety thresholds or compliance assessments.
+--------------------------------------------------------------------
+
+--- TC3_SmallSep_LongOvl ---
+Timestamp   : 2026-11-01 14:05:49
+Overall Risk: HIGHER PREDICTED RISK
+Reliability : ACCEPTABLE
+
+Input Configuration:
+  Separation_mm             : 15.0
+  Overlap_mm                : 420.0
+  Cable_Length_mm           : 3500.0
+  Frequency_Hz              : 5000000.0
+  Voltage_V                 : 230.0
+  Conductor_Radius_mm       : 3.5
+  Dielectric_Constant       : 7.5
+  Shield_Type               : Unshielded
+  Cable_Configuration       : Parallel
+
+Explanation:
+  This configuration has relatively HIGHER predicted electromagnetic coupling. Its predicted outputs exceed the 67th percentile of the training dataset distribution.
+  
+  Predicted electromagnetic outputs:
+    MutualInductance_nH: 35.811468  -> HIGHER PREDICTED RISK  (indicator=0.24/1.00)
+    MutualCapacitance_pF: 45.990418  -> HIGHER PREDICTED RISK  (indicator=0.53/1.00)
+    Victim_Voltage_V: 141.785844  -> HIGHER PREDICTED RISK  (indicator=0.29/1.00)
+    Victim_RMS_V: 95.333334  -> HIGHER PREDICTED RISK  (indicator=0.27/1.00)
+    Victim_PeakToPeak_V: 270.057502  -> HIGHER PREDICTED RISK  (indicator=0.27/1.00)
+  
+  Cable geometry observations:
+    - Cable separation is 15.0 mm, which is below the dataset-context compact threshold (30 mm). Close proximity can increase electromagnetic coupling.
+    - Parallel overlap length is 420.0 mm, exceeding the dataset-context extensive threshold (350 mm). Longer parallel runs may expose more cable length to electromagnetic coupling.
+    - Cable arrangement is Parallel. In this dataset context, parallel arrangements tend to exhibit higher predicted coupling than perpendicular or crossed arrangements.
+    - Unshielded cables are used. In the training dataset, unshielded configurations showed higher predicted coupling than equivalent shielded arrangements.
+    - The combination of reduced separation (15.0 mm) and extended overlap (420.0 mm) places this configuration in a geometrically high-exposure region of the dataset.
+    - The dielectric constant is 7.50, which is above the dataset median. Higher permittivity is associated with increased predicted capacitive coupling in the surrogate model.
+  
+  Prediction reliability: ACCEPTABLE
+    RMSE relative warnings:
+      Victim_RMS_V: RMSE=30.0782 is 31.6% of predicted value 95.3333
+      Victim_PeakToPeak_V: RMSE=87.8601 is 32.5% of predicted value 270.0575
+    Prediction uncertainty is not yet calibrated. The RMSE from the test set is the best available proxy but is not a formal prediction interval.
+  
+  Threshold method: dataset_relative_percentile (P33 / P67 of EMC_GUARD_Physics_Dataset.csv [SYNTHETIC]).
+  IMPORTANT: This is a PREDICTIVE DECISION-SUPPORT PROTOTYPE. Risk categories are dataset-relative and are NOT certified EMC safety thresholds or compliance assessments.
+--------------------------------------------------------------------
+
+--- TC4_Shielded ---
+Timestamp   : 2026-11-01 14:05:49
+Overall Risk: INTERMEDIATE PREDICTED RISK
+Reliability : ACCEPTABLE
+
+Input Configuration:
+  Separation_mm             : 40.0
+  Overlap_mm                : 250.0
+  Cable_Length_mm           : 2500.0
+  Frequency_Hz              : 2000000.0
+  Voltage_V                 : 110.0
+  Conductor_Radius_mm       : 2.0
+  Dielectric_Constant       : 4.5
+  Shield_Type               : Shielded
+  Cable_Configuration       : Perpendicular
+
+Explanation:
+  This configuration shows INTERMEDIATE predicted electromagnetic coupling. Its predicted outputs fall within the middle range (between the 33rd and 67th percentiles) of the training dataset.
+  
+  Predicted electromagnetic outputs:
+    MutualInductance_nH: 0.522473  -> INTERMEDIATE PREDICTED RISK  (indicator=0.00/1.00)
+    MutualCapacitance_pF: 0.177677  -> LOWER PREDICTED RISK  (indicator=0.00/1.00)
+    Victim_Voltage_V: 1.466489  -> LOWER PREDICTED RISK  (indicator=0.00/1.00)
+    Victim_RMS_V: 1.136529  -> LOWER PREDICTED RISK  (indicator=0.00/1.00)
+    Victim_PeakToPeak_V: 3.187815  -> LOWER PREDICTED RISK  (indicator=0.00/1.00)
+  
+  Cable geometry observations:
+    - Cable arrangement is Perpendicular. The model was trained with configurations where perpendicular arrangements showed reduced coupling compared to parallel.
+    - Shielded cables are used. The surrogate model was trained with shielded cables assigned a reduced coupling factor in the synthetic data generator.
+  
+  Prediction reliability: ACCEPTABLE
+    RMSE relative warnings:
+      MutualInductance_nH: RMSE=1.8531 is 354.7% of predicted value 0.5225
+      MutualCapacitance_pF: RMSE=1.7339 is 975.9% of predicted value 0.1777
+      Victim_Voltage_V: RMSE=41.5501 is 2833.3% of predicted value 1.4665
+      Victim_RMS_V: RMSE=30.0782 is 2646.5% of predicted value 1.1365
+      Victim_PeakToPeak_V: RMSE=87.8601 is 2756.1% of predicted value 3.1878
+    Prediction uncertainty is not yet calibrated. The RMSE from the test set is the best available proxy but is not a formal prediction interval.
+  
+  Threshold method: dataset_relative_percentile (P33 / P67 of EMC_GUARD_Physics_Dataset.csv [SYNTHETIC]).
+  IMPORTANT: This is a PREDICTIVE DECISION-SUPPORT PROTOTYPE. Risk categories are dataset-relative and are NOT certified EMC safety thresholds or compliance assessments.
+--------------------------------------------------------------------
+
+--- TC5_Unshielded ---
+Timestamp   : 2026-11-01 14:05:50
+Overall Risk: HIGHER PREDICTED RISK
+Reliability : ACCEPTABLE
+
+Input Configuration:
+  Separation_mm             : 40.0
+  Overlap_mm                : 250.0
+  Cable_Length_mm           : 2500.0
+  Frequency_Hz              : 2000000.0
+  Voltage_V                 : 110.0
+  Conductor_Radius_mm       : 2.0
+  Dielectric_Constant       : 4.5
+  Shield_Type               : Unshielded
+  Cable_Configuration       : Perpendicular
+
+Explanation:
+  This configuration has relatively HIGHER predicted electromagnetic coupling. Its predicted outputs exceed the 67th percentile of the training dataset distribution.
+  
+  Predicted electromagnetic outputs:
+    MutualInductance_nH: 2.960576  -> HIGHER PREDICTED RISK  (indicator=0.02/1.00)
+    MutualCapacitance_pF: 1.919466  -> HIGHER PREDICTED RISK  (indicator=0.02/1.00)
+    Victim_Voltage_V: 5.341487  -> INTERMEDIATE PREDICTED RISK  (indicator=0.01/1.00)
+    Victim_RMS_V: 4.389149  -> INTERMEDIATE PREDICTED RISK  (indicator=0.01/1.00)
+    Victim_PeakToPeak_V: 21.123170  -> INTERMEDIATE PREDICTED RISK  (indicator=0.02/1.00)
+  
+  Cable geometry observations:
+    - Cable arrangement is Perpendicular. The model was trained with configurations where perpendicular arrangements showed reduced coupling compared to parallel.
+    - Unshielded cables are used. In the training dataset, unshielded configurations showed higher predicted coupling than equivalent shielded arrangements.
+  
+  Prediction reliability: ACCEPTABLE
+    RMSE relative warnings:
+      MutualInductance_nH: RMSE=1.8531 is 62.6% of predicted value 2.9606
+      MutualCapacitance_pF: RMSE=1.7339 is 90.3% of predicted value 1.9195
+      Victim_Voltage_V: RMSE=41.5501 is 777.9% of predicted value 5.3415
+      Victim_RMS_V: RMSE=30.0782 is 685.3% of predicted value 4.3891
+      Victim_PeakToPeak_V: RMSE=87.8601 is 415.9% of predicted value 21.1232
+    Prediction uncertainty is not yet calibrated. The RMSE from the test set is the best available proxy but is not a formal prediction interval.
+  
+  Threshold method: dataset_relative_percentile (P33 / P67 of EMC_GUARD_Physics_Dataset.csv [SYNTHETIC]).
+  IMPORTANT: This is a PREDICTIVE DECISION-SUPPORT PROTOTYPE. Risk categories are dataset-relative and are NOT certified EMC safety thresholds or compliance assessments.
+--------------------------------------------------------------------
+
+--- TC6_OutOfDomain ---
+Timestamp   : 2026-11-01 14:05:51
+Overall Risk: HIGHER PREDICTED RISK
+Reliability : CAUTION
+
+Input Configuration:
+  Separation_mm             : 5000.0
+  Overlap_mm                : 250.0
+  Cable_Length_mm           : 2500.0
+  Frequency_Hz              : 2000000.0
+  Voltage_V                 : 110.0
+  Conductor_Radius_mm       : 2.0
+  Dielectric_Constant       : 4.5
+  Shield_Type               : Unshielded
+  Cable_Configuration       : Parallel
+
+Explanation:
+  This configuration has relatively HIGHER predicted electromagnetic coupling. Its predicted outputs exceed the 67th percentile of the training dataset distribution.
+  
+  Predicted electromagnetic outputs:
+    MutualInductance_nH: 2.484629  -> HIGHER PREDICTED RISK  (indicator=0.02/1.00)
+    MutualCapacitance_pF: 1.777061  -> HIGHER PREDICTED RISK  (indicator=0.02/1.00)
+    Victim_Voltage_V: 10.591533  -> INTERMEDIATE PREDICTED RISK  (indicator=0.02/1.00)
+    Victim_RMS_V: 7.186107  -> INTERMEDIATE PREDICTED RISK  (indicator=0.02/1.00)
+    Victim_PeakToPeak_V: 16.087921  -> INTERMEDIATE PREDICTED RISK  (indicator=0.02/1.00)
+  
+  Cable geometry observations:
+    - Cable separation is 5000.0 mm. Larger separation generally reduces inductive and capacitive coupling in the dataset-relative context.
+    - Cable arrangement is Parallel. In this dataset context, parallel arrangements tend to exhibit higher predicted coupling than perpendicular or crossed arrangements.
+    - Unshielded cables are used. In the training dataset, unshielded configurations showed higher predicted coupling than equivalent shielded arrangements.
+  
+  Prediction reliability: CAUTION
+    Out-of-training-range features: ['Separation_mm']
+    The model is extrapolating outside its validated input space.
+    Verify this prediction with MATLAB simulation.
+    RMSE relative warnings:
+      MutualInductance_nH: RMSE=1.8531 is 74.6% of predicted value 2.4846
+      MutualCapacitance_pF: RMSE=1.7339 is 97.6% of predicted value 1.7771
+      Victim_Voltage_V: RMSE=41.5501 is 392.3% of predicted value 10.5915
+      Victim_RMS_V: RMSE=30.0782 is 418.6% of predicted value 7.1861
+      Victim_PeakToPeak_V: RMSE=87.8601 is 546.1% of predicted value 16.0879
+    Prediction uncertainty is not yet calibrated. The RMSE from the test set is the best available proxy but is not a formal prediction interval.
+  
+  Threshold method: dataset_relative_percentile (P33 / P67 of EMC_GUARD_Physics_Dataset.csv [SYNTHETIC]).
+  IMPORTANT: This is a PREDICTIVE DECISION-SUPPORT PROTOTYPE. Risk categories are dataset-relative and are NOT certified EMC safety thresholds or compliance assessments.
+--------------------------------------------------------------------
+
+--- TC7_MissingKey ---
+ERROR: Missing required input features: ['Frequency_Hz']
+Required features: ['Separation_mm', 'Overlap_mm', 'Cable_Length_mm', 'Frequency_Hz', 'Voltage_V', 'Conductor_Radius_mm', 'Dielectric_Constant', 'Shield_Type', 'Cable_Configuration']

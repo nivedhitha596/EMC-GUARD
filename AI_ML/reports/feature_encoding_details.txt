@@ -1,0 +1,45 @@
+=================================================================
+EMC-GUARD — FEATURE ENCODING DETAILS
+Generated : 2026-11-01 12:45:56
+Data      : SYNTHETIC DUMMY DATASET (testing only)
+=================================================================
+
+[NUMERICAL FEATURES — StandardScaler]
+  Strategy : zero mean, unit variance
+  Imputer  : median (safety net for residual NaN)
+
+  Separation_mm              mean=102.7328  std=56.3670
+  Overlap_mm                 mean=256.9492  std=139.2018
+  Cable_Length_mm            mean=2483.3374  std=1390.2346
+  Frequency_Hz               mean=14870856.9298  std=8583143.8161
+  Voltage_V                  mean=241.0585  std=140.5729
+  Conductor_Radius_mm        mean=2.7043  std=1.2473
+  Dielectric_Constant        mean=6.0000  std=2.2526
+
+[CATEGORICAL FEATURES — OneHotEncoder (drop='first')]
+  Note: The first category of each feature is dropped to avoid
+        perfect multicollinearity (reference-category encoding).
+
+  Shield_Type
+    All categories : ['Shielded', 'Unshielded']
+    Reference (dropped): Shielded
+    Encoded categories : ['Unshielded']
+
+  Cable_Configuration
+    All categories : ['Crossed', 'Parallel', 'Perpendicular']
+    Reference (dropped): Crossed
+    Encoded categories : ['Parallel', 'Perpendicular']
+
+[FULL ENCODED FEATURE LIST]
+  Total features after encoding: 10
+
+    1. Separation_mm
+    2. Overlap_mm
+    3. Cable_Length_mm
+    4. Frequency_Hz
+    5. Voltage_V
+    6. Conductor_Radius_mm
+    7. Dielectric_Constant
+    8. Shield_Type_Unshielded
+    9. Cable_Configuration_Parallel
+   10. Cable_Configuration_Perpendicular

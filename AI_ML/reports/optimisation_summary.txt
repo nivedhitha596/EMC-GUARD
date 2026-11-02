@@ -1,0 +1,100 @@
+======================================================================
+EMC-GUARD — MODULE 5: CABLE-ROUTING OPTIMISATION SUMMARY
+Generated  : 2026-11-02 11:07:25
+Dataset    : SYNTHETIC
+======================================================================
+
+DISCLAIMER
+----------------------------------------------------------------------
+Results are from a model trained on SYNTHETIC DUMMY DATA.
+They do NOT represent validated electromagnetic improvements.
+All recommendations must be verified with MATLAB simulation.
+Risk categories are dataset-relative (P33/P67 percentile bounds),
+NOT certified EMC safety thresholds.
+
+======================================================================
+SECTION 1 — OPTIMISATION PARAMETERS
+----------------------------------------------------------------------
+  Primary objective  : Victim_Voltage_V
+  Candidates total   : 40
+  Feasible           : 40
+  Infeasible         : 0
+  Out-of-domain      : 0
+
+======================================================================
+SECTION 2 — BASELINE CONFIGURATION
+----------------------------------------------------------------------
+  Separation_mm             : 10.0
+  Overlap_mm                : 450.0
+  Cable_Length_mm           : 450.0
+  Frequency_Hz              : 100000.0
+  Voltage_V                 : 24.0
+  Conductor_Radius_mm       : 0.5
+  Dielectric_Constant       : 2.3
+  Shield_Type               : Unshielded
+  Cable_Configuration       : Parallel
+
+  Baseline predictions:
+    MutualInductance_nH       : 39.22985808
+    MutualCapacitance_pF      : 24.32153765
+    Victim_Voltage_V          : 39.22496956
+    Victim_RMS_V              : 27.75713825
+    Victim_PeakToPeak_V       : 109.01821702
+  Baseline risk category  : HIGHER PREDICTED RISK
+
+======================================================================
+SECTION 3 — RECOMMENDED CONFIGURATION
+----------------------------------------------------------------------
+  Separation_mm             : 50.0
+  Overlap_mm                : 100.0
+  Cable_Length_mm           : 450.0
+  Frequency_Hz              : 100000.0
+  Voltage_V                 : 24.0
+  Conductor_Radius_mm       : 0.5
+  Dielectric_Constant       : 2.3
+  Shield_Type               : Unshielded
+  Cable_Configuration       : Parallel
+  Candidate_ID              : CAND_032
+
+  Predicted EMC outputs:
+    MutualInductance_nH       : 1.57538690
+    MutualCapacitance_pF      : 1.87714052
+    Victim_Voltage_V          : 10.99370932
+    Victim_RMS_V              : 7.78845957
+    Victim_PeakToPeak_V       : 44.31810648
+
+  Relative improvement    : 71.97%
+  Recommended risk        : HIGHER PREDICTED RISK
+  Prediction reliability  : CAUTION
+
+======================================================================
+SECTION 4 — ENGINEERING EXPLANATION
+----------------------------------------------------------------------
+  The recommended configuration increases cable separation from 10.0 mm to 50.0 mm (change: +40.0 mm) and decreases parallel overlap from 450.0 mm to 100.0 mm (change: -350.0 mm).
+  The trained surrogate model predicts Victim_Voltage_V = 10.993709 for this arrangement, compared with 39.224970 for the original configuration.
+  This represents a predicted relative improvement of 71.97% in Victim_Voltage_V.
+  Risk category: HIGHER PREDICTED RISK. Prediction reliability: CAUTION.
+  IMPORTANT: This is a model-predicted improvement based on SYNTHETIC DATA. It does NOT represent a measured real-world EMI reduction. Send this configuration to MATLAB physics simulation for verification before engineering use.
+
+======================================================================
+SECTION 5 — TOP-5 FEASIBLE CANDIDATES
+----------------------------------------------------------------------
+  Rank  Candidate_ID Sep(mm)    Ovl(mm)    Victim_Voltage_V           Improv%    Risk                             Reliability
+  -------------------------------------------------------------------------------------------------------------------
+  1     CAND_032     50.0       100.0      10.993709                  71.97      HIGHER PREDICTED RISK            CAUTION
+  2     CAND_033     50.0       150.0      11.384272                  70.98      HIGHER PREDICTED RISK            CAUTION
+  3     CAND_034     50.0       200.0      12.377848                  68.44      HIGHER PREDICTED RISK            CAUTION
+  4     CAND_024     40.0       100.0      13.247323                  66.23      HIGHER PREDICTED RISK            CAUTION
+  5     CAND_025     40.0       150.0      13.885462                  64.60      HIGHER PREDICTED RISK            CAUTION
+
+======================================================================
+SECTION 6 — VALIDATION WORKFLOW
+----------------------------------------------------------------------
+  Step 1 [DONE]   : ML surrogate model predicts candidate configurations.
+  Step 2 [PENDING]: Send recommended configuration to MATLAB simulation.
+  Step 3 [PENDING]: Compare ML prediction vs MATLAB result.
+  Step 4 [PENDING]: If MATLAB confirms improvement -> proceed to prototype.
+  Step 5 [PENDING]: Measure physical prototype with calibrated EMC equipment.
+  NOTE: Do NOT use ML predictions for engineering sign-off.
+
+======================================================================

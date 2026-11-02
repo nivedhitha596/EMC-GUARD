@@ -1,0 +1,116 @@
+=================================================================
+EMC-GUARD — DATA QUALITY INSPECTION REPORT
+Generated : 2026-11-01 12:45:39
+Data      : SYNTHETIC DUMMY DATASET (testing only)
+=================================================================
+
+[1] Dataset Shape
+    1020 rows × 15 columns
+
+[2] Columns (15)
+    Configuration_ID, Separation_mm, Overlap_mm, Cable_Length_mm, Frequency_Hz, Voltage_V, Conductor_Radius_mm, Dielectric_Constant, Shield_Type, Cable_Configuration, MutualInductance_nH, MutualCapacitance_pF, Victim_Voltage_V, Victim_RMS_V, Victim_PeakToPeak_V
+
+[3] Data Types
+    Configuration_ID          str
+    Separation_mm             float64
+    Overlap_mm                float64
+    Cable_Length_mm           float64
+    Frequency_Hz              float64
+    Voltage_V                 float64
+    Conductor_Radius_mm       float64
+    Dielectric_Constant       float64
+    Shield_Type               str
+    Cable_Configuration       str
+    MutualInductance_nH       float64
+    MutualCapacitance_pF      float64
+    Victim_Voltage_V          float64
+    Victim_RMS_V              float64
+    Victim_PeakToPeak_V       float64
+
+[4] First 5 Records
+Configuration_ID  Separation_mm  Overlap_mm  Cable_Length_mm  Frequency_Hz  Voltage_V  Conductor_Radius_mm  Dielectric_Constant Shield_Type Cable_Configuration  MutualInductance_nH  MutualCapacitance_pF  Victim_Voltage_V  Victim_RMS_V  Victim_PeakToPeak_V
+        CFG_0001        155.921      40.411              NaN   24876805.01    358.334               1.4817               5.6438    Shielded            Parallel             0.100000              0.010000          5.625128      3.977049            11.251308
+        CFG_0002         90.581         NaN         2287.309   17823285.51    179.201               3.4832               2.9509  Unshielded       Perpendicular             1.074715              0.579098         22.157570     15.667049            44.307515
+        CFG_0003        172.427      73.225              NaN    7346397.56    426.082               3.9509               6.5534    Shielded       Perpendicular             0.100000              0.096424          2.063837      1.457837             4.130999
+        CFG_0004        140.987      84.640         3288.893   22370504.34    121.248               1.2499               3.2514  Unshielded             Crossed             0.678704              0.194220         11.715733      8.284584            23.431482
+        CFG_0005         23.365     319.819          667.904    2535342.39    269.658               0.6974               2.4877  Unshielded       Perpendicular             1.550867              0.442047          6.750224      4.773609            13.513211
+
+[5] Last 5 Records
+Configuration_ID  Separation_mm  Overlap_mm  Cable_Length_mm  Frequency_Hz  Voltage_V  Conductor_Radius_mm  Dielectric_Constant Shield_Type Cable_Configuration  MutualInductance_nH  MutualCapacitance_pF  Victim_Voltage_V  Victim_RMS_V  Victim_PeakToPeak_V
+     CFG_DUP_016         67.886     108.752         3647.660   15346422.57    265.371               2.2210                  NaN    Shielded            Parallel             0.745474              0.088721         19.183301     13.563741            38.367126
+     CFG_DUP_017        125.267     243.844          889.124   10380680.02    138.605               3.8609               5.3610    Shielded            Parallel             0.245089              0.067121          2.234796      1.577521             4.469505
+     CFG_DUP_018         59.775     264.835          580.591    5411431.30    308.000               4.1848               7.9364    Shielded             Crossed             0.895308              0.285109          9.512589      6.726435            19.018617
+     CFG_DUP_019        127.852     488.824         3804.992   17887586.05    151.591                  NaN               6.6001    Shielded       Perpendicular             0.100000              0.010000          1.688793      1.189843             3.383745
+     CFG_DUP_020        129.229     468.578         3001.451    4149471.76    101.307               3.0285               3.0932    Shielded            Parallel             0.621755              0.010000          1.652249      1.168220                  NaN
+
+[6] Descriptive Statistics
+       Configuration_ID  Separation_mm  Overlap_mm  Cable_Length_mm  Frequency_Hz     Voltage_V  Conductor_Radius_mm  Dielectric_Constant Shield_Type Cable_Configuration  MutualInductance_nH  MutualCapacitance_pF  Victim_Voltage_V  Victim_RMS_V  Victim_PeakToPeak_V
+count              1020     991.000000  989.000000     9.760000e+02  9.910000e+02  9.890000e+02           995.000000           990.000000        1020                1020         9.910000e+02            996.000000        994.000000    993.000000           988.000000
+unique             1020            NaN         NaN              NaN           NaN           NaN                  NaN                  NaN           2                   3                  NaN                   NaN               NaN           NaN                  NaN
+top            CFG_0001            NaN         NaN              NaN           NaN           NaN                  NaN                  NaN    Shielded             Crossed                  NaN                   NaN               NaN           NaN                  NaN
+freq                  1            NaN         NaN              NaN           NaN           NaN                  NaN                  NaN         523                 353                  NaN                   NaN               NaN           NaN                  NaN
+mean                NaN     101.168595  259.047996     2.782254e+04  1.470097e+07  1.960331e+04             2.729982             6.010071         NaN                 NaN         1.926353e+03              1.633251         34.441870     24.525370            71.083500
+std                 NaN      57.592611  142.485031     4.318451e+05  8.740983e+06  3.081633e+05             1.288113             2.268126         NaN                 NaN         6.059576e+04             12.438245         67.686787     48.044442           138.385789
+min                 NaN    -168.191381   10.254000     1.048510e+02 -3.155791e+02  1.462000e+00             0.501400             2.003300         NaN                 NaN        -3.839260e+02           -346.300341          0.004032      0.000885             0.008854
+25%                 NaN      51.430500  130.479000     1.301522e+03  7.227416e+06  1.215030e+02             1.611200             4.085075         NaN                 NaN         1.000000e-01              0.118900          2.228846      1.588195             4.682094
+50%                 NaN     101.328000  252.846000     2.522707e+03  1.453204e+07  2.401570e+02             2.777700             6.038550         NaN                 NaN         6.016890e-01              0.470969          6.951351      4.967481            14.268556
+75%                 NaN     151.783000  386.929000     3.751077e+03  2.231446e+07  3.651800e+02             3.858250             7.904975         NaN                 NaN         1.695754e+00              1.396663         32.514424     23.555221            68.139749
+max                 NaN     199.825000  499.717000     8.653677e+06  2.998227e+07  6.372527e+06             4.995000             9.996100         NaN                 NaN         1.907565e+06             86.484167        495.955764    350.693442           991.907127
+
+[7] Missing Values  (Total: 357)
+                      Missing  Percent(%)
+Separation_mm              29        2.84
+Overlap_mm                 31        3.04
+Cable_Length_mm            44        4.31
+Frequency_Hz               29        2.84
+Voltage_V                  31        3.04
+Conductor_Radius_mm        25        2.45
+Dielectric_Constant        30        2.94
+MutualInductance_nH        29        2.84
+MutualCapacitance_pF       24        2.35
+Victim_Voltage_V           26        2.55
+Victim_RMS_V               27        2.65
+Victim_PeakToPeak_V        32        3.14
+
+[8] Duplicate Configurations (same input features)  : 40 rows
+    Sample duplicate IDs:
+    CFG_0051, CFG_0053, CFG_0125, CFG_0164, CFG_0250, CFG_0285, CFG_0347, CFG_0350, CFG_0391, CFG_0440
+
+[9] Invalid Numerical Values (negative in positive-required columns)
+    Separation_mm              negatives=2  zeros=0
+    Frequency_Hz               negatives=5  zeros=0
+    MutualInductance_nH        negatives=2  zeros=0
+    MutualCapacitance_pF       negatives=1  zeros=0
+
+[10] Outlier Investigation (IQR × 3.0)
+    Cable_Length_mm            bounds=[-6047.144, 11099.743]  outliers=4
+    Voltage_V                  bounds=[-609.528, 1096.211]  outliers=5
+    MutualInductance_nH        bounds=[-4.687, 6.483]  outliers=68
+    MutualCapacitance_pF       bounds=[-3.714, 5.230]  outliers=85
+    Victim_Voltage_V           bounds=[-88.628, 123.371]  outliers=80
+    Victim_RMS_V               bounds=[-64.313, 89.456]  outliers=79
+    Victim_PeakToPeak_V        bounds=[-185.691, 258.513]  outliers=78
+
+[CLEAN-1] Remove invalid (negative) values
+          Records before : 1020
+          Records removed: 10
+          Records after  : 1010
+
+[CLEAN-2] Impute missing values (median strategy)
+          Missing before : 351
+          Missing after  : 0
+
+[CLEAN-3] Remove duplicate configurations (keep first)
+          Records before : 1010
+          Records removed: 20
+          Records after  : 990
+
+[CLEAN-4] Outlier handling (IQR × 3.0)
+          Records before         : 990
+          Implausible → removed  : 10
+          Extreme but valid → kept (Outlier_Flag=1): 133
+          Records after          : 980
+
+[SAVE] Cleaned dataset saved to:
+       dataset\EMC_GUARD_Physics_Dataset.csv
+       Final shape: 980 rows × 16 columns

@@ -1,0 +1,43 @@
+=================================================================
+EMC-GUARD — PREPROCESSING SUMMARY
+Generated : 2026-11-01 12:45:56
+Data      : SYNTHETIC DUMMY DATASET (testing only)
+=================================================================
+
+[DATASET SPLIT]
+  Total records (after cleaning)  : 980
+  Training records (80%)          : 784
+  Testing  records (20%)          : 196
+  Random state                    : 42
+
+[FEATURES]
+  Raw input features              : 9
+  Encoded/transformed features    : 10
+  Numerical (StandardScaler)      : 7
+  Categorical (OneHotEncoder)     : 2
+
+[TARGETS (not scaled)]
+  MutualInductance_nH
+  MutualCapacitance_pF
+  Victim_Voltage_V
+  Victim_RMS_V
+  Victim_PeakToPeak_V
+
+[LEAKAGE PREVENTION]
+  Preprocessor fitted on TRAINING data only.
+  Same fitted preprocessor applied to TEST data.
+  No test-set statistics used for imputation or scaling.
+
+[OUTPUT FILES]
+  dataset/X_train.csv               — encoded training features
+  dataset/X_test.csv                — encoded testing features
+  dataset/Y_train.csv               — training targets (original units)
+  dataset/Y_test.csv                — testing targets (original units)
+  dataset/emc_preprocessor.pkl      — fitted ColumnTransformer
+  reports/feature_encoding_details.txt
+  reports/preprocessing_summary.txt
+
+[REPLACING WITH REAL MATLAB DATA]
+  Update INPUT_CSV at the top of each script to point to the
+  real MATLAB simulation CSV.  The pipeline requires the same
+  column names and units; no other code changes are needed.

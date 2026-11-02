@@ -1,0 +1,78 @@
+{
+  "_comment": "EMC-GUARD Module 3 — Risk Analysis Configuration",
+  "_disclaimer": "These thresholds are DATASET-RELATIVE, derived from the 33rd and 67th percentiles of the synthetic dummy dataset. They are NOT validated engineering safety limits or certified EMC compliance thresholds. Do not use for engineering sign-off.",
+
+  "threshold_method": "dataset_relative_percentile",
+  "percentile_lower_boundary": 33,
+  "percentile_upper_boundary": 67,
+  "source_dataset": "EMC_GUARD_Physics_Dataset.csv",
+  "dataset_type": "SYNTHETIC",
+  "derived_from_n_records": 980,
+
+  "thresholds": {
+    "MutualInductance_nH": {
+      "unit": "nH",
+      "lower_upper": 0.234767,
+      "upper_lower": 1.162613,
+      "description": "Predicted mutual inductance between cables"
+    },
+    "MutualCapacitance_pF": {
+      "unit": "pF",
+      "lower_upper": 0.223403,
+      "upper_lower": 0.934938,
+      "description": "Predicted mutual capacitance between cables"
+    },
+    "Victim_Voltage_V": {
+      "unit": "V",
+      "lower_upper": 3.523615,
+      "upper_lower": 17.932108,
+      "description": "Predicted induced voltage on victim cable"
+    },
+    "Victim_RMS_V": {
+      "unit": "V",
+      "lower_upper": 2.526828,
+      "upper_lower": 13.166527,
+      "description": "Predicted RMS value of induced victim voltage"
+    },
+    "Victim_PeakToPeak_V": {
+      "unit": "V",
+      "lower_upper": 7.260776,
+      "upper_lower": 37.496253,
+      "description": "Predicted peak-to-peak induced voltage"
+    }
+  },
+
+  "risk_scoring": {
+    "_note": "Risk indicators are computed per target independently. No single composite score is forced because the targets are correlated — combining them would double-count shared variance. Each target receives a normalised 0-1 indicator. A composite summary is shown for orientation only.",
+    "primary_indicators": ["Victim_Voltage_V", "Victim_RMS_V", "Victim_PeakToPeak_V"],
+    "secondary_indicators": ["MutualInductance_nH", "MutualCapacitance_pF"],
+    "geometry_modifiers": {
+      "separation_low_threshold_mm": 30.0,
+      "overlap_high_threshold_mm": 350.0,
+      "separation_description": "Separation below 30 mm is considered geometrically compact in this dataset context.",
+      "overlap_description": "Overlap above 350 mm is considered geometrically extensive in this dataset context."
+    }
+  },
+
+  "model_reliability": {
+    "R2_acceptable_threshold": 0.60,
+    "RMSE_relative_warning_fraction": 0.30,
+    "_note": "If model R2 < 0.60 for a target, a reliability warning is appended to the explanation. RMSE as a fraction of the prediction value > 30% also triggers a caution."
+  },
+
+  "training_ranges": {
+    "Separation_mm":       [5.24,      199.825],
+    "Overlap_mm":          [10.254,    499.717],
+    "Cable_Length_mm":     [104.851,   4998.85],
+    "Frequency_Hz":        [20268.47,  29982268.35],
+    "Voltage_V":           [1.462,     499.858],
+    "Conductor_Radius_mm": [0.5014,    4.995],
+    "Dielectric_Constant": [2.0033,    9.9961]
+  },
+
+  "valid_categorical_values": {
+    "Shield_Type": ["Shielded", "Unshielded"],
+    "Cable_Configuration": ["Parallel", "Perpendicular", "Crossed"]
+  }
+}
+
