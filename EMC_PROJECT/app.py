@@ -1254,9 +1254,10 @@ L11_nH, L12_nH, L22_nH, AbsMutualInductance_nH, SimulationCase
 elif screen == "report":
     render_banner("Engineering Report Generation & Data Packages")
 
-    tab_pdf, tab_packages = st.tabs([
+    tab_pdf, tab_packages, tab_supp = st.tabs([
         "PDF Configuration Report",
-        "Stage 2–4 Technical Reports & Data Packages"
+        "Stage 2–4 Technical Reports & Data Packages",
+        "Supplementary Simulation Analysis",
     ])
 
     with tab_pdf:
@@ -1394,3 +1395,10 @@ elif screen == "report":
                 mime="text/csv",
                 use_container_width=True,
             )
+
+    with tab_supp:
+        try:
+            from supplementary_data import render_supplementary_analysis_section
+            render_supplementary_analysis_section()
+        except Exception as exc:
+            st.error(f"Could not load Supplementary Simulation Analysis module: {exc}")
