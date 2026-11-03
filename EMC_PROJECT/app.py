@@ -20,13 +20,24 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 # ── Ensure project root and AI_ML/src are on sys.path ───────────────────────
-_CURRENT_DIR = Path(__file__).resolve().parent
-_REPO_ROOT = _CURRENT_DIR.parent
+_CURRENT_FILE = Path(__file__).resolve()
+_CURRENT_DIR = _CURRENT_FILE.parent
+
+# Detect repo root robustly whether file is in Dashboard/, EMC_PROJECT/, or root
+if (_CURRENT_DIR / "EMC_PROJECT").exists():
+    _REPO_ROOT = _CURRENT_DIR
+elif (_CURRENT_DIR.parent / "EMC_PROJECT").exists():
+    _REPO_ROOT = _CURRENT_DIR.parent
+else:
+    _REPO_ROOT = _CURRENT_FILE.parents[1]
+
+_EMC_PROJECT = _REPO_ROOT / "EMC_PROJECT"
 _AIML_SRC = _REPO_ROOT / "AI_ML" / "src"
 _AIML_REPORTS = _REPO_ROOT / "AI_ML" / "reports"
 _AIML_FIGURES = _AIML_REPORTS / "figures"
+_DATA_DIR = _EMC_PROJECT / "data"
 
-for p in [str(_CURRENT_DIR), str(_AIML_SRC)]:
+for p in [str(_CURRENT_DIR), str(_EMC_PROJECT), str(_AIML_SRC), str(_REPO_ROOT)]:
     if p not in sys.path:
         sys.path.insert(0, p)
 
@@ -1010,10 +1021,10 @@ elif screen == "validation":
     </div>""", unsafe_allow_html=True)
 
     try:
-        pred_df = pd.read_csv(Path(__file__).parent / "data" / "Stage12A_Selected_Model_Predictions.csv")
-        summary_df = pd.read_csv(Path(__file__).parent / "data" / "Stage12A_Selected_Model_Summary.csv")
-        lolo_df = pd.read_csv(Path(__file__).parent / "data" / "LOLO_Summary.csv")
-        perf_df = pd.read_csv(Path(__file__).parent / "data" / "model_performance.csv")
+        pred_df = pd.read_csv(_DATA_DIR / "Stage12A_Selected_Model_Predictions.csv")
+        summary_df = pd.read_csv(_DATA_DIR / "Stage12A_Selected_Model_Summary.csv")
+        lolo_df = pd.read_csv(_DATA_DIR / "LOLO_Summary.csv")
+        perf_df = pd.read_csv(_DATA_DIR / "model_performance.csv")
         data_ok = True
     except Exception as exc:
         st.error(f"Could not load validation data: {exc}")

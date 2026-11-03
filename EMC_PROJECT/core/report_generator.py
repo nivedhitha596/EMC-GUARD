@@ -43,15 +43,18 @@ REPORT_DIR = Path(__file__).resolve().parent.parent / "reports"
 REPORT_DIR.mkdir(exist_ok=True)
 
 # ── Colour palette (matches dashboard) ──────────────────────────────────────
-_NAVY   = colors.HexColor("#0F172A")
-_BLUE   = colors.HexColor("#2563EB")
-_LIGHT  = colors.HexColor("#CBD5E1")
-_HEADER = colors.HexColor("#1E3A5F")
-_ROW1   = colors.HexColor("#1E293B")
-_ROW2   = colors.HexColor("#0F172A")
-_WHITE  = colors.white
-_WARN   = colors.HexColor("#F59E0B")
-_GREEN  = colors.HexColor("#22C55E")
+if REPORTLAB_AVAILABLE:
+    _NAVY   = colors.HexColor("#0F172A")
+    _BLUE   = colors.HexColor("#2563EB")
+    _LIGHT  = colors.HexColor("#CBD5E1")
+    _HEADER = colors.HexColor("#1E3A5F")
+    _ROW1   = colors.HexColor("#1E293B")
+    _ROW2   = colors.HexColor("#0F172A")
+    _WHITE  = colors.white
+    _WARN   = colors.HexColor("#F59E0B")
+    _GREEN  = colors.HexColor("#22C55E")
+else:
+    _NAVY = _BLUE = _LIGHT = _HEADER = _ROW1 = _ROW2 = _WHITE = _WARN = _GREEN = None
 
 
 def _styles() -> dict:

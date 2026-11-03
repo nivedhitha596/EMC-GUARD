@@ -1,1394 +1,1396 @@
 """
-EMC-GUARD: Physics-Informed Digital Twin for Elevator EMC Pre-Compliance
-=========================================================================
-MODULE 6 | Streamlit Engineering Dashboard
-File   : Dashboard/app.py
+app.py
+------
+EMC-PREDICT + EMC-GUARD  –  Main Streamlit Application Entry Point
 
-Integrates all five existing modules:
-  Module 1 - Dataset & Preprocessing
-  Module 2 - AI Prediction Engine     (predict_emc.py)
-  Module 3 - Risk Analysis            (risk_analysis.py)
-  Module 4 - Explainable AI           (feature_importance.py, prediction_uncertainty.py)
-  Module 5 - Cable Routing Optimiser  (optimise_routing.py)
+Physics-Informed Configuration-Aware EMC Digital Twin for Elevator Cable Systems.
+Integrated with Stages 1–4 AI/ML Verification, Evaluation, XAI, Risk Assessment,
+and Intelligent Configuration Optimisation.
 
-Run:
-    streamlit run Dashboard/app.py
-
-DISCLAIMER
-----------
-All predictions are from models trained on SYNTHETIC DUMMY DATA.
-Not for engineering sign-off or certified EMC compliance.
+Run:  streamlit run app.py
 """
 
+from __future__ import annotations
+
+import logging
 import os
 import sys
-import json
-import warnings
-import copy
+from datetime import datetime, timezone
 from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
+
+# ── Ensure project root and AI_ML/src are on sys.path ───────────────────────
+_CURRENT_FILE = Path(__file__).resolve()
+_CURRENT_DIR = _CURRENT_FILE.parent
+
+# Detect repo root robustly whether file is in Dashboard/, EMC_PROJECT/, or root
+if (_CURRENT_DIR / "EMC_PROJECT").exists():
+    _REPO_ROOT = _CURRENT_DIR
+elif (_CURRENT_DIR.parent / "EMC_PROJECT").exists():
+    _REPO_ROOT = _CURRENT_DIR.parent
+else:
+    _REPO_ROOT = _CURRENT_FILE.parents[1]
+
+_EMC_PROJECT = _REPO_ROOT / "EMC_PROJECT"
+_AIML_SRC = _REPO_ROOT / "AI_ML" / "src"
+_AIML_REPORTS = _REPO_ROOT / "AI_ML" / "reports"
+_AIML_FIGURES = _AIML_REPORTS / "figures"
+_DATA_DIR = _EMC_PROJECT / "data"
+
+for p in [str(_CURRENT_DIR), str(_EMC_PROJECT), str(_AIML_SRC), str(_REPO_ROOT)]:
+    if p not in sys.path:
+        sys.path.insert(0, p)
 
 import numpy as np
 import pandas as pd
-import streamlit as st
-import plotly.graph_objects as go
 import plotly.express as px
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
+import streamlit as st
 
-warnings.filterwarnings("ignore")
+# ── Project imports (EMC_PROJECT) ───────────────────────────────────────────
+from models.model_loader import (
+    get_model_status,
+    load_extratrees_models,
+    load_frozen_matlab_model,
+    load_physics_dataset,
+)
+from models.prediction_engine import (
+    SUPPORTED_CLEARANCES,
+    SUPPORTED_OVERLAPS,
+    SUPPORTED_PITCHES,
+    SUPPORTED_SEPARATIONS,
+    predict,
+    predict_all_configs,
+)
+from core.emc_guard import (
+    OBJECTIVE_LABELS,
+    enumerate_all_configurations,
+    predict_candidates,
+    run_emc_guard_assessment,
+    score_configurations,
+)
+from digital_twin.geometry import build_3d_figure, build_cross_section_figure
 
-# ---------------------------------------------------------------------------
-# PATH SETUP — make AI_ML/src importable
-# ---------------------------------------------------------------------------
-DASH_DIR  = Path(__file__).parent
-ROOT_DIR  = DASH_DIR.parent
-AI_ML_DIR = ROOT_DIR / "AI_ML"
-SRC_DIR   = AI_ML_DIR / "src"
-REPORTS   = AI_ML_DIR / "reports"
-MODELS    = AI_ML_DIR / "models"
-DATASET   = AI_ML_DIR / "dataset"
+try:
+    from core.report_generator import REPORTLAB_AVAILABLE, generate_report
+except Exception:
+    REPORTLAB_AVAILABLE = False
 
-if str(SRC_DIR) not in sys.path:
-    sys.path.insert(0, str(SRC_DIR))
+# ── AI_ML Stage 3 & 4 module imports ────────────────────────────────────────
+try:
+    import risk_assessment as ra
+    import optimise as opt
+    AIML_MODULES_AVAILABLE = True
+except Exception as _e:
+    AIML_MODULES_AVAILABLE = False
+    logging.warning("AI_ML modules could not be imported: %s", _e)
 
-# ---------------------------------------------------------------------------
+logging.basicConfig(level=logging.WARNING)
+
+# ─────────────────────────────────────────────────────────────────────────────
 # PAGE CONFIG
-# ---------------------------------------------------------------------------
+# ─────────────────────────────────────────────────────────────────────────────
 st.set_page_config(
-    page_title="EMC-GUARD | Digital Twin Dashboard",
+    page_title="EMC-PREDICT + EMC-GUARD",
     page_icon="⚡",
     layout="wide",
     initial_sidebar_state="expanded",
 )
 
-# ---------------------------------------------------------------------------
-# THEME & CUSTOM CSS
-# ---------------------------------------------------------------------------
+# ─────────────────────────────────────────────────────────────────────────────
+# GLOBAL CSS (dark industrial theme)
+# ─────────────────────────────────────────────────────────────────────────────
 st.markdown("""
 <style>
-/* ── Base ────────────────────────────────────────────────────── */
-html, body, [data-testid="stAppViewContainer"] {
-    background-color: #07111f;
-    color: #dce8f5;
-    font-family: 'Segoe UI', sans-serif;
+/* ── Base ── */
+html, body, [class*="css"] {
+    font-family: 'Inter', 'Segoe UI', sans-serif;
 }
-[data-testid="stSidebar"] {
-    background-color: #0b1d30;
-    border-right: 1px solid #1a3355;
-}
-/* ── Cards ───────────────────────────────────────────────────── */
-.emc-card {
-    background: #0f2236;
-    border: 1px solid #1a3a5c;
-    border-radius: 10px;
-    padding: 18px 22px;
-    margin-bottom: 14px;
-}
-.emc-card-accent {
-    background: linear-gradient(135deg, #0f2236, #0a2a45);
-    border: 1px solid #00b4d8;
-    border-radius: 10px;
-    padding: 18px 22px;
-    margin-bottom: 14px;
-}
-/* ── Metric tiles ────────────────────────────────────────────── */
-.metric-tile {
-    background: #0f2236;
-    border: 1px solid #1a3a5c;
+.main { background: #0F172A; }
+[data-testid="stSidebar"] { background: #1E293B; border-right: 1px solid #334155; }
+[data-testid="stSidebar"] .css-1d391kg { padding-top: 1rem; }
+
+/* ── Header banner ── */
+.banner {
+    background: linear-gradient(135deg, #1E3A5F 0%, #0F172A 100%);
+    border: 1px solid #2563EB;
     border-radius: 8px;
-    padding: 16px;
+    padding: 18px 24px 14px;
+    margin-bottom: 20px;
+}
+.banner h1 { color: #E2E8F0; font-size: 1.6rem; margin: 0; font-weight: 700; }
+.banner p  { color: #94A3B8; font-size: 0.9rem; margin: 4px 0 0; }
+
+/* ── Metric cards ── */
+.metric-card {
+    background: #1E293B;
+    border: 1px solid #334155;
+    border-radius: 8px;
+    padding: 14px 18px;
     text-align: center;
 }
-.metric-tile .val {
-    font-size: 2rem;
-    font-weight: 700;
-    color: #00d4ff;
+.metric-card .label { color: #64748B; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; }
+.metric-card .value { color: #E2E8F0; font-size: 1.4rem; font-weight: 700; margin: 4px 0; }
+.metric-card .unit  { color: #94A3B8; font-size: 0.8rem; }
+
+/* ── Status badges ── */
+.badge-ok   { display:inline-block; background:#166534; color:#86EFAC; border-radius:4px; padding:2px 10px; font-size:0.78rem; font-weight:600; }
+.badge-err  { display:inline-block; background:#7F1D1D; color:#FCA5A5; border-radius:4px; padding:2px 10px; font-size:0.78rem; font-weight:600; }
+.badge-pend { display:inline-block; background:#78350F; color:#FCD34D; border-radius:4px; padding:2px 10px; font-size:0.78rem; font-weight:600; }
+.badge-info { display:inline-block; background:#1E3A8A; color:#93C5FD; border-radius:4px; padding:2px 10px; font-size:0.78rem; font-weight:600; }
+
+/* ── Notice boxes ── */
+.notice {
+    background: #1C2B4B;
+    border-left: 4px solid #3B82F6;
+    padding: 10px 14px;
+    border-radius: 4px;
+    color: #93C5FD;
+    font-size: 0.85rem;
+    margin: 8px 0;
 }
-.metric-tile .lbl {
-    font-size: 0.78rem;
-    color: #8aa8c4;
-    margin-top: 4px;
+.warning-box {
+    background: #2D1B00;
+    border-left: 4px solid #F59E0B;
+    padding: 10px 14px;
+    border-radius: 4px;
+    color: #FCD34D;
+    font-size: 0.85rem;
+    margin: 8px 0;
 }
-/* ── Risk badges ─────────────────────────────────────────────── */
-.risk-lower       { background:#1b3c2a; color:#4caf50; border:1px solid #4caf50; }
-.risk-intermediate{ background:#3c2e10; color:#ff9800; border:1px solid #ff9800; }
-.risk-higher      { background:#3c1010; color:#f44336; border:1px solid #f44336; }
-.risk-unknown     { background:#1e2a38; color:#90a4ae; border:1px solid #546e7a; }
-.risk-badge {
-    display:inline-block; padding:5px 14px; border-radius:20px;
-    font-weight:600; font-size:0.85rem; letter-spacing:0.5px;
+.danger-box {
+    background: #3B0D0D;
+    border-left: 4px solid #EF4444;
+    padding: 10px 14px;
+    border-radius: 4px;
+    color: #FCA5A5;
+    font-size: 0.85rem;
+    margin: 8px 0;
 }
-/* ── Section headers ─────────────────────────────────────────── */
-.section-title {
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: #00d4ff;
-    border-bottom: 1px solid #1a3a5c;
-    padding-bottom: 8px;
-    margin-bottom: 16px;
+
+/* ── Section divider ── */
+.section-divider { border-top: 1px solid #334155; margin: 20px 0; }
+
+/* ── Streamlit overrides ── */
+.stSelectbox label, .stSlider label, .stNumberInput label { color: #94A3B8 !important; }
+.stButton > button {
+    background: #2563EB; color: white; border: none;
+    border-radius: 6px; padding: 8px 20px; font-weight: 600;
 }
-/* ── Warning / info banners ──────────────────────────────────── */
-.banner-warn {
-    background:#2e1f00; border-left:4px solid #ff9800;
-    padding:10px 14px; border-radius:4px; margin:8px 0;
-    font-size:0.85rem; color:#ffd082;
+.stButton > button:hover { background: #1D4ED8; }
+div[data-testid="metric-container"] {
+    background: #1E293B; border-radius: 8px; padding: 12px;
+    border: 1px solid #334155;
 }
-.banner-info {
-    background:#001f3a; border-left:4px solid #00b4d8;
-    padding:10px 14px; border-radius:4px; margin:8px 0;
-    font-size:0.85rem; color:#90caf9;
-}
-.banner-synth {
-    background:#1a0a2e; border-left:4px solid #9c27b0;
-    padding:10px 14px; border-radius:4px; margin:8px 0;
-    font-size:0.85rem; color:#ce93d8;
-}
-/* ── Buttons ─────────────────────────────────────────────────── */
-div.stButton > button {
-    background: linear-gradient(90deg,#0077b6,#00b4d8);
-    color: white; border:none; border-radius:6px;
-    padding: 10px 28px; font-weight:600; font-size:0.95rem;
-    transition: all 0.2s;
-}
-div.stButton > button:hover {
-    background: linear-gradient(90deg,#00b4d8,#0077b6);
-    transform: translateY(-1px);
-}
-/* ── Sidebar nav items ───────────────────────────────────────── */
-.sidebar-nav-item {
-    padding: 10px 14px; border-radius: 6px; cursor: pointer;
-    margin-bottom: 4px; font-size: 0.9rem;
-    transition: background 0.15s;
-}
-/* ── Scrollable table ────────────────────────────────────────── */
-.scroll-table { overflow-x: auto; }
-/* ── Divider ─────────────────────────────────────────────────── */
-hr.emc { border-color: #1a3a5c; }
 </style>
 """, unsafe_allow_html=True)
 
-SYNTH_BANNER = """<div class='banner-synth'>
-⚠️ <b>SYNTHETIC DATA:</b> All predictions are based on a model trained on
-<b>synthetic dummy data</b>. Results are for pipeline validation and
-decision-support only. They do <b>NOT</b> represent validated electromagnetic
-physics or certified EMC compliance.
-</div>"""
 
-# ---------------------------------------------------------------------------
-# PLOTLY DARK TEMPLATE
-# ---------------------------------------------------------------------------
-EMC_TEMPLATE = dict(
-    layout=go.Layout(
-        paper_bgcolor="#0f2236",
-        plot_bgcolor="#07111f",
-        font=dict(color="#dce8f5", family="Segoe UI"),
-        xaxis=dict(gridcolor="#1a3a5c", linecolor="#1a3a5c"),
-        yaxis=dict(gridcolor="#1a3a5c", linecolor="#1a3a5c"),
-        legend=dict(bgcolor="#0f2236", bordercolor="#1a3a5c"),
-        colorway=["#00d4ff", "#4caf50", "#ff9800", "#f44336",
-                  "#9c27b0", "#00bcd4", "#8bc34a"],
-    )
-)
+# ─────────────────────────────────────────────────────────────────────────────
+# SIDEBAR NAVIGATION (9 SCREENS PRESERVED)
+# ─────────────────────────────────────────────────────────────────────────────
+with st.sidebar:
+    st.markdown("""
+    <div style='text-align:center; padding:8px 0 16px;'>
+        <div style='color:#2563EB; font-size:1.8rem;'>⚡</div>
+        <div style='color:#E2E8F0; font-weight:700; font-size:1.05rem;'>EMC-PREDICT</div>
+        <div style='color:#94A3B8; font-size:0.8rem;'>+ EMC-GUARD AI/ML</div>
+    </div>
+    <hr style='border-color:#334155; margin:0 0 14px;'>
+    """, unsafe_allow_html=True)
 
-# ---------------------------------------------------------------------------
-# CONSTANTS
-# ---------------------------------------------------------------------------
-ALL_TARGETS = [
-    "MutualInductance_nH", "MutualCapacitance_pF",
-    "Victim_Voltage_V", "Victim_RMS_V", "Victim_PeakToPeak_V",
-]
-TARGET_UNITS = {
-    "MutualInductance_nH":   "nH",
-    "MutualCapacitance_pF":  "pF",
-    "Victim_Voltage_V":      "V",
-    "Victim_RMS_V":          "V",
-    "Victim_PeakToPeak_V":   "V",
-}
-TARGET_ICONS = {
-    "MutualInductance_nH":   "🔄",
-    "MutualCapacitance_pF":  "⚡",
-    "Victim_Voltage_V":      "📡",
-    "Victim_RMS_V":          "〰️",
-    "Victim_PeakToPeak_V":   "📶",
-}
-RISK_COLORS = {
-    "LOWER PREDICTED RISK":        "#4caf50",
-    "INTERMEDIATE PREDICTED RISK": "#ff9800",
-    "HIGHER PREDICTED RISK":       "#f44336",
-    "UNDETERMINED RISK":           "#90a4ae",
-}
-RISK_CSS = {
-    "LOWER PREDICTED RISK":        "risk-lower",
-    "INTERMEDIATE PREDICTED RISK": "risk-intermediate",
-    "HIGHER PREDICTED RISK":       "risk-higher",
-    "UNDETERMINED RISK":           "risk-unknown",
-}
-
-# ---------------------------------------------------------------------------
-# CACHED LOADERS
-# ---------------------------------------------------------------------------
-@st.cache_resource(show_spinner="Loading ML models …")
-def load_models():
-    """Load surrogate model bundle and preprocessor (cached across sessions)."""
-    import joblib
-    try:
-        preprocessor     = joblib.load(MODELS / "emc_preprocessor.pkl")
-        surrogate_bundle = joblib.load(MODELS / "emc_surrogate_model.pkl")
-        with open(MODELS / "target_model_metadata.json") as f:
-            metadata = json.load(f)
-        with open(REPORTS / "model_performance.json") as f:
-            perf = json.load(f)
-        return preprocessor, surrogate_bundle, metadata, perf
-    except Exception as e:
-        return None, None, None, None
-
-
-@st.cache_data(show_spinner="Loading dataset …")
-def load_dataset():
-    try:
-        return pd.read_csv(DATASET / "EMC_GUARD_Physics_Dataset.csv")
-    except Exception:
-        return pd.DataFrame()
-
-
-@st.cache_data(show_spinner=False)
-def load_report_json(filename: str):
-    path = REPORTS / filename
-    if path.exists():
-        with open(path) as f:
-            return json.load(f)
-    return {}
-
-
-@st.cache_data(show_spinner=False)
-def load_report_csv(filename: str):
-    path = REPORTS / filename
-    if path.exists():
-        return pd.read_csv(path)
-    return pd.DataFrame()
-
-
-def models_available() -> bool:
-    return (MODELS / "emc_surrogate_model.pkl").exists()
-
-
-# ---------------------------------------------------------------------------
-# HELPERS
-# ---------------------------------------------------------------------------
-def risk_badge(category: str) -> str:
-    css = RISK_CSS.get(category, "risk-unknown")
-    return f"<span class='risk-badge {css}'>{category}</span>"
-
-
-def _fmt(val, decimals=4):
-    if val is None or (isinstance(val, float) and np.isnan(val)):
-        return "N/A"
-    return f"{val:.{decimals}f}"
-
-
-def build_config_from_sidebar(prefix="pred") -> dict:
-    """Build the 9-feature configuration dict from sidebar sliders."""
-    return st.session_state.get(f"_cfg_{prefix}", {})
-
-
-# ---------------------------------------------------------------------------
-# CONFIGURATION INPUT PANEL (shared across pages)
-# ---------------------------------------------------------------------------
-def render_config_inputs(prefix: str = "pred", compact: bool = False) -> dict:
-    """
-    Render all 9 input controls.  Returns the configuration dict.
-    `prefix` namespaces session_state keys to avoid cross-page collisions.
-    """
-    if compact:
-        c1, c2 = st.columns(2)
-    else:
-        c1, c2 = st.columns([1, 1])
-
-    with c1:
-        sep = st.slider("Separation_mm (mm)",
-                        5.0, 200.0, 30.0, 5.0, key=f"{prefix}_sep",
-                        help="Cable-to-cable separation distance")
-        ovl = st.slider("Overlap_mm (mm)",
-                        10.0, 500.0, 200.0, 10.0, key=f"{prefix}_ovl",
-                        help="Parallel cable run length")
-        cbl = st.slider("Cable_Length_mm (mm)",
-                        100.0, 5000.0, 1000.0, 50.0, key=f"{prefix}_cbl",
-                        help="Total cable length")
-        freq = st.number_input("Frequency_Hz (Hz)",
-                               min_value=20000, max_value=30000000,
-                               value=500000, step=10000, key=f"{prefix}_freq",
-                               help="Signal frequency")
-    with c2:
-        volt = st.slider("Voltage_V (V)",
-                         1.0, 500.0, 48.0, 1.0, key=f"{prefix}_volt")
-        rad = st.slider("Conductor_Radius_mm (mm)",
-                        0.5, 5.0, 1.0, 0.05, key=f"{prefix}_rad",
-                        help="Training min ≈ 0.50 mm. Values at 0.5 mm trigger an extrapolation warning.")
-        diel = st.slider("Dielectric_Constant",
-                         2.0, 10.0, 4.5, 0.1, key=f"{prefix}_diel")
-        shield = st.selectbox("Shield_Type",
-                              ["Unshielded", "Shielded"],
-                              key=f"{prefix}_shield")
-        cable_cfg = st.selectbox("Cable_Configuration",
-                                 ["Parallel", "Perpendicular", "Crossed"],
-                                 key=f"{prefix}_cfg")
-
-    config = {
-        "Separation_mm":       float(sep),
-        "Overlap_mm":          float(ovl),
-        "Cable_Length_mm":     float(cbl),
-        "Frequency_Hz":        float(freq),
-        "Voltage_V":           float(volt),
-        "Conductor_Radius_mm": float(rad),
-        "Dielectric_Constant": float(diel),
-        "Shield_Type":         shield,
-        "Cable_Configuration": cable_cfg,
+    SCREENS = {
+        "1 · Executive Overview":          "overview",
+        "2 · Configuration Manager":       "config",
+        "3 · EMC-PREDICT Engine":          "predict",
+        "4 · Digital Twin Geometry":       "geometry",
+        "5 · EMC-GUARD Assessment":        "guard",
+        "6 · Configuration Comparison":    "compare",
+        "7 · Model Validation":            "validation",
+        "8 · ANSYS Integration":           "ansys",
+        "9 · Report Generation":           "report",
     }
-    return config
+    selected = st.radio("Navigation", list(SCREENS.keys()), label_visibility="collapsed")
+    screen = SCREENS[selected]
+
+    st.markdown("<hr style='border-color:#334155;'>", unsafe_allow_html=True)
+    st.markdown("""
+    <div style='font-size:0.74rem; color:#475569; padding:0 4px;'>
+        <b style='color:#64748B;'>Platform</b> KONE EMC-GUARD v2.0<br>
+        <b style='color:#64748B;'>Primary Engine</b> Stage 12A MATLAB (Frozen)<br>
+        <b style='color:#64748B;'>Surrogate</b> Stage 14A ExtraTrees<br>
+        <b style='color:#64748B;'>Dataset</b> 216 Analytical Configurations<br>
+        <b style='color:#64748B;'>Pareto Set</b> 6 Non-Dominated Candidates
+    </div>
+    """, unsafe_allow_html=True)
 
 
-# ---------------------------------------------------------------------------
-# PAGE 0 — OVERVIEW
-# ---------------------------------------------------------------------------
-def page_overview():
-    st.markdown("<div class='section-title'>⚡ EMC-GUARD — System Overview</div>",
-                unsafe_allow_html=True)
-    st.markdown(SYNTH_BANNER, unsafe_allow_html=True)
+# ─────────────────────────────────────────────────────────────────────────────
+# SHARED CACHED RESOURCES
+# ─────────────────────────────────────────────────────────────────────────────
+@st.cache_data(ttl=300)
+def _get_dataset() -> pd.DataFrame:
+    return load_physics_dataset()
 
-    # ── Hero description ──────────────────────────────────────────────────
-    st.markdown("""<div class='emc-card-accent'>
-    <b style='font-size:1.05rem;color:#00d4ff'>EMC-GUARD</b> is a Physics-Informed,
-    Configuration-Aware Digital Twin for Predictive EMC Pre-Compliance of Elevator
-    Systems. It combines electromagnetic physics simulation data with machine-learning
-    surrogate models to help engineers assess and optimise cable configurations
-    <em>before</em> physical testing or MATLAB simulation.
-    </div>""", unsafe_allow_html=True)
+@st.cache_resource
+def _get_model_status() -> dict:
+    return get_model_status()
 
-    # ── Dataset metrics ───────────────────────────────────────────────────
-    perf = load_report_json("model_performance.json")
-    df   = load_dataset()
+@st.cache_data(ttl=300)
+def _get_risk_assessed_df() -> pd.DataFrame:
+    if AIML_MODULES_AVAILABLE:
+        return ra.calculate_risk_indicators(_get_dataset())
+    return _get_dataset()
 
-    cols = st.columns(5)
-    tiles = [
-        ("Total Records",   perf.get("dataset_size", len(df)),           "#00d4ff"),
-        ("Training Records", perf.get("training_records", "—"),          "#4caf50"),
-        ("Testing Records",  perf.get("testing_records", "—"),           "#ff9800"),
-        ("Prediction Targets", len(perf.get("available_targets", ALL_TARGETS)), "#9c27b0"),
-        ("Dataset Type",     perf.get("dataset_type", "SYNTHETIC"),      "#f44336"),
-    ]
-    for col, (lbl, val, clr) in zip(cols, tiles):
-        with col:
-            st.markdown(f"""<div class='metric-tile'>
-                <div class='val' style='color:{clr}'>{val}</div>
-                <div class='lbl'>{lbl}</div>
-            </div>""", unsafe_allow_html=True)
+@st.cache_data(ttl=300)
+def _get_pareto_front_data() -> Tuple[pd.DataFrame, pd.DataFrame]:
+    if AIML_MODULES_AVAILABLE:
+        full_df = ra.calculate_risk_indicators(_get_dataset())
+        all_pareto = opt.compute_pareto_dominance(full_df)
+        pareto_front = all_pareto[all_pareto["Is_Pareto_Optimal"]].copy()
+        scored_pareto = opt.score_pareto_candidates(pareto_front, all_pareto)
+        return all_pareto, scored_pareto
+    return pd.DataFrame(), pd.DataFrame()
 
-    st.markdown("<br>", unsafe_allow_html=True)
 
-    # ── Module status ─────────────────────────────────────────────────────
-    st.markdown("<div class='section-title'>System Module Status</div>",
-                unsafe_allow_html=True)
+def config_inputs(key_prefix: str = "main") -> Tuple[float, float, float, float]:
+    """Render cable configuration selectors. Returns (sep, pitch, overlap, ground)."""
+    col1, col2, col3, col4 = st.columns(4)
+    with col1:
+        sep = st.selectbox(
+            "Pair Separation (mm)", SUPPORTED_SEPARATIONS,
+            index=0, key=f"{key_prefix}_sep",
+            help="Centre-to-centre distance between source and victim cable pairs."
+        )
+    with col2:
+        pitch = st.selectbox(
+            "Cable Pitch", SUPPORTED_PITCHES,
+            index=0, key=f"{key_prefix}_pitch",
+            help="Structural pitch / vertical twist stagger parameter."
+        )
+    with col3:
+        overlap = st.selectbox(
+            "Parallel Overlap (mm)", SUPPORTED_OVERLAPS,
+            index=0, key=f"{key_prefix}_overlap",
+            help="Length of parallel cable run region."
+        )
+    with col4:
+        ground = st.selectbox(
+            "Ground Clearance (mm)", SUPPORTED_CLEARANCES,
+            index=0, key=f"{key_prefix}_ground",
+            help="Height of cable centre above reference ground plane."
+        )
+    return float(sep), float(pitch), float(overlap), float(ground)
 
-    modules = [
-        ("Module 1", "Dataset Generation & Preparation",
-         (DATASET / "EMC_GUARD_Physics_Dataset.csv").exists(), "generate_dummy_data.py"),
-        ("Module 2", "AI Surrogate Prediction Engine",
-         (MODELS / "emc_surrogate_model.pkl").exists(), "train_model.py / predict_emc.py"),
-        ("Module 3", "Configuration Risk Analysis",
-         (REPORTS / "risk_thresholds.json").exists(), "risk_analysis.py"),
-        ("Module 4", "Explainable AI & Confidence Engine",
-         (REPORTS / "feature_importance.csv").exists(), "xai_engine.py"),
-        ("Module 5", "Cable-Routing Optimisation Engine",
-         (REPORTS / "optimisation_results.csv").exists(), "optimise_routing.py"),
-        ("Module 6", "Streamlit Engineering Dashboard",
-         True, "Dashboard/app.py"),
-    ]
 
-    for mod_id, name, ok, script in modules:
-        icon = "✅" if ok else "⚠️"
-        clr  = "#4caf50" if ok else "#ff9800"
-        status = "ACTIVE" if ok else "FILES MISSING"
-        st.markdown(f"""<div class='emc-card' style='padding:12px 18px'>
-            <span style='color:{clr};font-size:1.1rem'>{icon}</span>
-            <b style='color:#dce8f5;margin-left:8px'>{mod_id}</b>
-            <span style='color:#8aa8c4;margin-left:8px'>— {name}</span>
-            <span style='float:right;color:{clr};font-size:0.8rem'>{status}</span><br>
-            <span style='font-size:0.78rem;color:#546e7a;margin-left:26px'>{script}</span>
+def render_banner(subtitle: str = ""):
+    st.markdown(f"""
+    <div class="banner">
+        <h1>⚡ EMC-PREDICT + EMC-GUARD</h1>
+        <p>Physics-Informed Configuration-Aware EMC Digital Twin for Elevator Cable Systems
+        {'&nbsp;·&nbsp;' + subtitle if subtitle else ''}</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+#  SCREEN 1  –  EXECUTIVE OVERVIEW
+# ═══════════════════════════════════════════════════════════════════════════
+if screen == "overview":
+    render_banner("Executive Overview")
+
+    status = _get_model_status()
+
+    def _badge(ok, err=None):
+        if ok:   return '<span class="badge-ok">✓ Available</span>'
+        if err:  return '<span class="badge-err">✗ Error</span>'
+        return '<span class="badge-pend">⋯ Pending</span>'
+
+    # ── Primary Status Indicators ──────────────────────────────────────────
+    c1, c2, c3, c4 = st.columns(4)
+    with c1:
+        st.markdown(f"""<div class="metric-card">
+            <div class="label">Frozen MATLAB Engine</div>
+            <div style='margin:8px 0'>{_badge(status['frozen_matlab']['ok'], status['frozen_matlab']['error'])}</div>
+            <div class="unit">Stage 12A · Primary (Machine Precision)</div>
+        </div>""", unsafe_allow_html=True)
+    with c2:
+        st.markdown(f"""<div class="metric-card">
+            <div class="label">ExtraTrees Surrogate</div>
+            <div style='margin:8px 0'>{_badge(status['extratrees']['ok'], status['extratrees']['error'])}</div>
+            <div class="unit">Stage 14A · R²=1.000 (In-Sample)</div>
+        </div>""", unsafe_allow_html=True)
+    with c3:
+        n = status['physics_dataset']['n_configs']
+        st.markdown(f"""<div class="metric-card">
+            <div class="label">Physics Dataset</div>
+            <div class="value">{n}</div>
+            <div class="unit">MATLAB Analytical Grid</div>
+        </div>""", unsafe_allow_html=True)
+    with c4:
+        st.markdown("""<div class="metric-card">
+            <div class="label">Physical Validation</div>
+            <div style='margin:8px 0'><span class="badge-pend">⋯ Simulation Only</span></div>
+            <div class="unit">No empirical field data</div>
         </div>""", unsafe_allow_html=True)
 
-    # ── Model performance summary ─────────────────────────────────────────
-    st.markdown("<div class='section-title'>Model Performance Summary</div>",
-                unsafe_allow_html=True)
+    # ── AI/ML Stage 2–4 Status Badges ──────────────────────────────────────
+    st.markdown("<div style='margin-top:14px'></div>", unsafe_allow_html=True)
+    s1, s2, s3, s4 = st.columns(4)
+    with s1:
+        st.markdown("""<div class="metric-card">
+            <div class="label">LOLO Validation</div>
+            <div style='margin:6px 0'><span class="badge-ok">✓ Complete</span></div>
+            <div class="unit">Evaluated across all levels</div>
+        </div>""", unsafe_allow_html=True)
+    with s2:
+        st.markdown("""<div class="metric-card">
+            <div class="label">XAI & Feature Importance</div>
+            <div style='margin:6px 0'><span class="badge-ok">✓ Active</span></div>
+            <div class="unit">MDI, PFI, ICE & PDP</div>
+        </div>""", unsafe_allow_html=True)
+    with s3:
+        st.markdown("""<div class="metric-card">
+            <div class="label">Relative EMC Risk</div>
+            <div style='margin:6px 0'><span class="badge-ok">✓ Operational</span></div>
+            <div class="unit">Low / Mod / High Tiers</div>
+        </div>""", unsafe_allow_html=True)
+    with s4:
+        st.markdown("""<div class="metric-card">
+            <div class="label">Pareto Optimisation</div>
+            <div style='margin:6px 0'><span class="badge-ok">✓ 6 Candidates</span></div>
+            <div class="unit">Non-dominated Frontier</div>
+        </div>""", unsafe_allow_html=True)
 
-    if perf and "targets" in perf:
-        rows = []
-        for tgt, tdata in perf["targets"].items():
-            best_algo = tdata.get("best_algorithm", "—")
-            sel = tdata.get("selected_metrics", {})
-            rows.append({
-                "Target": tgt,
-                "Best Algorithm": best_algo,
-                "MAE":  sel.get("MAE",  "—"),
-                "RMSE": sel.get("RMSE", "—"),
-                "R²":   sel.get("R2",   "—"),
-            })
-        tbl = pd.DataFrame(rows)
-        st.dataframe(
-            tbl.style.format({"MAE": "{:.4f}", "RMSE": "{:.4f}", "R²": "{:.4f}"},
-                             na_rep="—"),
-            use_container_width=True, hide_index=True
-        )
+    st.markdown("<div class='section-divider'></div>", unsafe_allow_html=True)
 
-        # R² bar chart
-        fig = go.Figure()
-        tbl_sorted = tbl.sort_values("R²", ascending=True)
-        colors = ["#4caf50" if r >= 0.80 else "#ff9800" if r >= 0.70 else "#f44336"
-                  for r in tbl_sorted["R²"].astype(float)]
-        fig.add_trace(go.Bar(
-            x=tbl_sorted["R²"].astype(float),
-            y=tbl_sorted["Target"],
-            orientation="h",
-            marker_color=colors,
-            text=[f"R²={r:.4f}" for r in tbl_sorted["R²"].astype(float)],
-            textposition="outside",
-        ))
-        fig.add_vline(x=0.7, line_dash="dash", line_color="#ff9800",
-                      annotation_text="R²=0.70")
-        fig.update_layout(
-            template=EMC_TEMPLATE,
-            title="Model R² by Prediction Target (selected best algorithm)",
-            xaxis_title="R² Score", yaxis_title="",
-            height=300, margin=dict(l=0, r=60, t=40, b=30),
-        )
-        st.plotly_chart(fig, use_container_width=True)
+    # ── System Architecture ────────────────────────────────────────────────
+    col_a, col_b = st.columns([1.1, 0.9])
 
+    with col_a:
+        st.subheader("System Architecture")
+        st.markdown("""
+        ```
+        ┌────────────────────────────────────────────────────────┐
+        │            KONE EMC-GUARD PLATFORM v2.0                │
+        ├──────────────┬─────────────────────────────────────────┤
+        │  EMC-PREDICT │  Physics-Informed Prediction Engine     │
+        │              │  ├─ Stage 12A Frozen MATLAB Model       │
+        │              │  │   ├─ B2_SP_Ground  (Capacitance)    │
+        │              │  │   └─ B1_SP_Overlap (Inductance)     │
+        │              │  └─ Stage 14A ExtraTrees Surrogates     │
+        ├──────────────┼─────────────────────────────────────────┤
+        │  AI/ML XAI   │  Explainable AI & Evaluation (Stage 2) │
+        │              │  ├─ Leave-One-Level-Out (LOLO) CV       │
+        │              │  ├─ MDI & Permutation Feature Imp.     │
+        │              │  └─ ICE, PDP & OAT Sensitivity Sweeps   │
+        ├──────────────┼─────────────────────────────────────────┤
+        │  RISK ENGINE │  EMC Risk Assessment (Stage 3)          │
+        │              │  ├─ Relative Capacitive/Inductive Tiers │
+        │              │  └─ Explainable Geometric Attribution   │
+        ├──────────────┼─────────────────────────────────────────┤
+        │  OPTIMISER   │  Intelligent Optimisation (Stage 4)     │
+        │              │  ├─ Multi-objective Pareto Frontier     │
+        │              │  └─ Non-dominated candidate ranking     │
+        ├──────────────┼─────────────────────────────────────────┤
+        │  DIGITAL     │  3D Digital Twin Geometry               │
+        │  TWIN        │  (Configurable interactive spatial view)│
+        ├──────────────┼─────────────────────────────────────────┤
+        │  ANSYS I/F   │  (Ready for future Maxwell/Q3D data)    │
+        └──────────────┴─────────────────────────────────────────┘
+        ```
+        """)
 
-# ---------------------------------------------------------------------------
-# PAGE 1 — DIGITAL TWIN PREDICTION
-# ---------------------------------------------------------------------------
-def page_prediction():
-    st.markdown("<div class='section-title'>🔬 Digital Twin — EMI Prediction</div>",
-                unsafe_allow_html=True)
-    st.markdown(SYNTH_BANNER, unsafe_allow_html=True)
+    with col_b:
+        st.subheader("Prediction Parameters")
+        param_data = {
+            "Parameter":   ["Total Capacitance", "Abs. Mutual Inductance"],
+            "Unit":        ["pF/m", "nH"],
+            "Primary Model": ["Stage 12A Frozen MATLAB", "Stage 12A Frozen MATLAB"],
+            "Surrogate":   ["ExtraTrees Regressor", "ExtraTrees Regressor"],
+            "In-Sample R²": ["1.000000", "1.000000"],
+            "LOLO Gen.":   ["High except GC=10mm", "High on interior Sep"],
+        }
+        st.dataframe(pd.DataFrame(param_data), use_container_width=True, hide_index=True)
 
-    if not models_available():
-        st.error("Model files not found. Run train_model.py (Module 2) first.")
-        return
+        st.subheader("Supported Design Domain")
+        domain_data = {
+            "Parameter":  ["Pair Separation", "Twist Pitch", "Parallel Overlap", "Ground Clearance"],
+            "Levels":     [
+                "8, 12, 16, 20, 24, 28 mm",
+                "2, 3, 4",
+                "150, 300, 450 mm",
+                "10, 25, 50, 100 mm"
+            ],
+            "Count":      [6, 3, 3, 4],
+        }
+        st.dataframe(pd.DataFrame(domain_data), use_container_width=True, hide_index=True)
 
-    # ── Configuration inputs ──────────────────────────────────────────────
-    st.markdown("<div class='emc-card'>", unsafe_allow_html=True)
-    st.markdown("**Cable Configuration Parameters**")
-    config = render_config_inputs(prefix="pred")
-    st.markdown("</div>", unsafe_allow_html=True)
-
-    run = st.button("⚡ Predict EMI", key="btn_predict")
-
-    if run:
-        with st.spinner("Running Module 2 prediction …"):
-            try:
-                from predict_emc import predict_interference, ValidationError
-                result = predict_interference(config, verbose=False)
-                st.session_state["pred_result"] = result
-                st.session_state["pred_config"] = copy.deepcopy(config)
-            except Exception as e:
-                st.error(f"Prediction failed: {e}")
-                return
-
-    if "pred_result" not in st.session_state:
-        st.info("Set configuration above and click **Predict EMI**.")
-        return
-
-    result = st.session_state["pred_result"]
-    cfg    = st.session_state["pred_config"]
-    preds  = result.get("predictions", {})
-    warns  = result.get("warnings", [])
-    m_info = result.get("model_info", {})
-
-    # Warnings
-    for w in warns:
-        st.markdown(f"<div class='banner-warn'>⚠️ {w}</div>",
-                    unsafe_allow_html=True)
-
-    # ── Prediction metric cards ───────────────────────────────────────────
-    st.markdown("<div class='section-title'>Predicted EMC Outputs</div>",
-                unsafe_allow_html=True)
-
-    cols = st.columns(len(preds))
-    for col, (tgt, val) in zip(cols, preds.items()):
-        unit = TARGET_UNITS.get(tgt, "")
-        icon = TARGET_ICONS.get(tgt, "📊")
-        r2   = m_info.get(tgt, {}).get("R2") or 0
-        r2_c = "#4caf50" if r2 >= 0.80 else "#ff9800" if r2 >= 0.70 else "#f44336"
-        with col:
-            st.markdown(f"""<div class='metric-tile'>
-                <div style='font-size:1.5rem'>{icon}</div>
-                <div class='val'>{val:.4f}</div>
-                <div class='lbl'>{tgt}<br><span style='color:{unit};'>{unit}</span></div>
-                <div style='font-size:0.72rem;color:{r2_c};margin-top:6px'>
-                    R²={r2:.4f}</div>
-            </div>""", unsafe_allow_html=True)
-
-    # ── Radar chart of predictions (normalised) ───────────────────────────
-    if len(preds) >= 3:
-        norm_vals = []
-        norm_tgts = []
-        perf_data = load_report_json("model_performance.json")
-        err_df = load_report_csv("prediction_error_analysis.csv")
-
-        for tgt, val in preds.items():
-            if not err_df.empty and tgt in err_df["target"].values:
-                p90 = err_df[err_df["target"] == tgt]["p90_AE"].values[0]
-                low, high = max(0, val - p90), val + p90
-            else:
-                low, high = 0, val * 1.5 if val > 0 else 1
-
-            norm = val / high if high > 0 else 0
-            norm_vals.append(round(min(1, norm), 4))
-            norm_tgts.append(tgt.replace("_", " "))
-
-        fig = go.Figure(go.Scatterpolar(
-            r=norm_vals + [norm_vals[0]],
-            theta=norm_tgts + [norm_tgts[0]],
-            fill="toself",
-            fillcolor="rgba(0,180,216,0.2)",
-            line=dict(color="#00d4ff"),
-            name="Predicted (normalised)",
-        ))
-        fig.update_layout(
-            template=EMC_TEMPLATE,
-            polar=dict(
-                bgcolor="#07111f",
-                radialaxis=dict(visible=True, range=[0, 1],
-                                gridcolor="#1a3a5c", color="#8aa8c4"),
-                angularaxis=dict(gridcolor="#1a3a5c", color="#8aa8c4"),
-            ),
-            title="Predicted EMC Profile (normalised to P90 AE bound)",
-            height=380, margin=dict(t=50, b=20),
-        )
-        st.plotly_chart(fig, use_container_width=True)
-
-    # ── Raw prediction table ──────────────────────────────────────────────
-    with st.expander("Raw Prediction Details"):
-        rows = []
-        for tgt, val in preds.items():
-            info = m_info.get(tgt, {})
-            rows.append({
-                "Target": tgt,
-                "Unit": TARGET_UNITS.get(tgt, ""),
-                "Predicted Value": f"{val:.8f}",
-                "Algorithm": info.get("algorithm", "—"),
-                "R²": f"{info.get('R2', 0):.4f}",
-            })
-        st.dataframe(pd.DataFrame(rows), use_container_width=True, hide_index=True)
-
-
-# ---------------------------------------------------------------------------
-# PAGE 2 — RISK ANALYSIS
-# ---------------------------------------------------------------------------
-def page_risk_analysis():
-    st.markdown("<div class='section-title'>🛡️ Configuration Risk Analysis</div>",
-                unsafe_allow_html=True)
-    st.markdown(SYNTH_BANNER, unsafe_allow_html=True)
-    st.markdown("""<div class='banner-info'>
-    Risk categories are <b>dataset-relative</b> (P33/P67 percentile boundaries of the
-    training dataset). They are NOT certified EMC safety thresholds.
+    # ── Scientific Limitations Notice ──────────────────────────────────────
+    st.markdown("""<div class="warning-box">
+    <b>⚠ Scientific Limitations & Boundary Statement</b><br>
+    This platform predicts selected electromagnetic coupling parameters (total capacitance and absolute
+    mutual inductance) across a discrete 216-configuration dataset derived from deterministic MATLAB
+    analytical field calculations. It does <b>not</b> predict victim terminal voltage, conducted emissions,
+    or radiated emission compliance. <b>No physical elevator field measurements, regulatory certifications
+    (e.g., EN 12015/12016), or safety guarantees have been established.</b>
     </div>""", unsafe_allow_html=True)
 
-    if not models_available():
-        st.error("Model files not found. Run train_model.py first.")
-        return
 
-    st.markdown("<div class='emc-card'>", unsafe_allow_html=True)
-    st.markdown("**Cable Configuration Parameters**")
-    config = render_config_inputs(prefix="risk")
-    st.markdown("</div>", unsafe_allow_html=True)
+# ═══════════════════════════════════════════════════════════════════════════
+#  SCREEN 2  –  CONFIGURATION MANAGER
+# ═══════════════════════════════════════════════════════════════════════════
+elif screen == "config":
+    render_banner("Configuration Manager")
 
-    if st.button("🛡️ Analyse Risk", key="btn_risk"):
-        with st.spinner("Running Module 3 risk analysis …"):
-            try:
-                from risk_analysis import analyze_configuration
-                result = analyze_configuration(config, config_id="USER_CONFIG")
-                st.session_state["risk_result"] = result
-                st.session_state["risk_config"] = copy.deepcopy(config)
-            except Exception as e:
-                st.error(f"Risk analysis failed: {e}")
-                return
+    st.subheader("Select Cable Configuration")
+    sep, pitch, overlap, ground = config_inputs("cfg")
 
-    if "risk_result" not in st.session_state:
-        st.info("Set configuration above and click **Analyse Risk**.")
-        return
-
-    result = st.session_state["risk_result"]
-    preds  = result.get("predictions", {})
-    risk_overall = result.get("overall_risk_category", "UNDETERMINED RISK")
-    per_tgt_risk = result.get("per_target_risk", {})
-    per_tgt_ind  = result.get("per_target_indicators", {})
-    geo_obs      = result.get("geometry_observations", [])
-    reliability  = result.get("reliability", {})
-    explanation  = result.get("explanation", "")
-
-    # ── Overall risk banner ───────────────────────────────────────────────
-    badge = risk_badge(risk_overall)
-    clr   = RISK_COLORS.get(risk_overall, "#90a4ae")
-    st.markdown(f"""<div class='emc-card-accent' style='border-color:{clr}'>
-        <span style='font-size:1.1rem;color:#8aa8c4'>Overall Risk Category: </span>
-        {badge}
-        <span style='float:right;font-size:0.82rem;color:#8aa8c4'>
-            Reliability: {reliability.get("overall_reliability","—")}
-        </span>
-    </div>""", unsafe_allow_html=True)
-
-    # ── Per-target risk table ─────────────────────────────────────────────
-    st.markdown("<div class='section-title'>Per-Target Risk Classification</div>",
-                unsafe_allow_html=True)
-
-    risk_cols = st.columns(len(preds) if preds else 1)
-    for col, tgt in zip(risk_cols, ALL_TARGETS):
-        if tgt not in preds:
-            continue
-        val  = preds[tgt]
-        cat  = per_tgt_risk.get(tgt, "UNDETERMINED RISK")
-        ind  = per_tgt_ind.get(tgt)
-        clr  = RISK_COLORS.get(cat, "#90a4ae")
-        ind_pct = f"{ind*100:.1f}%" if ind is not None else "—"
-        with col:
-            st.markdown(f"""<div class='metric-tile' style='border-color:{clr}'>
-                <div class='val' style='font-size:1.2rem;color:{clr}'>{val:.4f}</div>
-                <div class='lbl'>{tgt}<br>{TARGET_UNITS.get(tgt,"")}</div>
-                <div style='font-size:0.75rem;margin-top:6px;color:{clr}'>{cat}</div>
-                <div style='font-size:0.72rem;color:#546e7a'>Indicator: {ind_pct}</div>
-            </div>""", unsafe_allow_html=True)
-
-    # ── Risk indicators gauge chart ───────────────────────────────────────
-    valid_inds = {t: v for t, v in per_tgt_ind.items()
-                  if v is not None and not np.isnan(v)}
-    if valid_inds:
-        fig = go.Figure()
-        labels = [t.replace("_", "<br>") for t in valid_inds]
-        values = list(valid_inds.values())
-        bar_colors = ["#4caf50" if v < 0.33 else "#ff9800" if v < 0.67 else "#f44336"
-                      for v in values]
-        fig.add_trace(go.Bar(
-            x=labels, y=values, marker_color=bar_colors,
-            text=[f"{v:.2f}" for v in values], textposition="outside",
-        ))
-        fig.add_hline(y=0.33, line_dash="dot", line_color="#4caf50",
-                      annotation_text="P33 boundary")
-        fig.add_hline(y=0.67, line_dash="dot", line_color="#f44336",
-                      annotation_text="P67 boundary")
-        fig.update_layout(
-            template=EMC_TEMPLATE,
-            title="Normalised Risk Indicators (0 = dataset min, 1 = dataset max)",
-            yaxis=dict(range=[0, 1.1], title="Indicator (0–1)"),
-            height=320, margin=dict(t=40, b=20),
-        )
-        st.plotly_chart(fig, use_container_width=True)
-
-    # ── Geometry observations ─────────────────────────────────────────────
-    if geo_obs:
-        st.markdown("<div class='section-title'>Geometry Observations</div>",
-                    unsafe_allow_html=True)
-        for obs in geo_obs:
-            st.markdown(f"<div class='banner-info'>ℹ️ {obs}</div>",
-                        unsafe_allow_html=True)
-
-    # ── Engineering explanation ───────────────────────────────────────────
-    with st.expander("Engineering Explanation (Module 3 Output)"):
-        for line in explanation.split("\n"):
-            if line.strip():
-                st.markdown(f"<span style='font-size:0.88rem;color:#b0cfe0'>{line}</span>",
-                            unsafe_allow_html=True)
-
-    # ── Reliability warnings ──────────────────────────────────────────────
-    rel_warns = reliability.get("warnings", []) + reliability.get("ood_features", [])
-    if rel_warns:
-        with st.expander("Reliability Warnings"):
-            for w in rel_warns:
-                st.markdown(f"<div class='banner-warn'>⚠️ {w}</div>",
-                            unsafe_allow_html=True)
-
-
-# ---------------------------------------------------------------------------
-# PAGE 3 — EXPLAINABLE AI
-# ---------------------------------------------------------------------------
-def page_xai():
-    st.markdown("<div class='section-title'>🧠 Explainable AI & Prediction Confidence</div>",
-                unsafe_allow_html=True)
-    st.markdown(SYNTH_BANNER, unsafe_allow_html=True)
-
-    # ── Feature importance (from saved CSV) ───────────────────────────────
-    st.markdown("<div class='section-title'>Permutation Feature Importance</div>",
-                unsafe_allow_html=True)
-
-    fi_df = load_report_csv("feature_importance.csv")
-    if fi_df.empty:
-        st.warning("feature_importance.csv not found. Run xai_engine.py (Module 4) first.")
+    df = _get_dataset()
+    mask = (
+        np.isclose(df["PairSeparation_mm"],   sep,     atol=1e-6)
+        & np.isclose(df["PairPitch_mm"],       pitch,   atol=1e-6)
+        & np.isclose(df["Overlap_mm"],         overlap, atol=1e-6)
+        & np.isclose(df["GroundClearance_mm"], ground,  atol=1e-6)
+    )
+    matched = df[mask]
+    if len(matched) == 1:
+        row = matched.iloc[0]
+        config_id = row["Config_ID"]
+        st.markdown(f"""<div class="notice">
+            ✓ <b>Valid configuration</b> &nbsp;·&nbsp; ID: <b>{config_id}</b>
+            &nbsp;·&nbsp; Configuration index: {matched.index[0] + 1} of 216
+        </div>""", unsafe_allow_html=True)
     else:
-        targets_in_fi = fi_df["target"].unique().tolist()
-        sel_tgt = st.selectbox("Select prediction target:", targets_in_fi, key="fi_tgt")
-        sub = fi_df[fi_df["target"] == sel_tgt].sort_values("mean_importance",
-                                                              ascending=True)
-        fig = go.Figure(go.Bar(
-            x=sub["mean_importance"],
-            y=sub["feature"],
-            orientation="h",
-            error_x=dict(type="data", array=sub["std_importance"], visible=True,
-                         color="#546e7a"),
-            marker_color="#00d4ff",
-            text=[f"{v:.4f}" for v in sub["mean_importance"]],
-            textposition="outside",
-        ))
-        fig.add_vline(x=0, line_dash="dash", line_color="#546e7a")
-        fig.update_layout(
-            template=EMC_TEMPLATE,
-            title=f"Permutation Feature Importance — {sel_tgt}<br>"
-                  "<sup>Mean MAE increase when feature is shuffled. "
-                  "Predictive dependence, NOT physical causation.</sup>",
-            xaxis_title="Mean MAE increase when feature permuted",
-            height=360, margin=dict(l=0, r=60, t=60, b=20),
-        )
-        st.plotly_chart(fig, use_container_width=True)
+        st.error("Configuration not found in the 216-point design grid.")
+        config_id = "—"
 
-        # All-targets heatmap
-        with st.expander("Feature Importance Heatmap (all targets)"):
-            pivot = fi_df.pivot_table(index="feature", columns="target",
-                                      values="mean_importance", aggfunc="mean")
-            fig2 = px.imshow(pivot.round(4), color_continuous_scale="YlOrRd",
-                             text_auto=".3f",
-                             labels=dict(color="Mean MAE increase"))
-            fig2.update_layout(template=EMC_TEMPLATE, height=350,
-                               title="Feature Importance Heatmap")
-            st.plotly_chart(fig2, use_container_width=True)
+    st.markdown("<div class='section-divider'></div>", unsafe_allow_html=True)
 
-    # ── Test-set error statistics ─────────────────────────────────────────
-    st.markdown("<div class='section-title'>Test-Set Error Statistics</div>",
-                unsafe_allow_html=True)
+    col1, col2 = st.columns(2)
+    with col1:
+        st.subheader("Configuration Summary")
+        summary = pd.DataFrame({
+            "Parameter":  [
+                "Pair Separation", "Cable Pitch", "Parallel Overlap",
+                "Ground Clearance", "Configuration ID"
+            ],
+            "Value":      [
+                f"{sep} mm", f"{pitch}", f"{overlap} mm", f"{ground} mm", config_id
+            ],
+            "Description": [
+                "Horizontal distance between cable pair centres",
+                "Twist pitch / vertical stagger parameter",
+                "Length of parallel cable run",
+                "Height of cable centre above ground plane",
+                "Reference ID in 216-configuration dataset",
+            ],
+        })
+        st.dataframe(summary, use_container_width=True, hide_index=True)
 
-    err_df = load_report_csv("prediction_error_analysis.csv")
-    if err_df.empty:
-        st.warning("prediction_error_analysis.csv not found. Run xai_engine.py first.")
-    else:
-        display_cols = [c for c in ["target", "algorithm", "MAE", "RMSE",
-                                     "mean_residual", "median_AE",
-                                     "p90_AE", "p95_AE"] if c in err_df.columns]
-        st.dataframe(
-            err_df[display_cols].style.format(
-                {c: "{:.4f}" for c in display_cols if c not in ["target", "algorithm"]}
-            ),
-            use_container_width=True, hide_index=True,
-        )
+    with col2:
+        st.subheader("Dataset Reference Values")
+        if len(matched) == 1:
+            ref_vals = pd.DataFrame({
+                "Parameter": ["Total Capacitance", "Abs. Mutual Inductance"],
+                "Reference Value": [
+                    f"{row['TotalCapacitance_pF_per_m']:.6g}",
+                    f"{row['AbsMutualInductance_nH']:.6g}",
+                ],
+                "Unit": ["pF/m", "nH"],
+                "Source": ["MATLAB analytical model", "MATLAB analytical model"],
+            })
+            st.dataframe(ref_vals, use_container_width=True, hide_index=True)
 
-        # MAE / RMSE comparison chart
-        fig3 = go.Figure()
-        fig3.add_trace(go.Bar(name="MAE",  x=err_df["target"], y=err_df["MAE"],
-                               marker_color="#00d4ff"))
-        fig3.add_trace(go.Bar(name="RMSE", x=err_df["target"], y=err_df["RMSE"],
-                               marker_color="#ff9800"))
-        fig3.update_layout(template=EMC_TEMPLATE, barmode="group",
-                           title="Test-Set MAE and RMSE per Target",
-                           yaxis_title="Error (target units)",
-                           height=320, margin=dict(t=40, b=20))
-        st.plotly_chart(fig3, use_container_width=True)
-
-    # ── Conformal prediction intervals ────────────────────────────────────
-    st.markdown("<div class='section-title'>Conformal Prediction Intervals (90% Nominal)</div>",
-                unsafe_allow_html=True)
-
-    calib = load_report_json("uncertainty_calibration.json")
-    if not calib:
-        st.warning("uncertainty_calibration.json not found. Run xai_engine.py first.")
-    else:
-        rows = []
-        for tgt, cr in calib.items():
-            if cr.get("status") == "CALIBRATED":
-                emp = cr["coverage_empirical"]
-                clr = "#4caf50" if 0.88 <= emp <= 0.98 else "#ff9800"
-                rows.append({
-                    "Target": tgt,
-                    "Half-width (q̂)": cr["q_hat"],
-                    "Nominal Coverage": f"{cr['coverage_nominal']:.0%}",
-                    "Empirical Coverage": f"{emp:.2%}",
-                    "Interval Width": cr["mean_interval_width"],
-                    "Calibration Set (n)": cr["n_calib"],
-                })
-        if rows:
-            st.dataframe(pd.DataFrame(rows), use_container_width=True, hide_index=True)
-            st.markdown("""<div class='banner-info'>
-            ℹ️ Split conformal prediction. Coverage is <b>marginal</b> (averaged over inputs),
-            not conditional. Valid only under exchangeability with training distribution.
-            </div>""", unsafe_allow_html=True)
-
-    # ── Model disagreement for current config ─────────────────────────────
-    st.markdown("<div class='section-title'>Intra-Ensemble Spread (Model Disagreement)</div>",
-                unsafe_allow_html=True)
-
-    st.markdown("<div class='emc-card'>", unsafe_allow_html=True)
-    config_dis = render_config_inputs(prefix="dis", compact=True)
-    st.markdown("</div>", unsafe_allow_html=True)
-
-    if st.button("Analyse Prediction Spread", key="btn_spread"):
-        if not models_available():
-            st.error("Model files not found.")
+            # Stage 3 Risk Indicator Quick Preview
+            if AIML_MODULES_AVAILABLE:
+                risk_res = ra.assess_configuration(sep, pitch, overlap, ground)
+                if risk_res.get("status") == "OK":
+                    tier = risk_res["combined_assessment"]["combined_risk_tier"]
+                    badge_class = "badge-ok" if "Low" in tier else ("badge-pend" if "Mod" in tier else "badge-err")
+                    st.markdown(f"""
+                    <div style='margin-top:14px; padding:10px 14px; background:#1E293B; border-radius:6px; border:1px solid #334155;'>
+                        <b style='color:#94A3B8; font-size:0.8rem; text-transform:uppercase;'>Relative EMC Risk Tier</b><br>
+                        <span class="{badge_class}">{tier}</span>
+                        <span style='color:#CBD5E1; font-size:0.85rem; margin-left:8px;'>
+                            (Score: {risk_res['combined_assessment']['combined_risk_indicator']:.4f})
+                        </span>
+                    </div>
+                    """, unsafe_allow_html=True)
         else:
-            with st.spinner("Computing intra-ensemble spread …"):
-                try:
-                    from prediction_uncertainty import (
-                        calculate_model_disagreement, check_prediction_domain,
-                        _load_artefacts
-                    )
-                    preprocessor, surrogate_bundle, metadata, perf = _load_artefacts()
-                    dis = calculate_model_disagreement(
-                        config_dis, preprocessor, surrogate_bundle, perf
-                    )
-                    dom = check_prediction_domain(config_dis)
-                    st.session_state["xai_dis"]  = dis
-                    st.session_state["xai_dom"]  = dom
-                    st.session_state["xai_cfg"]  = copy.deepcopy(config_dis)
-                except Exception as e:
-                    st.error(f"Spread analysis failed: {e}")
+            st.info("Select a valid configuration to see reference values.")
 
-    if "xai_dis" in st.session_state:
-        dis = st.session_state["xai_dis"]
-        dom = st.session_state["xai_dom"]
-        dom_status = dom.get("domain_status", "UNKNOWN")
-        dom_clr = {"IN_DOMAIN": "#4caf50",
-                   "UNUSUAL_COMBINATION": "#ff9800",
-                   "OUT_OF_DOMAIN": "#f44336"}.get(dom_status, "#90a4ae")
-        st.markdown(f"""<div class='banner-info' style='border-color:{dom_clr}'>
-            Domain Status: <b style='color:{dom_clr}'>{dom_status}</b>
-            {"&nbsp;|&nbsp; Mahalanobis: " + str(dom.get("mahal_distance","N/A"))
-             if dom.get("mahal_distance") else ""}
-        </div>""", unsafe_allow_html=True)
+    st.markdown("""<div class="notice">
+    <b>ℹ Domain policy:</b> Only the 216 discrete configurations from the MATLAB analytical dataset
+    are supported. Interpolation and extrapolation outside this grid are strictly rejected.
+    </div>""", unsafe_allow_html=True)
 
-        dis_cols = st.columns(len(dis))
-        for col, (tgt, d) in zip(dis_cols, dis.items()):
-            mean_p = d.get("mean_prediction", 0)
-            std_p  = d.get("std_intra_ensemble", 0)
-            frac   = (std_p / mean_p * 100) if mean_p > 0 else 0
-            spread_clr = "#f44336" if frac > 20 else "#ff9800" if frac > 10 else "#4caf50"
-            with col:
-                st.markdown(f"""<div class='metric-tile'>
-                    <div class='val' style='font-size:1rem;color:#00d4ff'>
-                        {mean_p:.4f}</div>
-                    <div class='lbl'>{tgt}</div>
-                    <div style='font-size:0.75rem;margin-top:4px;color:{spread_clr}'>
-                        Spread: {frac:.1f}%</div>
-                    <div style='font-size:0.7rem;color:#546e7a'>
-                        std={std_p:.4f}</div>
+
+# ═══════════════════════════════════════════════════════════════════════════
+#  SCREEN 3  –  EMC-PREDICT ENGINE
+# ═══════════════════════════════════════════════════════════════════════════
+elif screen == "predict":
+    render_banner("EMC-PREDICT Engine")
+
+    st.subheader("Prediction Configuration")
+    sep, pitch, overlap, ground = config_inputs("pred")
+
+    col_eng, col_btn = st.columns([3, 1])
+    with col_eng:
+        engine_choice = st.radio(
+            "Prediction Engine",
+            ["frozen_matlab", "extratrees"],
+            format_func=lambda x: {
+                "frozen_matlab": "Stage 12A – Frozen MATLAB Linear Model (Primary / Analytical Precision)",
+                "extratrees":    "Stage 14A – ExtraTrees Surrogate (Secondary / ML Approximation)",
+            }[x],
+            horizontal=True,
+        )
+    with col_btn:
+        st.markdown("<div style='height:26px'></div>", unsafe_allow_html=True)
+        run_clicked = st.button("▶  Run Prediction", type="primary", use_container_width=True)
+
+    if run_clicked:
+        with st.spinner("Executing prediction…"):
+            result = predict(sep, pitch, overlap, ground, engine=engine_choice)
+
+        if result["status"] != "OK":
+            st.error(f"Prediction failed: {result.get('error', 'Unknown error')}")
+        else:
+            st.markdown("<div class='section-divider'></div>", unsafe_allow_html=True)
+
+            config_id = result["config_id"]
+            cap = result["predictions"]["TotalCapacitance_pF_per_m"]
+            mut = result["predictions"]["AbsMutualInductance_nH"]
+            ts  = result["timestamp"]
+
+            st.subheader("Predicted Outputs")
+            mc1, mc2, mc3 = st.columns(3)
+            with mc1:
+                st.markdown(f"""<div class="metric-card">
+                    <div class="label">Total Capacitance</div>
+                    <div class="value">{cap['value']:.5g}</div>
+                    <div class="unit">pF/m</div>
+                </div>""", unsafe_allow_html=True)
+            with mc2:
+                st.markdown(f"""<div class="metric-card">
+                    <div class="label">Abs. Mutual Inductance</div>
+                    <div class="value">{mut['value']:.5g}</div>
+                    <div class="unit">nH</div>
+                </div>""", unsafe_allow_html=True)
+            with mc3:
+                st.markdown(f"""<div class="metric-card">
+                    <div class="label">Configuration ID</div>
+                    <div class="value" style='font-size:1.2rem'>{config_id}</div>
+                    <div class="unit">{engine_choice}</div>
                 </div>""", unsafe_allow_html=True)
 
-        st.markdown("""<div class='banner-warn'>
-        ⚠️ Intra-ensemble spread is the std of 200 individual tree predictions.
-        It is NOT a calibrated confidence interval. High spread indicates
-        the ensemble trees disagree for this input — consider MATLAB verification.
-        </div>""", unsafe_allow_html=True)
+            # ── Detailed table ────────────────────────────────────────────
+            st.subheader("Prediction Detail vs Analytical Reference")
+            detail = pd.DataFrame({
+                "Parameter": ["Total Capacitance", "Abs. Mutual Inductance"],
+                "Predicted": [f"{cap['value']:.8g}", f"{mut['value']:.8g}"],
+                "MATLAB Reference": [f"{cap['reference']:.8g}", f"{mut['reference']:.8g}"],
+                "Absolute Difference": [f"{cap['abs_diff']:.3e}", f"{mut['abs_diff']:.3e}"],
+                "Unit":  [cap['unit'], mut['unit']],
+                "Model": [cap['model'], mut['model']],
+            })
+            st.dataframe(detail, use_container_width=True, hide_index=True)
+
+            # ── Integrated Stage 3 Risk & XAI Attribution ─────────────────
+            if AIML_MODULES_AVAILABLE:
+                st.subheader("Relative EMC Risk Assessment & Geometric Attribution")
+                risk_eval = ra.assess_configuration(sep, pitch, overlap, ground, engine=engine_choice)
+                if risk_eval.get("status") == "OK":
+                    comb = risk_eval["combined_assessment"]
+                    tier = comb["combined_risk_tier"]
+                    tier_badge = "badge-ok" if "Low" in tier else ("badge-pend" if "Mod" in tier else "badge-err")
+
+                    rk1, rk2, rk3 = st.columns(3)
+                    with rk1:
+                        c_ind = risk_eval["predictions"]["TotalCapacitance_pF_per_m"]
+                        st.markdown(f"""<div class="metric-card">
+                            <div class="label">Capacitance Relative Indicator</div>
+                            <div class="value">{c_ind['relative_indicator']:.3f}</div>
+                            <div class="unit">Percentile: {c_ind['percentile_in_dataset']:.1f}% · {c_ind['risk_tier']}</div>
+                        </div>""", unsafe_allow_html=True)
+                    with rk2:
+                        m_ind = risk_eval["predictions"]["AbsMutualInductance_nH"]
+                        st.markdown(f"""<div class="metric-card">
+                            <div class="label">Inductance Relative Indicator</div>
+                            <div class="value">{m_ind['relative_indicator']:.3f}</div>
+                            <div class="unit">Percentile: {m_ind['percentile_in_dataset']:.1f}% · {m_ind['risk_tier']}</div>
+                        </div>""", unsafe_allow_html=True)
+                    with rk3:
+                        st.markdown(f"""<div class="metric-card">
+                            <div class="label">Combined Relative Tier</div>
+                            <div style='margin:6px 0'><span class="{tier_badge}">{tier}</span></div>
+                            <div class="unit">Combined Score: {comb['combined_risk_indicator']:.4f}</div>
+                        </div>""", unsafe_allow_html=True)
+
+                    with st.expander("🔍 Explainable AI (XAI) Parameter Rationale", expanded=True):
+                        st.markdown(f"**Engineering Rationale:** {risk_eval['explainable_attribution']['engineering_rationale']}")
+                        st.markdown("**Capacitive Driving Mechanisms:**")
+                        for d in risk_eval["explainable_attribution"]["capacitance_drivers"]:
+                            st.markdown(f"- {d}")
+                        st.markdown("**Inductive Driving Mechanisms:**")
+                        for d in risk_eval["explainable_attribution"]["mutual_inductance_drivers"]:
+                            st.markdown(f"- {d}")
+
+            # ── Model Info & Disclaimer ───────────────────────────────────
+            info = result["model_info"]
+            st.markdown(f"""<div class="notice">
+            <b>Model Metadata:</b> Engine: <b>{info['engine']}</b> · Domain: {info['domain']} ·
+            Column Index: {info['column_index']} · Timestamp: {ts}
+            </div>""", unsafe_allow_html=True)
+
+            st.markdown(f"""<div class="warning-box">
+            ⚠ {result['validation_notice']}
+            </div>""", unsafe_allow_html=True)
+
+            # Store in session state
+            st.session_state["last_prediction"] = result
+            st.session_state["last_config"] = (sep, pitch, overlap, ground)
 
 
-# ---------------------------------------------------------------------------
-# PAGE 4 — CABLE ROUTING OPTIMISATION
-# ---------------------------------------------------------------------------
-def page_optimisation():
-    st.markdown("<div class='section-title'>🔧 Cable-Routing Optimisation Engine</div>",
-                unsafe_allow_html=True)
-    st.markdown(SYNTH_BANNER, unsafe_allow_html=True)
-    st.markdown("""<div class='banner-info'>
-    Grid-search optimisation. The engine explores Separation × Overlap combinations,
-    predicts EMC outputs for each using Module 2, and ranks by lowest predicted
-    <b>Victim_Voltage_V</b>. Module 3 risk analysis is applied to every feasible candidate.
+# ═══════════════════════════════════════════════════════════════════════════
+#  SCREEN 4  –  DIGITAL TWIN GEOMETRY
+# ═══════════════════════════════════════════════════════════════════════════
+elif screen == "geometry":
+    render_banner("Digital Twin Geometry Visualisation")
+
+    st.markdown("""<div class="notice">
+    Interactive geometric visual representation of the cable bundle configuration updated
+    in real time as parameters change. It is <b>not</b> a numerical electromagnetic field solver.
     </div>""", unsafe_allow_html=True)
 
-    if not models_available():
-        st.error("Model files not found. Run train_model.py first.")
-        return
+    sep, pitch, overlap, ground = config_inputs("geom")
 
-    # ── Baseline + search grid inputs ─────────────────────────────────────
-    col_base, col_grid = st.columns([1.2, 1])
+    tab3d, tab2d = st.tabs(["3D View", "Cross-Section (XY)"])
 
-    with col_base:
-        st.markdown("<div class='emc-card'>", unsafe_allow_html=True)
-        st.markdown("**Baseline Configuration**")
-        base_config = render_config_inputs(prefix="opt")
-        st.markdown("</div>", unsafe_allow_html=True)
+    with tab3d:
+        with st.spinner("Building 3D geometric model…"):
+            fig3d = build_3d_figure(sep, pitch, overlap, ground)
+            fig3d.update_layout(paper_bgcolor="#0F172A", font=dict(color="#CBD5E1"))
+        st.plotly_chart(fig3d, use_container_width=True)
 
-    with col_grid:
-        st.markdown("<div class='emc-card'>", unsafe_allow_html=True)
-        st.markdown("**Grid Search Parameters**")
-        s_min  = st.number_input("Separation min (mm)", 5.0,  200.0, 10.0, 5.0, key="opt_smin")
-        s_max  = st.number_input("Separation max (mm)", 5.0,  200.0, 80.0, 5.0, key="opt_smax")
-        s_step = st.number_input("Separation step (mm)", 1.0, 50.0,  10.0, 1.0, key="opt_sstep")
-        o_min  = st.number_input("Overlap min (mm)", 10.0, 500.0, 50.0, 10.0,  key="opt_omin")
-        o_max  = st.number_input("Overlap max (mm)", 10.0, 500.0, 450.0, 10.0, key="opt_omax")
-        o_step = st.number_input("Overlap step (mm)", 10.0, 100.0, 50.0, 10.0, key="opt_ostep")
-        top_n  = st.slider("Top N to display", 3, 10, 5, key="opt_topn")
-        n_sep  = max(1, int((s_max - s_min) / s_step) + 1)
-        n_ovl  = max(1, int((o_max - o_min) / o_step) + 1)
-        n_cand = n_sep * n_ovl
-        st.markdown(f"""<div class='banner-info'>
-            Grid: {n_sep} sep × {n_ovl} ovl = <b>{n_cand} candidates</b>
-            (+ baseline). Est. time: {n_cand * 3 // 2} – {n_cand * 3} sec
-        </div>""", unsafe_allow_html=True)
-        st.markdown("</div>", unsafe_allow_html=True)
+        st.markdown(f"""
+        | Geometric Parameter | Configuration Value |
+        |---|---|
+        | **Source Cable** | Blue · Centre at (0, {ground} mm) |
+        | **Victim Cable** | Orange · Centre at ({sep} mm, {ground + pitch} mm) |
+        | **Parallel Run (Overlap)** | {overlap} mm |
+        | **Ground Clearance** | {ground} mm |
+        | **Conductor Diameter** | ~6 mm (representative bundle) |
+        """)
 
-    if st.button("🔧 Run Optimisation", key="btn_opt"):
-        if s_max <= s_min:
-            st.error("Separation max must be greater than min.")
-            return
-        if o_max <= o_min:
-            st.error("Overlap max must be greater than min.")
-            return
-        with st.spinner(f"Running grid search ({n_cand} candidates + Module 3 risk) …"):
-            try:
-                from optimise_routing import optimise_cable_routing
-                result = optimise_cable_routing(
-                    initial_configuration = base_config,
-                    sep_min  = float(s_min),  sep_max  = float(s_max),
-                    sep_step = float(s_step),
-                    ovl_min  = float(o_min),  ovl_max  = float(o_max),
-                    ovl_step = float(o_step),
-                    top_n    = int(top_n),
-                    verbose  = False,
-                )
-                st.session_state["opt_result"] = result
-            except Exception as e:
-                st.error(f"Optimisation failed: {e}")
-                return
+    with tab2d:
+        fig2d = build_cross_section_figure(sep, pitch, ground)
+        fig2d.update_layout(paper_bgcolor="#0F172A", font=dict(color="#CBD5E1"))
+        st.plotly_chart(fig2d, use_container_width=True)
 
-    if "opt_result" not in st.session_state:
-        st.info("Configure the search grid and click **Run Optimisation**.")
-        return
-
-    res = st.session_state["opt_result"]
-    pri = res["primary_objective"]
-    pred_col = f"Pred_{pri}"
-    base_val = res["baseline_value"]
-    best_val = res["best_value"]
-    rel_impr = res["relative_improvement_pct"]
-
-    # ── Summary banner ────────────────────────────────────────────────────
-    impr_clr = "#4caf50" if rel_impr > 0 else "#f44336"
-    st.markdown(f"""<div class='emc-card-accent'>
-        <b style='color:#00d4ff;font-size:1.1rem'>Optimisation Complete</b>
-        &nbsp;&nbsp;|&nbsp;&nbsp;
-        Candidates: {res['n_candidates']}
-        &nbsp;|&nbsp; Feasible: {res['n_feasible']}
-        &nbsp;|&nbsp; Infeasible: {res['n_infeasible']}
-        &nbsp;|&nbsp; OOD: {res['n_ood']}
-        <br><br>
-        <b>Primary objective:</b> {pri}
-        &nbsp;&nbsp;
-        <b>Baseline:</b> {base_val:.4f}
-        &nbsp;&nbsp;
-        <b>Best predicted:</b> {best_val:.4f}
-        &nbsp;&nbsp;
-        <b style='color:{impr_clr}'>Improvement: {rel_impr:+.2f}%</b>
+    st.markdown("""<div class="warning-box">
+    ⚠ The cable cross-section geometry is a representative engineering rendering and has not been
+    experimentally validated as an exact manufactured KONE cable harness.
     </div>""", unsafe_allow_html=True)
 
-    # ── Baseline vs recommended cards ─────────────────────────────────────
-    col_b, col_r = st.columns(2)
-    rec = res["recommended"]
-    with col_b:
-        st.markdown(f"""<div class='emc-card'>
-            <b style='color:#8aa8c4'>Baseline</b><br>
-            Separation: <b>{base_config['Separation_mm']:.1f} mm</b> &nbsp;
-            Overlap: <b>{base_config['Overlap_mm']:.1f} mm</b><br>
-            {pri}: <b style='color:#ff9800'>{base_val:.4f}</b><br>
-            Risk: {risk_badge(res['risk_baseline'])}
-        </div>""", unsafe_allow_html=True)
-    with col_r:
-        st.markdown(f"""<div class='emc-card' style='border-color:#4caf50'>
-            <b style='color:#4caf50'>Recommended — {rec['Candidate_ID']}</b><br>
-            Separation: <b>{rec['Separation_mm']:.1f} mm</b> &nbsp;
-            Overlap: <b>{rec['Overlap_mm']:.1f} mm</b><br>
-            {pri}: <b style='color:#4caf50'>{best_val:.4f}</b><br>
-            Risk: {risk_badge(res['risk_recommended'])}
-        </div>""", unsafe_allow_html=True)
 
-    # ── Engineering explanation ───────────────────────────────────────────
-    with st.expander("Engineering Explanation"):
-        for line in res["explanation"].split("\n"):
-            if line.strip():
-                st.markdown(f"<span style='font-size:0.88rem;color:#b0cfe0'>{line}</span>",
-                            unsafe_allow_html=True)
+# ═══════════════════════════════════════════════════════════════════════════
+#  SCREEN 5  –  EMC-GUARD ASSESSMENT & PARETO OPTIMISATION
+# ═══════════════════════════════════════════════════════════════════════════
+elif screen == "guard":
+    render_banner("EMC-GUARD Configuration Assessment & Optimisation")
 
-    # ── Top-N table ───────────────────────────────────────────────────────
-    st.markdown("<div class='section-title'>Top Feasible Candidates</div>",
-                unsafe_allow_html=True)
-
-    top_df = res["top_n_df"].copy()
-    disp_cols = ["Rank", "Candidate_ID", "Separation_mm", "Overlap_mm",
-                 pred_col, "Relative_Improvement_pct",
-                 "Risk_Category", "Risk_Reliability", "Feasibility_Status"]
-    disp_cols = [c for c in disp_cols if c in top_df.columns]
-    st.dataframe(
-        top_df[disp_cols].style.format({
-            pred_col: "{:.4f}",
-            "Relative_Improvement_pct": "{:.2f}%",
-            "Rank": "{:.0f}",
-        }),
-        use_container_width=True, hide_index=True,
-    )
-
-    # ── Charts ────────────────────────────────────────────────────────────
-    feasible_df = res["feasible_df"].copy()
-
-    tab1, tab2, tab3, tab4 = st.tabs([
-        "📈 vs Separation", "📉 vs Overlap", "🗺️ Grid Heatmap", "🏆 Ranking"
+    tab_assess, tab_pareto = st.tabs([
+        "Multi-Objective Assessment & Search",
+        "Intelligent Pareto Optimisation (Stage 4)"
     ])
 
-    with tab1:
-        sep_group = (feasible_df.groupby("Separation_mm")[pred_col]
-                     .mean().reset_index())
-        fig = go.Figure()
-        fig.add_trace(go.Scatter(
-            x=sep_group["Separation_mm"], y=sep_group[pred_col],
-            mode="lines+markers", name="Mean predicted",
-            line=dict(color="#00d4ff", width=2),
-            marker=dict(size=7),
-        ))
-        fig.add_hline(y=base_val, line_dash="dash", line_color="#ff9800",
-                      annotation_text=f"Baseline {base_val:.2f}")
-        fig.update_layout(
-            template=EMC_TEMPLATE,
-            title=f"Mean Predicted {pri} vs Separation (averaged over all overlaps)",
-            xaxis_title="Separation_mm (mm)", yaxis_title=pri,
-            height=340, margin=dict(t=40, b=20),
+    with tab_assess:
+        st.markdown("""<div class="notice">
+        EMC-GUARD ranks alternative cable configurations based on predicted electromagnetic coupling.
+        <b>No compliance, safety, or certification determinations are made.</b>
+        </div>""", unsafe_allow_html=True)
+
+        st.subheader("Reference Configuration")
+        sep, pitch, overlap, ground = config_inputs("guard")
+
+        st.subheader("Assessment Objective")
+        col_obj, col_wc, col_wm = st.columns([2, 1, 1])
+        with col_obj:
+            objective = st.selectbox(
+                "Ranking Objective", list(OBJECTIVE_LABELS.keys()),
+                format_func=lambda k: OBJECTIVE_LABELS[k]
+            )
+        with col_wc:
+            w_cap = st.slider("Capacitance weight", 0.0, 1.0, 0.5, 0.05,
+                              disabled=(objective != "minimize_combined"))
+        with col_wm:
+            w_mut = st.slider("Inductance weight", 0.0, 1.0, 0.5, 0.05,
+                              disabled=(objective != "minimize_combined"))
+
+        st.subheader("Installation Constraints (optional)")
+        col_cs, col_co, col_cg = st.columns(3)
+        with col_cs:
+            allowed_sep = st.multiselect("Allowed separations (mm)", SUPPORTED_SEPARATIONS, default=SUPPORTED_SEPARATIONS)
+        with col_co:
+            allowed_ov  = st.multiselect("Allowed overlaps (mm)", SUPPORTED_OVERLAPS, default=SUPPORTED_OVERLAPS)
+        with col_cg:
+            allowed_gc  = st.multiselect("Allowed clearances (mm)", SUPPORTED_CLEARANCES, default=SUPPORTED_CLEARANCES)
+
+        engine_g = st.radio(
+            "Prediction engine", ["frozen_matlab", "extratrees"],
+            format_func=lambda x: {"frozen_matlab": "Frozen MATLAB (primary)", "extratrees": "ExtraTrees (secondary)"}[x],
+            horizontal=True, key="guard_engine"
         )
-        st.plotly_chart(fig, use_container_width=True)
 
-    with tab2:
-        ovl_group = (feasible_df.groupby("Overlap_mm")[pred_col]
-                     .mean().reset_index())
-        fig = go.Figure()
-        fig.add_trace(go.Scatter(
-            x=ovl_group["Overlap_mm"], y=ovl_group[pred_col],
-            mode="lines+markers", name="Mean predicted",
-            line=dict(color="#ff9800", width=2),
-            marker=dict(size=7, symbol="square"),
-        ))
-        fig.add_hline(y=base_val, line_dash="dash", line_color="#f44336",
-                      annotation_text=f"Baseline {base_val:.2f}")
-        fig.update_layout(
-            template=EMC_TEMPLATE,
-            title=f"Mean Predicted {pri} vs Overlap (averaged over all separations)",
-            xaxis_title="Overlap_mm (mm)", yaxis_title=pri,
-            height=340, margin=dict(t=40, b=20),
-        )
-        st.plotly_chart(fig, use_container_width=True)
+        if st.button("▶  Run EMC-GUARD Assessment", type="primary"):
+            with st.spinner("Evaluating candidate configurations…"):
+                result = run_emc_guard_assessment(
+                    sep, pitch, overlap, ground,
+                    objective=objective, w_cap=w_cap, w_mut=w_mut,
+                    engine=engine_g,
+                    constrain_separation=allowed_sep or None,
+                    constrain_overlap=allowed_ov or None,
+                    constrain_clearance=allowed_gc or None,
+                )
 
-    with tab3:
-        try:
-            pivot = feasible_df.pivot_table(
-                index="Separation_mm", columns="Overlap_mm",
-                values=pred_col, aggfunc="mean",
-            )
-            annotate = pivot.size <= 200
-            fig = px.imshow(
-                pivot.round(2),
-                color_continuous_scale="YlOrRd",
-                labels=dict(x="Overlap_mm (mm)", y="Separation_mm (mm)",
-                            color=pri),
-                text_auto=".2f" if annotate else False,
-            )
-            fig.update_layout(
-                template=EMC_TEMPLATE,
-                title=f"Grid Search Heatmap — Predicted {pri}",
-                height=420,
-            )
-            st.plotly_chart(fig, use_container_width=True)
-        except Exception as e:
-            st.warning(f"Could not generate heatmap: {e}")
+            if "error" in result:
+                st.error(result["error"])
+            else:
+                st.markdown("<div class='section-divider'></div>", unsafe_allow_html=True)
+                st.subheader("Recommendation")
+                st.markdown(f"""<div class="notice">💡 {result['recommendation']}</div>""", unsafe_allow_html=True)
 
-    with tab4:
-        palette = {
-            "LOWER PREDICTED RISK":        "#4caf50",
-            "INTERMEDIATE PREDICTED RISK": "#ff9800",
-            "HIGHER PREDICTED RISK":       "#f44336",
-            "UNDETERMINED RISK":           "#90a4ae",
-        }
-        top_chart = res["top_n_df"].copy()
-        top_labels = [
-            f"{row['Candidate_ID']}<br>Sep={row['Separation_mm']:.0f}mm "
-            f"Ovl={row['Overlap_mm']:.0f}mm"
-            for _, row in top_chart.iterrows()
-        ]
-        bar_colors = [palette.get(r, "#90a4ae")
-                      for r in top_chart["Risk_Category"]]
-        fig = go.Figure()
-        fig.add_trace(go.Bar(
-            x=top_labels, y=top_chart[pred_col],
-            marker_color=bar_colors, name=pri,
-            text=[f"{v:.3f}<br>{i:+.1f}%"
-                  for v, i in zip(top_chart[pred_col],
-                                  top_chart["Relative_Improvement_pct"])],
-            textposition="outside",
-        ))
-        fig.add_hline(y=base_val, line_dash="dash", line_color="#ff9800",
-                      annotation_text=f"Baseline {base_val:.2f}")
-        fig.update_layout(
-            template=EMC_TEMPLATE,
-            title=f"Top-{len(top_chart)} Candidates — {pri}",
-            yaxis_title=pri, height=380,
-            margin=dict(t=40, b=20),
-        )
-        st.plotly_chart(fig, use_container_width=True)
+                ref = result["reference"]
+                top = result["top_config"]
 
-    # ── Downloads ─────────────────────────────────────────────────────────
-    opt_csv = REPORTS / "optimisation_results.csv"
-    opt_json = REPORTS / "recommended_configuration.json"
-    dl_col1, dl_col2 = st.columns(2)
-    with dl_col1:
-        if opt_csv.exists():
-            st.download_button(
-                "⬇️ Download Optimisation CSV",
-                data=opt_csv.read_bytes(),
-                file_name="optimisation_results.csv",
-                mime="text/csv",
-            )
-    with dl_col2:
-        if opt_json.exists():
-            st.download_button(
-                "⬇️ Download Recommended Config JSON",
-                data=opt_json.read_bytes(),
-                file_name="recommended_configuration.json",
-                mime="application/json",
-            )
+                c1, c2, c3, c4 = st.columns(4)
+                def _delta_label(new, old):
+                    d = new - old
+                    pct = 100 * d / old if old != 0 else 0
+                    sign = "▲" if d > 0 else "▼"
+                    return f"{sign} {abs(pct):.1f}%"
 
+                with c1:
+                    st.metric("Candidates evaluated", result["n_candidates"])
+                with c2:
+                    st.metric("Ref. Capacitance", f"{ref['cap']:.4g} pF/m")
+                with c3:
+                    st.metric("Top Cap. Predicted", f"{top['TotalCapacitance_pF_per_m']:.4g} pF/m",
+                              delta=_delta_label(top['TotalCapacitance_pF_per_m'], ref['cap']))
+                with c4:
+                    st.metric("Top Mut. Predicted", f"{top['AbsMutualInductance_nH']:.4g} nH",
+                              delta=_delta_label(top['AbsMutualInductance_nH'], ref['mut']))
 
-# ---------------------------------------------------------------------------
-# PAGE 5 — MODEL PERFORMANCE
-# ---------------------------------------------------------------------------
-def page_model_performance():
-    st.markdown("<div class='section-title'>📊 Model Performance & Evaluation</div>",
-                unsafe_allow_html=True)
-    st.markdown(SYNTH_BANNER, unsafe_allow_html=True)
+                ranked = result["ranked_df"]
+                st.subheader("Ranked Configurations (Top 20)")
+                display_cols = [
+                    "Rank", "Config_ID", "PairSeparation_mm", "PairPitch_mm",
+                    "Overlap_mm", "GroundClearance_mm",
+                    "TotalCapacitance_pF_per_m", "AbsMutualInductance_nH",
+                    "ObjectiveScore", "CouplingAssessment",
+                ]
+                disp = ranked[[c for c in display_cols if c in ranked.columns]].head(20)
+                st.dataframe(disp.style.format({
+                    "TotalCapacitance_pF_per_m": "{:.4g}",
+                    "AbsMutualInductance_nH":    "{:.4g}",
+                    "ObjectiveScore":             "{:.4f}",
+                }), use_container_width=True, hide_index=True)
 
-    perf = load_report_json("model_performance.json")
-    if not perf:
-        st.error("model_performance.json not found. Run train_model.py first.")
-        return
+                st.session_state["guard_result"] = result
 
-    # ── Configuration info ────────────────────────────────────────────────
-    cfg = perf.get("training_config", {})
-    st.markdown(f"""<div class='emc-card'>
-        <b>Evaluation date:</b> {perf.get("evaluation_date","—")} &nbsp;|&nbsp;
-        <b>Dataset:</b> {perf.get("dataset_type","—")} &nbsp;|&nbsp;
-        <b>Records:</b> {perf.get("dataset_size","—")}
-        (Train: {perf.get("training_records","—")},
-         Test: {perf.get("testing_records","—")}) &nbsp;|&nbsp;
-        <b>Test split:</b> {cfg.get("test_size",0.2)*100:.0f}%
-    </div>""", unsafe_allow_html=True)
+    # ── TAB 2: INTELLIGENT PARETO OPTIMISATION (STAGE 4) ────────────────────
+    with tab_pareto:
+        st.subheader("Multi-Objective Pareto Frontier Analysis")
+        st.markdown("""<div class="notice">
+        <b>Pareto Optimality Principle:</b> A configuration is Pareto-optimal if no other configuration
+        in the 216-dataset can reduce mutual inductance without simultaneously increasing capacitance.
+        </div>""", unsafe_allow_html=True)
 
-    # ── Per-target metrics tabs ───────────────────────────────────────────
-    targets = list(perf.get("targets", {}).keys())
-    tabs = st.tabs(targets)
+        if AIML_MODULES_AVAILABLE:
+            all_pareto_df, pareto_front_df = _get_pareto_front_data()
 
-    for tab, tgt in zip(tabs, targets):
-        with tab:
-            tdata = perf["targets"][tgt]
-            best  = tdata.get("best_algorithm", "—")
-            algos = ["Random Forest", "Extra Trees"]
-            algo_cols = st.columns(2)
-            for col, algo in zip(algo_cols, algos):
-                ad = tdata.get(algo, {})
-                sel = algo == best
-                clr = "#00d4ff" if sel else "#546e7a"
-                lbl = " ✦ SELECTED" if sel else ""
-                with col:
-                    st.markdown(f"""<div class='emc-card' style='border-color:{clr}'>
-                        <b style='color:{clr}'>{algo}{lbl}</b><br>
-                        MAE:  <b>{ad.get('MAE', '—'):.4f}</b> &nbsp;|&nbsp;
-                        RMSE: <b>{ad.get('RMSE','—'):.4f}</b> &nbsp;|&nbsp;
-                        R²:   <b>{ad.get('R2',  '—'):.4f}</b>
+            if not pareto_front_df.empty:
+                # Pareto Metric Highlights
+                p1, p2, p3 = st.columns(3)
+                min_c = pareto_front_df.loc[pareto_front_df["TotalCapacitance_pF_per_m"].idxmin()]
+                min_m = pareto_front_df.loc[pareto_front_df["AbsMutualInductance_nH"].idxmin()]
+                best_bal = pareto_front_df.loc[pareto_front_df["Weighted_Tradeoff_Score"].idxmin()]
+
+                with p1:
+                    st.markdown(f"""<div class="metric-card">
+                        <div class="label">Min. Capacitance Champion</div>
+                        <div class="value">{min_c['TotalCapacitance_pF_per_m']:.2f} <span style='font-size:0.9rem'>pF/m</span></div>
+                        <div class="unit">{min_c['Config_ID']} · Sep={min_c['PairSeparation_mm']:.0f}mm · Mut={min_c['AbsMutualInductance_nH']:.3f}nH</div>
+                    </div>""", unsafe_allow_html=True)
+                with p2:
+                    st.markdown(f"""<div class="metric-card">
+                        <div class="label">Min. Inductance Champion</div>
+                        <div class="value">{min_m['AbsMutualInductance_nH']:.4f} <span style='font-size:0.9rem'>nH</span></div>
+                        <div class="unit">{min_m['Config_ID']} · Sep={min_m['PairSeparation_mm']:.0f}mm · Cap={min_m['TotalCapacitance_pF_per_m']:.2f}pF/m</div>
+                    </div>""", unsafe_allow_html=True)
+                with p3:
+                    st.markdown(f"""<div class="metric-card">
+                        <div class="label">Recommended Balanced Design</div>
+                        <div class="value">{best_bal['Config_ID']}</div>
+                        <div class="unit">Sep={best_bal['PairSeparation_mm']:.0f}mm · Cap={best_bal['TotalCapacitance_pF_per_m']:.2f} · Mut={best_bal['AbsMutualInductance_nH']:.4f}</div>
                     </div>""", unsafe_allow_html=True)
 
-            # RF vs ET comparison bar
-            rf = tdata.get("Random Forest", {})
-            et = tdata.get("Extra Trees", {})
-            metrics = ["MAE", "RMSE", "R2"]
-            fig = go.Figure()
-            fig.add_trace(go.Bar(name="Random Forest",
-                                 x=metrics,
-                                 y=[rf.get(m, 0) for m in metrics],
-                                 marker_color="#00d4ff"))
-            fig.add_trace(go.Bar(name="Extra Trees",
-                                 x=metrics,
-                                 y=[et.get(m, 0) for m in metrics],
-                                 marker_color="#4caf50"))
-            fig.update_layout(
-                template=EMC_TEMPLATE, barmode="group",
-                title=f"{tgt} — RF vs ET Comparison",
-                height=300, margin=dict(t=40, b=20),
-            )
-            st.plotly_chart(fig, use_container_width=True)
+                st.markdown("<div style='margin-top:16px'></div>", unsafe_allow_html=True)
 
-    # ── Overall comparison charts ─────────────────────────────────────────
-    st.markdown("<div class='section-title'>Algorithm Comparison Across All Targets</div>",
-                unsafe_allow_html=True)
+                # Interactive Plotly Pareto Front Chart
+                fig_pf = go.Figure()
+                dominated = all_pareto_df[~all_pareto_df["Is_Pareto_Optimal"]]
+                fig_pf.add_trace(go.Scatter(
+                    x=dominated["TotalCapacitance_pF_per_m"],
+                    y=dominated["AbsMutualInductance_nH"],
+                    mode="markers",
+                    marker=dict(color="#475569", size=6, opacity=0.6),
+                    name="Dominated (210)",
+                    text=[f"{r.Config_ID}: C={r.TotalCapacitance_pF_per_m:.2f}, M={r.AbsMutualInductance_nH:.3f}" for _, r in dominated.iterrows()],
+                    hoverinfo="text",
+                ))
+                p_sorted = pareto_front_df.sort_values("TotalCapacitance_pF_per_m")
+                fig_pf.add_trace(go.Scatter(
+                    x=p_sorted["TotalCapacitance_pF_per_m"],
+                    y=p_sorted["AbsMutualInductance_nH"],
+                    mode="lines+markers+text",
+                    line=dict(color="#EF4444", width=2.5, dash="dash"),
+                    marker=dict(size=12, color="#EF4444", symbol="diamond"),
+                    text=[f"{r.Config_ID} ({r.PairSeparation_mm:.0f}mm)" for _, r in p_sorted.iterrows()],
+                    textposition="top right",
+                    textfont=dict(color="#F87171", size=11),
+                    name="Pareto Optimal Front (6)",
+                ))
+                fig_pf.update_layout(
+                    title="<b>Multi-Objective Pareto Optimisation Frontier</b>",
+                    xaxis=dict(title="Total Capacitance [pF/m] (Minimise →)", gridcolor="#334155"),
+                    yaxis=dict(title="Absolute Mutual Inductance [nH] (Minimise →)", gridcolor="#334155"),
+                    paper_bgcolor="#0F172A", plot_bgcolor="#1E293B",
+                    font=dict(color="#CBD5E1"), height=450,
+                )
+                st.plotly_chart(fig_pf, use_container_width=True)
 
-    rows_rf, rows_et = [], []
-    for tgt, td in perf.get("targets", {}).items():
-        rf = td.get("Random Forest", {})
-        et = td.get("Extra Trees", {})
-        rows_rf.append({"target": tgt, "MAE": rf.get("MAE"), "RMSE": rf.get("RMSE"),
-                        "R2": rf.get("R2"), "algorithm": "Random Forest"})
-        rows_et.append({"target": tgt, "MAE": et.get("MAE"), "RMSE": et.get("RMSE"),
-                        "R2": et.get("R2"), "algorithm": "Extra Trees"})
-    comp_df = pd.DataFrame(rows_rf + rows_et)
+                # Pareto Candidates Table
+                st.subheader("The 6 Non-Dominated Pareto Optimal Configurations")
+                p_disp = pareto_front_df[[
+                    "Config_ID", "PairSeparation_mm", "PairPitch_mm", "Overlap_mm", "GroundClearance_mm",
+                    "TotalCapacitance_pF_per_m", "AbsMutualInductance_nH", "Candidate_Role", "Inclusion_Rationale"
+                ]]
+                st.dataframe(p_disp, use_container_width=True, hide_index=True)
 
-    if not comp_df.empty:
-        c1, c2 = st.columns(2)
-        with c1:
-            fig = px.bar(comp_df, x="target", y="R2", color="algorithm",
-                         barmode="group", color_discrete_map={
-                             "Random Forest": "#00d4ff", "Extra Trees": "#4caf50"},
-                         title="R² Score Comparison")
-            fig.add_hline(y=0.70, line_dash="dot", line_color="#ff9800",
-                          annotation_text="R²=0.70")
-            fig.update_layout(template=EMC_TEMPLATE, height=340,
-                              margin=dict(t=40, b=20))
-            st.plotly_chart(fig, use_container_width=True)
-        with c2:
-            fig = px.bar(comp_df, x="target", y="MAE", color="algorithm",
-                         barmode="group", color_discrete_map={
-                             "Random Forest": "#00d4ff", "Extra Trees": "#4caf50"},
-                         title="MAE Comparison")
-            fig.update_layout(template=EMC_TEMPLATE, height=340,
-                              margin=dict(t=40, b=20))
-            st.plotly_chart(fig, use_container_width=True)
-
-    # ── Pre-generated evaluation plots ────────────────────────────────────
-    st.markdown("<div class='section-title'>Pre-Generated Evaluation Plots</div>",
-                unsafe_allow_html=True)
-    vis_dir = AI_ML_DIR / "reports" / "visualisations"
-    img_files = sorted(vis_dir.glob("*.png"))
-    if img_files:
-        cols = st.columns(3)
-        for i, img in enumerate(img_files[:9]):
-            with cols[i % 3]:
-                st.image(str(img), caption=img.stem, use_container_width=True)
-    else:
-        st.info("No pre-generated PNG files found in reports/visualisations/")
-
-
-# ---------------------------------------------------------------------------
-# PAGE 6 — DOWNLOAD REPORTS
-# ---------------------------------------------------------------------------
-def page_downloads():
-    st.markdown("<div class='section-title'>📥 Download Reports</div>",
-                unsafe_allow_html=True)
-
-    files = [
-        ("Prediction Results CSV",           "prediction_results.csv",         "text/csv"),
-        ("Feature Importance CSV",            "feature_importance.csv",          "text/csv"),
-        ("Prediction Error Analysis CSV",     "prediction_error_analysis.csv",   "text/csv"),
-        ("Risk Analysis Results CSV",         "risk_analysis_results.csv",       "text/csv"),
-        ("Optimisation Results CSV",          "optimisation_results.csv",        "text/csv"),
-        ("Recommended Configuration JSON",    "recommended_configuration.json",  "application/json"),
-        ("Model Performance JSON",            "model_performance.json",          "application/json"),
-        ("Risk Thresholds JSON",              "risk_thresholds.json",            "application/json"),
-        ("Uncertainty Calibration JSON",      "uncertainty_calibration.json",    "application/json"),
-        ("Prediction Reliability Report TXT", "prediction_reliability_report.txt","text/plain"),
-        ("Optimisation Summary TXT",          "optimisation_summary.txt",        "text/plain"),
-        ("Risk Assessment Report TXT",        "risk_assessment_report.txt",      "text/plain"),
-        ("Model Evaluation Report TXT",       "model_evaluation_report.txt",     "text/plain"),
-    ]
-
-    cols = st.columns(3)
-    for i, (label, filename, mime) in enumerate(files):
-        fpath = REPORTS / filename
-        with cols[i % 3]:
-            if fpath.exists():
+                # Download Pareto CSV
+                csv_bytes = pareto_front_df.to_csv(index=False).encode("utf-8")
                 st.download_button(
-                    f"⬇️ {label}",
-                    data=fpath.read_bytes(),
-                    file_name=filename,
-                    mime=mime,
+                    label="⬇  Download Pareto Optimal Configurations CSV",
+                    data=csv_bytes,
+                    file_name="pareto_optimal_configurations.csv",
+                    mime="text/csv",
+                )
+        else:
+            st.info("Stage 4 optimisation module is loading or unavailable.")
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+#  SCREEN 6  –  CONFIGURATION COMPARISON
+# ═══════════════════════════════════════════════════════════════════════════
+elif screen == "compare":
+    render_banner("Configuration Comparison")
+
+    st.subheader("Select Configurations to Compare")
+    n_configs = st.slider("Number of configurations", 2, 6, 3)
+
+    configs = []
+    for i in range(n_configs):
+        with st.expander(f"Configuration {i+1}", expanded=(i < 3)):
+            sc = config_inputs(f"cmp{i}")
+            configs.append(sc)
+
+    ref_idx = st.selectbox(
+        "Reference for % difference", list(range(1, n_configs + 1)),
+        format_func=lambda x: f"Configuration {x}"
+    ) - 1
+
+    if st.button("▶  Compare Configurations", type="primary"):
+        with st.spinner("Executing predictions for all selected configurations…"):
+            results = []
+            for i, (s, p, o, g) in enumerate(configs):
+                res = predict(s, p, o, g, engine="frozen_matlab")
+                c_val = res["predictions"]["TotalCapacitance_pF_per_m"]["value"] if res["status"] == "OK" else None
+                m_val = res["predictions"]["AbsMutualInductance_nH"]["value"] if res["status"] == "OK" else None
+                results.append({
+                    "Config #":     f"Config {i+1}",
+                    "Config_ID":    res.get("config_id", "—"),
+                    "Sep (mm)":     s,
+                    "Pitch":        p,
+                    "Overlap (mm)": o,
+                    "GC (mm)":      g,
+                    "Cap (pF/m)":   c_val,
+                    "Mut (nH)":     m_val,
+                    "Status":       res["status"],
+                })
+            df_cmp = pd.DataFrame(results)
+
+        valid = df_cmp[df_cmp["Status"] == "OK"]
+        if valid.empty:
+            st.error("No valid predictions obtained.")
+        else:
+            ref_cap = valid.iloc[ref_idx]["Cap (pF/m)"] if ref_idx < len(valid) else valid.iloc[0]["Cap (pF/m)"]
+            ref_mut = valid.iloc[ref_idx]["Mut (nH)"]   if ref_idx < len(valid) else valid.iloc[0]["Mut (nH)"]
+            df_cmp["ΔCap %"] = df_cmp["Cap (pF/m)"].apply(
+                lambda v: f"{100*(v-ref_cap)/ref_cap:+.2f}%" if pd.notna(v) and ref_cap != 0 else "—"
+            )
+            df_cmp["ΔMut %"] = df_cmp["Mut (nH)"].apply(
+                lambda v: f"{100*(v-ref_mut)/ref_mut:+.2f}%" if pd.notna(v) and ref_mut != 0 else "—"
+            )
+
+            st.subheader("Comparison Table")
+            st.dataframe(df_cmp.style.format({
+                "Cap (pF/m)": "{:.4g}",
+                "Mut (nH)":   "{:.4g}",
+            }), use_container_width=True, hide_index=True)
+
+            # Stage 4 Automated Trade-Off & Dominance Evaluation
+            if AIML_MODULES_AVAILABLE and len(valid) >= 2:
+                st.subheader("Pareto Dominance & Trade-Off Evaluation")
+                ref_row = valid.iloc[ref_idx]
+                for i, r in valid.iterrows():
+                    if i == ref_idx:
+                        continue
+                    c_ref = {
+                        "PairSeparation_mm": ref_row["Sep (mm)"], "PairPitch_mm": ref_row["Pitch"],
+                        "Overlap_mm": ref_row["Overlap (mm)"], "GroundClearance_mm": ref_row["GC (mm)"],
+                        "TotalCapacitance_pF_per_m": ref_row["Cap (pF/m)"], "AbsMutualInductance_nH": ref_row["Mut (nH)"],
+                        "Config_ID": ref_row["Config_ID"],
+                    }
+                    c_cand = {
+                        "PairSeparation_mm": r["Sep (mm)"], "PairPitch_mm": r["Pitch"],
+                        "Overlap_mm": r["Overlap (mm)"], "GroundClearance_mm": r["GC (mm)"],
+                        "TotalCapacitance_pF_per_m": r["Cap (pF/m)"], "AbsMutualInductance_nH": r["Mut (nH)"],
+                        "Config_ID": r["Config_ID"],
+                    }
+                    comp_eval = opt.compare_configurations(c_ref, c_cand, f"Config {ref_idx+1}", r["Config #"])
+                    st.markdown(f"**{r['Config #']} vs Config {ref_idx+1} ({ref_row['Config_ID']}):** {comp_eval['tradeoff_summary']}")
+                    st.caption(comp_eval["dominance_relationship"])
+
+            st.markdown("<div class='section-divider'></div>", unsafe_allow_html=True)
+
+            c_bar, m_bar = st.columns(2)
+            with c_bar:
+                fig_cap = px.bar(
+                    valid, x="Config #", y="Cap (pF/m)",
+                    color="Config #", title="Total Capacitance Comparison",
+                    labels={"Cap (pF/m)": "Capacitance (pF/m)"},
+                    color_discrete_sequence=px.colors.qualitative.Set2,
+                )
+                fig_cap.update_layout(
+                    paper_bgcolor="#0F172A", plot_bgcolor="#1E293B",
+                    font=dict(color="#CBD5E1"), showlegend=False,
+                    yaxis=dict(gridcolor="#334155"), height=350
+                )
+                st.plotly_chart(fig_cap, use_container_width=True)
+
+            with m_bar:
+                fig_mut = px.bar(
+                    valid, x="Config #", y="Mut (nH)",
+                    color="Config #", title="Abs. Mutual Inductance Comparison",
+                    labels={"Mut (nH)": "Inductance (nH)"},
+                    color_discrete_sequence=px.colors.qualitative.Set2,
+                )
+                fig_mut.update_layout(
+                    paper_bgcolor="#0F172A", plot_bgcolor="#1E293B",
+                    font=dict(color="#CBD5E1"), showlegend=False,
+                    yaxis=dict(gridcolor="#334155"), height=350
+                )
+                st.plotly_chart(fig_mut, use_container_width=True)
+
+            st.session_state["comparison_df"] = df_cmp
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+#  SCREEN 7  –  MODEL VALIDATION & EXPLAINABLE AI
+# ═══════════════════════════════════════════════════════════════════════════
+elif screen == "validation":
+    render_banner("Model Validation & Explainable AI (XAI)")
+
+    st.markdown("""<div class="notice">
+    Validation evidence from Stage 12A MATLAB analytical models, Stage 14A ExtraTrees surrogate models,
+    and Stage 2 Explainable AI (XAI) feature attribution.
+    </div>""", unsafe_allow_html=True)
+
+    try:
+        pred_df = pd.read_csv(_DATA_DIR / "Stage12A_Selected_Model_Predictions.csv")
+        summary_df = pd.read_csv(_DATA_DIR / "Stage12A_Selected_Model_Summary.csv")
+        lolo_df = pd.read_csv(_DATA_DIR / "LOLO_Summary.csv")
+        perf_df = pd.read_csv(_DATA_DIR / "model_performance.csv")
+        data_ok = True
+    except Exception as exc:
+        st.error(f"Could not load validation data: {exc}")
+        data_ok = False
+
+    if data_ok:
+        tab_sum, tab_pva, tab_res, tab_cv, tab_xai = st.tabs([
+            "Model Summary", "Predicted vs Actual", "Residuals",
+            "LOLO Cross-Validation", "Explainable AI (Stage 2)"
+        ])
+
+        with tab_sum:
+            st.subheader("Stage 12A Frozen Model Summary")
+            st.dataframe(summary_df, use_container_width=True, hide_index=True)
+
+            st.subheader("Stage 14A ExtraTrees Surrogate Performance (In-Sample)")
+            st.dataframe(perf_df, use_container_width=True, hide_index=True)
+            st.caption("Notice: In-sample R²=1.0 reflects reproduction of deterministic analytical equations, not empirical test generalisation.")
+
+        with tab_pva:
+            st.subheader("Predicted vs. Analytical Reference — Stage 12A")
+            pv_c1, pv_c2 = st.columns(2)
+            with pv_c1:
+                fig_pvc = go.Figure()
+                fig_pvc.add_trace(go.Scatter(
+                    x=pred_df["ActualCapacitance_pF_m"], y=pred_df["PredictedCapacitance_pF_m"],
+                    mode="markers", marker=dict(color="#2196F3", size=5, opacity=0.7),
+                    name="Configurations",
+                ))
+                mn = pred_df["ActualCapacitance_pF_m"].min()
+                mx = pred_df["ActualCapacitance_pF_m"].max()
+                fig_pvc.add_trace(go.Scatter(
+                    x=[mn, mx], y=[mn, mx], mode="lines",
+                    line=dict(color="#EF4444", dash="dash"), name="Ideal (1:1)"
+                ))
+                fig_pvc.update_layout(
+                    title="Capacitance: Predicted vs. Actual",
+                    xaxis_title="Actual (pF/m)", yaxis_title="Predicted (pF/m)",
+                    paper_bgcolor="#0F172A", plot_bgcolor="#1E293B",
+                    font=dict(color="#CBD5E1"), height=380,
+                    xaxis=dict(gridcolor="#334155"), yaxis=dict(gridcolor="#334155"),
+                )
+                st.plotly_chart(fig_pvc, use_container_width=True)
+
+            with pv_c2:
+                fig_pvm = go.Figure()
+                fig_pvm.add_trace(go.Scatter(
+                    x=pred_df["ActualAbsMutualInductance_nH"], y=pred_df["PredictedAbsMutualInductance_nH"],
+                    mode="markers", marker=dict(color="#FF9800", size=5, opacity=0.7),
+                    name="Configurations",
+                ))
+                mn = pred_df["ActualAbsMutualInductance_nH"].min()
+                mx = pred_df["ActualAbsMutualInductance_nH"].max()
+                fig_pvm.add_trace(go.Scatter(
+                    x=[mn, mx], y=[mn, mx], mode="lines",
+                    line=dict(color="#EF4444", dash="dash"), name="Ideal (1:1)"
+                ))
+                fig_pvm.update_layout(
+                    title="Mutual Inductance: Predicted vs. Actual",
+                    xaxis_title="Actual (nH)", yaxis_title="Predicted (nH)",
+                    paper_bgcolor="#0F172A", plot_bgcolor="#1E293B",
+                    font=dict(color="#CBD5E1"), height=380,
+                    xaxis=dict(gridcolor="#334155"), yaxis=dict(gridcolor="#334155"),
+                )
+                st.plotly_chart(fig_pvm, use_container_width=True)
+
+        with tab_res:
+            st.subheader("Residual Error Distributions — Stage 12A")
+            r_c1, r_c2 = st.columns(2)
+            with r_c1:
+                res_c = pred_df["CapacitanceResidual_pF_m"]
+                fig_rc = px.histogram(
+                    res_c, nbins=30, title="Capacitance Residuals (pF/m)",
+                    labels={"value": "Residual (pF/m)"},
+                    color_discrete_sequence=["#2196F3"],
+                )
+                fig_rc.update_layout(
+                    paper_bgcolor="#0F172A", plot_bgcolor="#1E293B",
+                    font=dict(color="#CBD5E1"), height=350,
+                    xaxis=dict(gridcolor="#334155"), yaxis=dict(gridcolor="#334155"),
+                )
+                st.plotly_chart(fig_rc, use_container_width=True)
+                st.markdown(f"RMSE: **{res_c.pow(2).mean()**0.5:.3e}** pF/m · MAE: **{res_c.abs().mean():.3e}** pF/m")
+
+            with r_c2:
+                res_m = pred_df["AbsMutualInductanceResidual_nH"]
+                fig_rm = px.histogram(
+                    res_m, nbins=30, title="Mutual Inductance Residuals (nH)",
+                    labels={"value": "Residual (nH)"},
+                    color_discrete_sequence=["#FF9800"],
+                )
+                fig_rm.update_layout(
+                    paper_bgcolor="#0F172A", plot_bgcolor="#1E293B",
+                    font=dict(color="#CBD5E1"), height=350,
+                    xaxis=dict(gridcolor="#334155"), yaxis=dict(gridcolor="#334155"),
+                )
+                st.plotly_chart(fig_rm, use_container_width=True)
+                st.markdown(f"RMSE: **{res_m.pow(2).mean()**0.5:.3e}** nH · MAE: **{res_m.abs().mean():.3e}** nH")
+
+        with tab_cv:
+            st.subheader("Leave-One-Level-Out (LOLO) Generalisation Assessment")
+            st.markdown("""<div class="notice">
+            LOLO withholds all configurations at a specific factor level and evaluates predictions
+            using a model trained exclusively on remaining data. This reveals interpolation versus
+            boundary extrapolation limitations.
+            </div>""", unsafe_allow_html=True)
+
+            for target in lolo_df["Target"].unique():
+                sub = lolo_df[lolo_df["Target"] == target]
+                st.markdown(f"**{target}**")
+                st.dataframe(sub[[
+                    "HeldOutFeature", "NumberOfLevels",
+                    "Mean_AI_RMSE", "Mean_AI_R2", "Mean_RMSE_Improvement_Percent"
+                ]].rename(columns={
+                    "HeldOutFeature": "Held-out factor",
+                    "NumberOfLevels": "Levels",
+                    "Mean_AI_RMSE": "Pooled RMSE",
+                    "Mean_AI_R2": "Pooled R²",
+                    "Mean_RMSE_Improvement_Percent": "RMSE improvement %",
+                }), use_container_width=True, hide_index=True)
+
+            st.markdown("""<div class="warning-box">
+            ⚠ <b>Scientific Observation on Negative R² Values:</b><br>
+            Notice negative R² when withholding <code>GroundClearance_mm=10mm</code> (-8.67) and <code>PairPitch_mm=2</code> (-2.25).
+            Decision trees predict flat piecewise step functions and cannot extrapolate steep asymptotic field increases
+            beyond observed training bounds. This highlights why predictions are restricted strictly to the 216-grid.
+            </div>""", unsafe_allow_html=True)
+
+        with tab_xai:
+            st.subheader("Feature Importance & Physical Attribution (Stage 2)")
+            fx1, fx2 = st.columns(2)
+            with fx1:
+                st.markdown("**Total Capacitance Feature Importance**")
+                cap_imp = pd.DataFrame({
+                    "Feature": ["GroundClearance_mm", "PairSeparation_mm", "PairPitch_mm"],
+                    "MDI Importance": ["92.8%", "6.3%", "0.9%"],
+                    "PFI R² Drop": ["+1.8755", "+0.1386", "+0.0240"],
+                    "Physical Driver": ["Earth image charge coupling", "Inter-pair spacing", "Twist geometry"],
+                })
+                st.dataframe(cap_imp, use_container_width=True, hide_index=True)
+
+            with fx2:
+                st.markdown("**Mutual Inductance Feature Importance**")
+                mut_imp = pd.DataFrame({
+                    "Feature": ["PairSeparation_mm", "PairPitch_mm", "Overlap_mm"],
+                    "MDI Importance": ["58.4%", "25.8%", "15.8%"],
+                    "PFI R² Drop": ["+1.4633", "+0.7072", "+0.4509"],
+                    "Physical Driver": ["Magnetic spatial field decay (1/r)", "Periodic twist cancellation", "Coupled parallel run length"],
+                })
+                st.dataframe(mut_imp, use_container_width=True, hide_index=True)
+
+            st.markdown(r"""
+            **One-at-a-Time (OAT) Dynamic Sensitivity Ranges (at Median Config):**
+            - **Ground Clearance ($10 \to 100$ mm):** Drives a **$36.17$ pF/m ($88.4\%$)** change in capacitance.
+            - **Pair Separation ($8 \to 28$ mm):** Drives an **$8.40$ nH ($616.6\%$)** change in mutual inductance.
+            - **Pair Pitch ($2 \to 4$ mm):** Drives a **$1.84$ nH ($135.2\%$)** change in mutual inductance.
+            """)
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+#  SCREEN 8  –  ANSYS INTEGRATION
+# ═══════════════════════════════════════════════════════════════════════════
+elif screen == "ansys":
+    render_banner("ANSYS Electronics Desktop Integration")
+
+    st.markdown("""<div class="notice">
+    This module is prepared for future ANSYS Electronics Desktop numerical verification.
+    Comparison functions are implemented and ready to activate once Maxwell / Q3D simulation data is provided.
+    </div>""", unsafe_allow_html=True)
+
+    st.markdown("""<div class="warning-box">
+    ⚠ <b>ANSYS integration: Pending simulation data.</b><br>
+    No ANSYS Q3D, Maxwell or HFSS results are currently available in the project repository.
+    The comparison interface below will automatically populate when simulation data is supplied.
+    </div>""", unsafe_allow_html=True)
+
+    st.subheader("Expected Data Format")
+    tab_q3d, tab_max, tab_comp = st.tabs(["Q3D Capacitance", "Maxwell Inductance", "Comparison Interface"])
+
+    with tab_q3d:
+        st.markdown("**Expected Q3D capacitance matrix columns:**")
+        st.code("""
+Config_ID, PairSeparation_mm, PairPitch_mm, Overlap_mm, GroundClearance_mm,
+C11_pF, C12_pF, C22_pF, TotalCapacitance_pF_per_m, FrequencyHz, SimulationCase
+        """)
+        st.markdown("""Once supplied, the comparison will compute:
+- Point-by-point difference between MATLAB and ANSYS predictions
+- Percentage deviation across the 216-configuration grid
+- Identification of configurations with highest discrepancy
+        """)
+
+    with tab_max:
+        st.markdown("**Expected Maxwell / Q3D inductance matrix columns:**")
+        st.code("""
+Config_ID, PairSeparation_mm, PairPitch_mm, Overlap_mm, GroundClearance_mm,
+L11_nH, L12_nH, L22_nH, AbsMutualInductance_nH, SimulationCase
+        """)
+
+    with tab_comp:
+        st.subheader("MATLAB vs ANSYS Comparison Interface")
+        st.info("Upload an ANSYS result CSV to activate the comparison engine.")
+        uploaded = st.file_uploader("Upload ANSYS result CSV", type=["csv"])
+        if uploaded:
+            try:
+                ansys_df = pd.read_csv(uploaded)
+                matlab_df = _get_dataset()
+                st.success(f"ANSYS file loaded: {len(ansys_df)} rows.")
+                if "TotalCapacitance_pF_per_m" in ansys_df.columns:
+                    merged = matlab_df.merge(ansys_df, on="Config_ID", suffixes=("_MATLAB", "_ANSYS"))
+                    merged["ΔCap (%)"] = 100 * (
+                        merged["TotalCapacitance_pF_per_m_ANSYS"] -
+                        merged["TotalCapacitance_pF_per_m_MATLAB"]
+                    ) / merged["TotalCapacitance_pF_per_m_MATLAB"]
+                    st.dataframe(merged[[
+                        "Config_ID", "TotalCapacitance_pF_per_m_MATLAB",
+                        "TotalCapacitance_pF_per_m_ANSYS", "ΔCap (%)"
+                    ]], use_container_width=True)
+                else:
+                    st.dataframe(ansys_df.head(20), use_container_width=True)
+            except Exception as exc:
+                st.error(f"Could not parse ANSYS file: {exc}")
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+#  SCREEN 9  –  REPORT GENERATION & DATA PACKAGE DOWNLOADS
+# ═══════════════════════════════════════════════════════════════════════════
+elif screen == "report":
+    render_banner("Engineering Report Generation & Data Packages")
+
+    tab_pdf, tab_packages = st.tabs([
+        "PDF Configuration Report",
+        "Stage 2–4 Technical Reports & Data Packages"
+    ])
+
+    with tab_pdf:
+        st.subheader("Generate Cable Assessment PDF")
+        sep, pitch, overlap, ground = config_inputs("rep")
+
+        last = st.session_state.get("last_prediction")
+        guard_result = st.session_state.get("guard_result")
+        comp_df = st.session_state.get("comparison_df")
+
+        col_opt1, col_opt2 = st.columns(2)
+        with col_opt1:
+            include_comparison = st.checkbox("Include configuration comparison table", value=(comp_df is not None))
+        with col_opt2:
+            include_recommendation = st.checkbox("Include EMC-GUARD recommendation", value=(guard_result is not None))
+
+        if not REPORTLAB_AVAILABLE:
+            st.warning("`reportlab` is not installed in the active environment. PDF compilation requires reportlab. You can download complete Markdown reports and CSV data packages in the next tab.")
+        else:
+            if st.button("📄  Generate PDF Report", type="primary"):
+                with st.spinner("Compiling engineering assessment report…"):
+                    res = predict(sep, pitch, overlap, ground, engine="frozen_matlab")
+                    if res["status"] != "OK":
+                        st.error(f"Prediction error: {res.get('error')}")
+                        st.stop()
+
+                    cap = res["predictions"]["TotalCapacitance_pF_per_m"]
+                    mut = res["predictions"]["AbsMutualInductance_nH"]
+                    recommendation = guard_result.get("recommendation") if (include_recommendation and guard_result) else None
+                    df_for_report = comp_df if (include_comparison and comp_df is not None) else None
+
+                    ts = datetime.now(timezone.utc)
+                    fname = f"EMC_GUARD_Report_{res['config_id']}_{ts.strftime('%Y%m%d_%H%M%S')}.pdf"
+
+                    pdf_bytes = generate_report(
+                        config_id=res["config_id"],
+                        sep=sep, pitch=pitch, overlap=overlap, ground=ground,
+                        cap_value=cap["value"], mut_value=mut["value"],
+                        cap_model=cap["model"], mut_model=mut["model"],
+                        engine="Stage12A_FrozenMATLAB",
+                        recommendation=recommendation,
+                        comparison_df=df_for_report,
+                        filename=fname,
+                    )
+
+                st.success(f"Report generated: {fname}")
+                st.download_button(
+                    label="⬇  Download PDF Report",
+                    data=pdf_bytes, file_name=fname,
+                    mime="application/pdf", type="primary",
+                )
+
+    with tab_packages:
+        st.subheader("Technical Engineering Reports & Data Exports")
+        st.markdown("""
+        All official technical reports and dataset exports generated in Stages 2, 3, and 4
+        can be downloaded directly for review, auditing, or offline analysis:
+        """)
+
+        # ── Engineering Markdown Reports ──────────────────────────────────
+        st.markdown("#### Formal Engineering Reports (Markdown)")
+        rep_cols = st.columns(3)
+
+        eval_rep_path = _AIML_REPORTS / "MODEL_EVALUATION_AND_XAI_REPORT.md"
+        risk_rep_path = _AIML_REPORTS / "EMC_RISK_ASSESSMENT_REPORT.md"
+        opt_rep_path  = _AIML_REPORTS / "CONFIGURATION_OPTIMISATION_REPORT.md"
+
+        with rep_cols[0]:
+            if eval_rep_path.exists():
+                st.download_button(
+                    label="⬇  Model Evaluation & XAI Report",
+                    data=eval_rep_path.read_text(encoding="utf-8"),
+                    file_name="MODEL_EVALUATION_AND_XAI_REPORT.md",
+                    mime="text/markdown",
                     use_container_width=True,
                 )
-            else:
-                st.markdown(f"""<div class='emc-card' style='opacity:0.5;text-align:center'>
-                    ⚠️ {label}<br>
-                    <span style='font-size:0.75rem;color:#546e7a'>{filename} not found</span>
-                </div>""", unsafe_allow_html=True)
+        with rep_cols[1]:
+            if risk_rep_path.exists():
+                st.download_button(
+                    label="⬇  EMC Risk Assessment Report",
+                    data=risk_rep_path.read_text(encoding="utf-8"),
+                    file_name="EMC_RISK_ASSESSMENT_REPORT.md",
+                    mime="text/markdown",
+                    use_container_width=True,
+                )
+        with rep_cols[2]:
+            if opt_rep_path.exists():
+                st.download_button(
+                    label="⬇  Pareto Optimisation Report",
+                    data=opt_rep_path.read_text(encoding="utf-8"),
+                    file_name="CONFIGURATION_OPTIMISATION_REPORT.md",
+                    mime="text/markdown",
+                    use_container_width=True,
+                )
 
+        st.markdown("<div style='margin-top:10px'></div>", unsafe_allow_html=True)
 
-# ---------------------------------------------------------------------------
-# SIDEBAR NAVIGATION
-# ---------------------------------------------------------------------------
-def render_sidebar():
-    with st.sidebar:
-        st.markdown("""<div style='text-align:center;padding:14px 0 8px'>
-            <span style='font-size:2rem'>⚡</span><br>
-            <b style='font-size:1.15rem;color:#00d4ff'>EMC-GUARD</b><br>
-            <span style='font-size:0.75rem;color:#546e7a'>Digital Twin Dashboard</span>
-        </div>""", unsafe_allow_html=True)
-        st.markdown("<hr class='emc'>", unsafe_allow_html=True)
+        # ── CSV Datasets & Results ─────────────────────────────────────────
+        st.markdown("#### Processed Datasets & Metric CSVs")
+        data_cols = st.columns(3)
 
-        pages = {
-            "🏠  Overview":              "overview",
-            "🔬  Digital Twin Prediction":"prediction",
-            "🛡️  Risk Analysis":          "risk",
-            "🧠  Explainable AI":         "xai",
-            "🔧  Route Optimisation":     "optimisation",
-            "📊  Model Performance":      "performance",
-            "📥  Download Reports":       "downloads",
-        }
+        with data_cols[0]:
+            # Pareto optimal configurations CSV
+            if AIML_MODULES_AVAILABLE:
+                _, p_df = _get_pareto_front_data()
+                if not p_df.empty:
+                    st.download_button(
+                        label="⬇  Pareto Front Configurations (CSV)",
+                        data=p_df.to_csv(index=False).encode("utf-8"),
+                        file_name="pareto_optimal_configurations.csv",
+                        mime="text/csv",
+                        use_container_width=True,
+                    )
 
-        if "page" not in st.session_state:
-            st.session_state["page"] = "overview"
+        with data_cols[1]:
+            # Full 216 risk assessment CSV
+            if AIML_MODULES_AVAILABLE:
+                risk_df = _get_risk_assessed_df()
+                if not risk_df.empty:
+                    st.download_button(
+                        label="⬇  All 216 Configs Risk Assessment (CSV)",
+                        data=risk_df.to_csv(index=False).encode("utf-8"),
+                        file_name="all_configurations_risk_assessment.csv",
+                        mime="text/csv",
+                        use_container_width=True,
+                    )
 
-        for label, key in pages.items():
-            selected = st.session_state["page"] == key
-            bg = "#1a3a5c" if selected else "transparent"
-            clr = "#00d4ff" if selected else "#8aa8c4"
-            if st.sidebar.button(label, key=f"nav_{key}",
-                                 use_container_width=True):
-                st.session_state["page"] = key
-                st.rerun()
-
-        st.markdown("<hr class='emc'>", unsafe_allow_html=True)
-
-        # Module status mini-indicators
-        checks = [
-            ("M2 Models",   (MODELS / "emc_surrogate_model.pkl").exists()),
-            ("M3 Thresholds",(REPORTS / "risk_thresholds.json").exists()),
-            ("M4 XAI",       (REPORTS / "feature_importance.csv").exists()),
-            ("M5 Optimiser", (REPORTS / "optimisation_results.csv").exists()),
-        ]
-        for name, ok in checks:
-            clr = "#4caf50" if ok else "#f44336"
-            dot = "●" if ok else "○"
-            st.markdown(
-                f"<span style='color:{clr};font-size:0.8rem'>{dot} {name}</span><br>",
-                unsafe_allow_html=True
+        with data_cols[2]:
+            # Raw MATLAB 216 Physics Dataset
+            ds = _get_dataset()
+            st.download_button(
+                label="⬇  Original MATLAB Physics Dataset (CSV)",
+                data=ds.to_csv(index=False).encode("utf-8"),
+                file_name="EMC_GUARD_Physics_Dataset_MATLAB.csv",
+                mime="text/csv",
+                use_container_width=True,
             )
-
-        st.markdown("<hr class='emc'>", unsafe_allow_html=True)
-        st.markdown("""<div style='font-size:0.7rem;color:#2a4a6a;text-align:center'>
-            SYNTHETIC DATA PROTOTYPE<br>Not for engineering sign-off
-        </div>""", unsafe_allow_html=True)
-
-    return st.session_state["page"]
-
-
-# ---------------------------------------------------------------------------
-# MAIN
-# ---------------------------------------------------------------------------
-def main():
-    page = render_sidebar()
-
-    page_map = {
-        "overview":     page_overview,
-        "prediction":   page_prediction,
-        "risk":         page_risk_analysis,
-        "xai":          page_xai,
-        "optimisation": page_optimisation,
-        "performance":  page_model_performance,
-        "downloads":    page_downloads,
-    }
-
-    fn = page_map.get(page, page_overview)
-    fn()
-
-
-if __name__ == "__main__":
-    main()
-

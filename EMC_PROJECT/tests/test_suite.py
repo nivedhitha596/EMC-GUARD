@@ -331,10 +331,10 @@ print("="*65)
 passed = sum(1 for _, r, _ in results if r == PASS)
 failed = sum(1 for _, r, _ in results if r == FAIL)
 for name, r, err in results:
-    mark = "✓" if r == PASS else "✗"
+    mark = "[PASS]" if r == PASS else "[FAIL]"
     print(f"  {mark}  {name}")
     if err:
-        print(f"      → {err[:100]}")
+        print(f"      -> {err[:100]}")
 
 print(f"\n  Passed: {passed} / {len(results)}")
 print(f"  Failed: {failed} / {len(results)}")
