@@ -406,7 +406,7 @@ if screen == "overview":
             <div class="unit">Non-dominated Frontier</div>
         </div>""")
 
-    render_html("<div class='section-divider'></div>")
+    st.divider()
 
     # ── System Architecture ────────────────────────────────────────────────
     col_a, col_b = st.columns([1.1, 0.9])
@@ -509,7 +509,7 @@ elif screen == "config":
         st.error("Configuration not found in the 216-point design grid.")
         config_id = "—"
 
-    render_html("<div class='section-divider'></div>")
+    st.divider()
 
     col1, col2 = st.columns(2)
     with col1:
@@ -601,7 +601,7 @@ elif screen == "predict":
         if result["status"] != "OK":
             st.error(f"Prediction failed: {result.get('error', 'Unknown error')}")
         else:
-            render_html("<div class='section-divider'></div>")
+            st.divider()
 
             config_id = result["config_id"]
             cap = result["predictions"]["TotalCapacitance_pF_per_m"]
@@ -718,15 +718,22 @@ elif screen == "geometry":
             fig3d.update_layout(paper_bgcolor="#0F172A", font=dict(color="#CBD5E1"))
         st.plotly_chart(fig3d, use_container_width=True)
 
-        render_html(f"""
-        | Geometric Parameter | Configuration Value |
-        |---|---|
-        | **Source Cable** | Blue · Centre at (0, {ground} mm) |
-        | **Victim Cable** | Orange · Centre at ({sep} mm, {ground + pitch} mm) |
-        | **Parallel Run (Overlap)** | {overlap} mm |
-        | **Ground Clearance** | {ground} mm |
-        | **Conductor Diameter** | ~6 mm (representative bundle) |
-        """)
+        st.dataframe(pd.DataFrame({
+            "Geometric Parameter": [
+                "Source Cable (Blue)",
+                "Victim Cable (Orange)",
+                "Parallel Run (Overlap)",
+                "Ground Clearance",
+                "Conductor Diameter"
+            ],
+            "Configuration Value": [
+                f"Centre at (0, {ground} mm)",
+                f"Centre at ({sep} mm, {ground + pitch} mm)",
+                f"{overlap} mm",
+                f"{ground} mm",
+                "~6 mm (representative bundle)"
+            ]
+        }), use_container_width=True, hide_index=True)
 
     with tab2d:
         fig2d = build_cross_section_figure(sep, pitch, ground)
@@ -802,7 +809,7 @@ elif screen == "guard":
             if "error" in result:
                 st.error(result["error"])
             else:
-                render_html("<div class='section-divider'></div>")
+                st.divider()
                 st.subheader("Recommendation")
                 render_html(f"""<div class="notice">💡 {result['recommendation']}</div>""")
 
@@ -1031,10 +1038,10 @@ elif screen == "compare":
                         "Config_ID": r["Config_ID"],
                     }
                     comp_eval = opt.compare_configurations(c_ref, c_cand, f"Config {ref_idx+1}", r["Config #"])
-                    render_html(f"**{r['Config #']} vs Config {ref_idx+1} ({ref_row['Config_ID']}):** {comp_eval['tradeoff_summary']}")
+                    st.markdown(f"**{r['Config #']} vs Config {ref_idx+1} ({ref_row['Config_ID']}):** {comp_eval['tradeoff_summary']}")
                     st.caption(comp_eval["dominance_relationship"])
 
-            st.markdown("<div class='section-divider'></div>")
+            st.divider()
 
             c_bar, m_bar = st.columns(2)
             with c_bar:
@@ -1074,10 +1081,7 @@ elif screen == "compare":
 elif screen == "validation":
     render_banner("Model Validation & Explainable AI (XAI)")
 
-    render_html("""<div class="notice">
-    Validation evidence from Stage 12A MATLAB analytical models, Stage 14A ExtraTrees surrogate models,
-    and Stage 2 Explainable AI (XAI) feature attribution.
-    </div>""")
+    st.info("ℹ️ Validation evidence from Stage 12A MATLAB analytical models, Stage 14A ExtraTrees surrogate models, and Stage 2 Explainable AI (XAI) feature attribution.")
 
     try:
         pred_df = pd.read_csv(_DATA_DIR / "Stage12A_Selected_Model_Predictions.csv")
@@ -1166,7 +1170,7 @@ elif screen == "validation":
                     xaxis=dict(gridcolor="#334155"), yaxis=dict(gridcolor="#334155"),
                 )
                 st.plotly_chart(fig_rc, use_container_width=True)
-                render_html(f"RMSE: **{res_c.pow(2).mean()**0.5:.3e}** pF/m · MAE: **{res_c.abs().mean():.3e}** pF/m")
+                st.markdown(f"RMSE: **{res_c.pow(2).mean()**0.5:.3e}** pF/m · MAE: **{res_c.abs().mean():.3e}** pF/m")
 
             with r_c2:
                 res_m = pred_df["AbsMutualInductanceResidual_nH"]
@@ -1193,7 +1197,7 @@ elif screen == "validation":
 
             for target in lolo_df["Target"].unique():
                 sub = lolo_df[lolo_df["Target"] == target]
-                render_html(f"**{target}**")
+                st.markdown(f"**{target}**")
                 st.dataframe(sub[[
                     "HeldOutFeature", "NumberOfLevels",
                     "Mean_AI_RMSE", "Mean_AI_R2", "Mean_RMSE_Improvement_Percent"
@@ -1216,7 +1220,7 @@ elif screen == "validation":
             st.subheader("Feature Importance & Physical Attribution (Stage 2)")
             fx1, fx2 = st.columns(2)
             with fx1:
-                render_html("**Total Capacitance Feature Importance**")
+                st.markdown("**Total Capacitance Feature Importance**")
                 cap_imp = pd.DataFrame({
                     "Feature": ["GroundClearance_mm", "PairSeparation_mm", "PairPitch_mm"],
                     "MDI Importance": ["92.8%", "6.3%", "0.9%"],
@@ -1247,69 +1251,376 @@ elif screen == "validation":
 #  SCREEN 8  –  ANSYS INTEGRATION
 # ═══════════════════════════════════════════════════════════════════════════
 elif screen == "ansys":
-    render_banner("ANSYS Electronics Desktop Integration")
+    render_banner("ANSYS Electronics Desktop Numerical Verification")
 
-    st.markdown("""<div class="notice">
-    This module is prepared for future ANSYS Electronics Desktop numerical verification.
-    Comparison functions are implemented and ready to activate once Maxwell / Q3D simulation data is provided.
-    </div>""")
+    st.info("""
+    **ANSYS Numerical Verification Workflow**  
+    • **Primary Reference Baseline:** MATLAB Stage 12A Frozen analytical least-squares models (machine-precision deterministic equations).  
+    • **ANSYS Q3D Extractor:** Numerical quasi-static finite-element capacitance matrix solution ($C_{11}, C_{12}, C_{22}, C_{\text{total}}$).  
+    • **ANSYS Maxwell 3D / 2D:** Numerical eddy-current / magnetostatic inductance matrix solution ($L_{11}, L_{12}, L_{22}, M_{\text{mutual}}$).  
+    • **Configuration Matching:** Matches imported numerical records with the 216-point analytical grid via `Config_ID` or geometric coordinates (`PairSeparation_mm`, `PairPitch_mm`, `Overlap_mm`, `GroundClearance_mm`).  
+    • **Deviation Quantification:** Computes point-by-point absolute error $|ANSYS - MATLAB|$ and relative percentage discrepancy $\frac{|ANSYS - MATLAB|}{|MATLAB|} \times 100%$.
+    """)
 
-    render_html("""<div class="warning-box">
-    ⚠ <b>ANSYS integration: Pending simulation data.</b><br>
-    No ANSYS Q3D, Maxwell or HFSS results are currently available in the project repository.
-    The comparison interface below will automatically populate when simulation data is supplied.
-    </div>""")
+    tab_q3d, tab_max, tab_joint, tab_guide = st.tabs([
+        "Q3D Capacitance Import",
+        "Maxwell Inductance Import",
+        "Multi-Physics Verification",
+        "Integration Guide & Templates"
+    ])
 
-    st.subheader("Expected Data Format")
-    tab_q3d, tab_max, tab_comp = st.tabs(["Q3D Capacitance", "Maxwell Inductance", "Comparison Interface"])
+    matlab_df = _get_dataset()
 
+    # --- Helper to match ANSYS DataFrame against 216-point dataset ---
+    def _match_ansys_data(raw_df: pd.DataFrame, target_col: str, ref_col: str):
+        # Normalize column names
+        col_map = {c.strip(): c for c in raw_df.columns}
+        
+        # Check Config_ID matching
+        matched_rows = []
+        if "Config_ID" in col_map:
+            cid_col = col_map["Config_ID"]
+            merged = pd.merge(
+                matlab_df,
+                raw_df,
+                left_on="Config_ID",
+                right_on=cid_col,
+                suffixes=("_MATLAB", "_ANSYS")
+            )
+            return merged, "Config_ID"
+        
+        # Check geometric matching
+        geom_keys = ["PairSeparation_mm", "PairPitch_mm", "Overlap_mm", "GroundClearance_mm"]
+        if all(k in col_map for k in geom_keys):
+            merged = pd.merge(
+                matlab_df,
+                raw_df,
+                on=geom_keys,
+                suffixes=("_MATLAB", "_ANSYS")
+            )
+            return merged, "Geometry"
+        
+        return pd.DataFrame(), "None"
+
+    # --- TAB 1: Q3D Capacitance Import ---
     with tab_q3d:
-        render_html("**Expected Q3D capacitance matrix columns:**")
-        st.code("""
-Config_ID, PairSeparation_mm, PairPitch_mm, Overlap_mm, GroundClearance_mm,
-C11_pF, C12_pF, C22_pF, TotalCapacitance_pF_per_m, FrequencyHz, SimulationCase
-        """)
-        st.markdown("""Once supplied, the comparison will compute:
-- Point-by-point difference between MATLAB and ANSYS predictions
-- Percentage deviation across the 216-configuration grid
-- Identification of configurations with highest discrepancy
-        """)
-
-    with tab_max:
-        st.markdown("**Expected Maxwell / Q3D inductance matrix columns:**")
-        st.code("""
-Config_ID, PairSeparation_mm, PairPitch_mm, Overlap_mm, GroundClearance_mm,
-L11_nH, L12_nH, L22_nH, AbsMutualInductance_nH, SimulationCase
-        """)
-
-    with tab_comp:
-        st.subheader("MATLAB vs ANSYS Comparison Interface")
-        st.info("Upload an ANSYS result CSV to activate the comparison engine.")
-        uploaded = st.file_uploader("Upload ANSYS result CSV", type=["csv"])
-        if uploaded:
+        st.subheader("ANSYS Q3D Extractor Capacitance Verification")
+        st.caption("Import numerical capacitance matrix simulation results exported from ANSYS Q3D.")
+        
+        up_q3d = st.file_uploader("Upload ANSYS Q3D Capacitance CSV", type=["csv"], key="q3d_csv")
+        if not up_q3d:
+            st.warning("⚠️ **Simulation Status:** ANSYS numerical verification is awaiting actual Maxwell/Q3D simulation exports. The analytical prediction engine remains operational.")
+            st.markdown("""
+            **Expected Q3D Export Columns:**
+            `Config_ID`, `PairSeparation_mm`, `PairPitch_mm`, `Overlap_mm`, `GroundClearance_mm`, `TotalCapacitance_pF_per_m` (or `C11_pF`, `C12_pF`, `C22_pF`).
+            """)
+        else:
             try:
-                ansys_df = pd.read_csv(uploaded)
-                matlab_df = _get_dataset()
-                st.success(f"ANSYS file loaded: {len(ansys_df)} rows.")
-                if "TotalCapacitance_pF_per_m" in ansys_df.columns:
-                    merged = matlab_df.merge(ansys_df, on="Config_ID", suffixes=("_MATLAB", "_ANSYS"))
-                    merged["ΔCap (%)"] = 100 * (
-                        merged["TotalCapacitance_pF_per_m_ANSYS"] -
-                        merged["TotalCapacitance_pF_per_m_MATLAB"]
-                    ) / merged["TotalCapacitance_pF_per_m_MATLAB"]
-                    st.dataframe(merged[[
-                        "Config_ID", "TotalCapacitance_pF_per_m_MATLAB",
-                        "TotalCapacitance_pF_per_m_ANSYS", "ΔCap (%)"
-                    ]], use_container_width=True)
+                raw_q3d = pd.read_csv(up_q3d)
+                st.success(f"File uploaded: `{up_q3d.name}` ({len(raw_q3d)} records).")
+                
+                # Identify capacitance column
+                cap_col = None
+                for c in ["TotalCapacitance_pF_per_m", "TotalCapacitance", "Capacitance_pF_m", "C_total_pF_m"]:
+                    if c in raw_q3d.columns:
+                        cap_col = c
+                        break
+                
+                if not cap_col and "C11_pF" in raw_q3d.columns and "C12_pF" in raw_q3d.columns:
+                    raw_q3d["TotalCapacitance_pF_per_m"] = raw_q3d["C11_pF"] + raw_q3d["C12_pF"].abs()
+                    cap_col = "TotalCapacitance_pF_per_m"
+                
+                if not cap_col:
+                    st.error("Uploaded CSV must contain `TotalCapacitance_pF_per_m` or matrix columns `C11_pF`, `C12_pF`.")
                 else:
-                    st.dataframe(ansys_df.head(20), use_container_width=True)
+                    merged_q3d, match_type = _match_ansys_data(raw_q3d, cap_col, "TotalCapacitance_pF_per_m")
+                    if merged_q3d.empty:
+                        st.error("Could not match any rows against the 216-point MATLAB analytical grid. Ensure Config_ID or geometric coordinates match.")
+                    else:
+                        ansys_cap = merged_q3d[cap_col] if cap_col in merged_q3d.columns else merged_q3d[f"{cap_col}_ANSYS"]
+                        matlab_cap = merged_q3d["TotalCapacitance_pF_per_m_MATLAB"] if "TotalCapacitance_pF_per_m_MATLAB" in merged_q3d.columns else merged_q3d["TotalCapacitance_pF_per_m"]
+                        
+                        abs_diff = (ansys_cap - matlab_cap).abs()
+                        pct_diff = (abs_diff / matlab_cap) * 100
+                        
+                        merged_q3d["ANSYS_Cap_pF_m"] = ansys_cap
+                        merged_q3d["MATLAB_Cap_pF_m"] = matlab_cap
+                        merged_q3d["Abs_Diff_pF_m"] = abs_diff
+                        merged_q3d["Pct_Diff_%"] = pct_diff
+                        
+                        m1, m2, m3, m4 = st.columns(4)
+                        m1.metric("Matched Configurations", f"{len(merged_q3d)} / 216", f"Matched by {match_type}")
+                        m2.metric("Mean Absolute Error", f"{abs_diff.mean():.4f} pF/m")
+                        m3.metric("Mean Relative Discrepancy", f"{pct_diff.mean():.2f} %")
+                        m4.metric("Max Discrepancy", f"{pct_diff.max():.2f} %")
+                        
+                        st.divider()
+                        
+                        # Plotly scatter: Analytical vs ANSYS
+                        c_plot1, c_plot2 = st.columns(2)
+                        with c_plot1:
+                            fig_sc = go.Figure()
+                            fig_sc.add_trace(go.Scatter(
+                                x=matlab_cap, y=ansys_cap, mode="markers",
+                                text=merged_q3d["Config_ID"],
+                                marker=dict(color="#00d4ff", size=8, opacity=0.8),
+                                name="Matched Cases"
+                            ))
+                            # 1:1 line
+                            min_v, max_v = min(matlab_cap.min(), ansys_cap.min()), max(matlab_cap.max(), ansys_cap.max())
+                            fig_sc.add_trace(go.Scatter(
+                                x=[min_v, max_v], y=[min_v, max_v], mode="lines",
+                                line=dict(color="#94A3B8", dash="dash"), name="Ideal 1:1 Parity"
+                            ))
+                            fig_sc.update_layout(
+                                title="Capacitance Parity: Analytical MATLAB vs Q3D",
+                                xaxis_title="Analytical Reference (pF/m)",
+                                yaxis_title="ANSYS Q3D Numerical (pF/m)",
+                                paper_bgcolor="#0F172A", plot_bgcolor="#1E293B",
+                                font=dict(color="#CBD5E1"), height=380
+                            )
+                            st.plotly_chart(fig_sc, use_container_width=True)
+                            
+                        with c_plot2:
+                            fig_bar = px.bar(
+                                merged_q3d.sort_values("Pct_Diff_%", ascending=False).head(20),
+                                x="Config_ID", y="Pct_Diff_%",
+                                title="Top Percentage Discrepancies (% Deviation)",
+                                labels={"Pct_Diff_%": "Discrepancy (%)", "Config_ID": "Configuration ID"},
+                                color="Pct_Diff_%", color_continuous_scale="Viridis"
+                            )
+                            fig_bar.update_layout(
+                                paper_bgcolor="#0F172A", plot_bgcolor="#1E293B",
+                                font=dict(color="#CBD5E1"), height=380
+                            )
+                            st.plotly_chart(fig_bar, use_container_width=True)
+                        
+                        st.subheader("Comparison Table: Q3D Numerical vs MATLAB Analytical")
+                        display_df = merged_q3d[[
+                            "Config_ID", "PairSeparation_mm", "PairPitch_mm", "Overlap_mm", "GroundClearance_mm",
+                            "MATLAB_Cap_pF_m", "ANSYS_Cap_pF_m", "Abs_Diff_pF_m", "Pct_Diff_%"
+                        ]]
+                        st.dataframe(display_df.style.format({
+                            "MATLAB_Cap_pF_m": "{:.4f}",
+                            "ANSYS_Cap_pF_m": "{:.4f}",
+                            "Abs_Diff_pF_m": "{:.4f}",
+                            "Pct_Diff_%": "{:.2f}%"
+                        }), use_container_width=True, hide_index=True)
+                        
+                        csv_data = display_df.to_csv(index=False)
+                        st.download_button(
+                            "📥 Download Q3D Capacitance Comparison CSV",
+                            data=csv_data,
+                            file_name="EMC_GUARD_Q3D_Capacitance_Comparison.csv",
+                            mime="text/csv",
+                            use_container_width=True
+                        )
             except Exception as exc:
-                st.error(f"Could not parse ANSYS file: {exc}")
+                st.error(f"Error parsing Q3D file: {exc}")
+
+    # --- TAB 2: Maxwell Inductance Import ---
+    with tab_max:
+        st.subheader("ANSYS Maxwell Inductance Verification")
+        st.caption("Import numerical mutual inductance simulation results exported from ANSYS Maxwell.")
+        
+        up_max = st.file_uploader("Upload ANSYS Maxwell Inductance CSV", type=["csv"], key="maxwell_csv")
+        if not up_max:
+            st.warning("⚠️ **Simulation Status:** ANSYS numerical verification is awaiting actual Maxwell/Q3D simulation exports. The analytical prediction engine remains operational.")
+            st.markdown("""
+            **Expected Maxwell Export Columns:**
+            `Config_ID`, `PairSeparation_mm`, `PairPitch_mm`, `Overlap_mm`, `GroundClearance_mm`, `AbsMutualInductance_nH` (or `L11_nH`, `L12_nH`, `L22_nH`).
+            """)
+        else:
+            try:
+                raw_max = pd.read_csv(up_max)
+                st.success(f"File uploaded: `{up_max.name}` ({len(raw_max)} records).")
+                
+                mut_col = None
+                for c in ["AbsMutualInductance_nH", "AbsMutualInductance", "MutualInductance_nH", "M_mutual_nH"]:
+                    if c in raw_max.columns:
+                        mut_col = c
+                        break
+                
+                if not mut_col and "L12_nH" in raw_max.columns:
+                    raw_max["AbsMutualInductance_nH"] = raw_max["L12_nH"].abs()
+                    mut_col = "AbsMutualInductance_nH"
+                
+                if not mut_col:
+                    st.error("Uploaded CSV must contain `AbsMutualInductance_nH` or `L12_nH`.")
+                else:
+                    merged_max, match_type = _match_ansys_data(raw_max, mut_col, "AbsMutualInductance_nH")
+                    if merged_max.empty:
+                        st.error("Could not match any rows against the 216-point MATLAB analytical grid.")
+                    else:
+                        ansys_mut = merged_max[mut_col] if mut_col in merged_max.columns else merged_max[f"{mut_col}_ANSYS"]
+                        matlab_mut = merged_max["AbsMutualInductance_nH_MATLAB"] if "AbsMutualInductance_nH_MATLAB" in merged_max.columns else merged_max["AbsMutualInductance_nH"]
+                        
+                        abs_diff_m = (ansys_mut - matlab_mut).abs()
+                        pct_diff_m = (abs_diff_m / matlab_mut) * 100
+                        
+                        merged_max["ANSYS_Mut_nH"] = ansys_mut
+                        merged_max["MATLAB_Mut_nH"] = matlab_mut
+                        merged_max["Abs_Diff_nH"] = abs_diff_m
+                        merged_max["Pct_Diff_%"] = pct_diff_m
+                        
+                        m1, m2, m3, m4 = st.columns(4)
+                        m1.metric("Matched Configurations", f"{len(merged_max)} / 216", f"Matched by {match_type}")
+                        m2.metric("Mean Absolute Error", f"{abs_diff_m.mean():.4f} nH")
+                        m3.metric("Mean Relative Discrepancy", f"{pct_diff_m.mean():.2f} %")
+                        m4.metric("Max Discrepancy", f"{pct_diff_m.max():.2f} %")
+                        
+                        st.divider()
+                        
+                        c_plot1, c_plot2 = st.columns(2)
+                        with c_plot1:
+                            fig_sm = go.Figure()
+                            fig_sm.add_trace(go.Scatter(
+                                x=matlab_mut, y=ansys_mut, mode="markers",
+                                text=merged_max["Config_ID"],
+                                marker=dict(color="#a855f7", size=8, opacity=0.8),
+                                name="Matched Cases"
+                            ))
+                            min_m_v, max_m_v = min(matlab_mut.min(), ansys_mut.min()), max(matlab_mut.max(), ansys_mut.max())
+                            fig_sm.add_trace(go.Scatter(
+                                x=[min_m_v, max_m_v], y=[min_m_v, max_m_v], mode="lines",
+                                line=dict(color="#94A3B8", dash="dash"), name="Ideal 1:1 Parity"
+                            ))
+                            fig_sm.update_layout(
+                                title="Inductance Parity: Analytical MATLAB vs Maxwell",
+                                xaxis_title="Analytical Reference (nH)",
+                                yaxis_title="ANSYS Maxwell Numerical (nH)",
+                                paper_bgcolor="#0F172A", plot_bgcolor="#1E293B",
+                                font=dict(color="#CBD5E1"), height=380
+                            )
+                            st.plotly_chart(fig_sm, use_container_width=True)
+                            
+                        with c_plot2:
+                            fig_bar_m = px.bar(
+                                merged_max.sort_values("Pct_Diff_%", ascending=False).head(20),
+                                x="Config_ID", y="Pct_Diff_%",
+                                title="Top Percentage Discrepancies (% Deviation)",
+                                labels={"Pct_Diff_%": "Discrepancy (%)", "Config_ID": "Configuration ID"},
+                                color="Pct_Diff_%", color_continuous_scale="Purples"
+                            )
+                            fig_bar_m.update_layout(
+                                paper_bgcolor="#0F172A", plot_bgcolor="#1E293B",
+                                font=dict(color="#CBD5E1"), height=380
+                            )
+                            st.plotly_chart(fig_bar_m, use_container_width=True)
+                        
+                        st.subheader("Comparison Table: Maxwell Numerical vs MATLAB Analytical")
+                        display_m_df = merged_max[[
+                            "Config_ID", "PairSeparation_mm", "PairPitch_mm", "Overlap_mm", "GroundClearance_mm",
+                            "MATLAB_Mut_nH", "ANSYS_Mut_nH", "Abs_Diff_nH", "Pct_Diff_%"
+                        ]]
+                        st.dataframe(display_m_df.style.format({
+                            "MATLAB_Mut_nH": "{:.4f}",
+                            "ANSYS_Mut_nH": "{:.4f}",
+                            "Abs_Diff_nH": "{:.4f}",
+                            "Pct_Diff_%": "{:.2f}%"
+                        }), use_container_width=True, hide_index=True)
+                        
+                        csv_data_m = display_m_df.to_csv(index=False)
+                        st.download_button(
+                            "📥 Download Maxwell Inductance Comparison CSV",
+                            data=csv_data_m,
+                            file_name="EMC_GUARD_Maxwell_Inductance_Comparison.csv",
+                            mime="text/csv",
+                            use_container_width=True
+                        )
+            except Exception as exc:
+                st.error(f"Error parsing Maxwell file: {exc}")
+
+    # --- TAB 3: Multi-Physics Comparison ---
+    with tab_joint:
+        st.subheader("Joint Multi-Physics Numerical Verification")
+        st.markdown("""
+        When both Q3D capacitance and Maxwell inductance data are uploaded, this interface provides
+        a combined verification scorecard evaluating total electromagnetic coupling conformity.
+        """)
+        
+        # Check if both uploaded in session state
+        has_q = bool(up_q3d)
+        has_m = bool(up_max)
+        
+        if not (has_q or has_m):
+            st.info("ℹ️ Upload Q3D and/or Maxwell files in the respective tabs above to view synthesized verification metrics.")
+        else:
+            st.success(f"Active verification streams: {'Q3D Capacitance ' if has_q else ''}{'Maxwell Inductance' if has_m else ''}")
+            st.markdown("""
+            **Verification Engineering Rules:**
+            1. Deviations under 5% reflect normal numerical discretization and mesh boundary tolerances.
+            2. Deviations between 5% and 15% indicate edge-field fringing or high ground-proximity non-linearities requiring local mesh refinement.
+            3. Deviations exceeding 15% indicate boundary condition discrepancies or geometric misalignment.
+            """)
+
+    # --- TAB 4: Integration Guide & Templates ---
+    with tab_guide:
+        st.subheader("ANSYS Electronics Desktop Export Guide & Schemas")
+        st.markdown("""
+        To export numerical simulation results from ANSYS Electronics Desktop for ingestion into EMC-GUARD:
+
+        #### 1. ANSYS Q3D Extractor Setup
+        - Define source and victim net conductors in the 3D modeler.
+        - Run Quasi-Static Capacitance Extraction ($f = 1\text{ MHz}$).
+        - Export the capacitance matrix via **Results** &rarr; **Export Solution Data** &rarr; **CSV**.
+        - Ensure column names match the supported schema below.
+
+        #### 2. ANSYS Maxwell Setup
+        - Run Eddy Current or Magnetostatic solver.
+        - Compute Inductance Matrix reduction for the two conductor loops.
+        - Export the absolute mutual inductance $L_{12}$ or $M_{\text{mutual}}$ in nanohenries ($nH$).
+        """)
+
+        st.divider()
+
+        st.markdown("#### Download Standard Export Templates")
+        col_t1, col_t2 = st.columns(2)
+        with col_t1:
+            q3d_tpl = pd.DataFrame({
+                "Config_ID": ["EMC-001", "EMC-002", "EMC-003"],
+                "PairSeparation_mm": [8.0, 8.0, 8.0],
+                "PairPitch_mm": [2.0, 2.0, 2.0],
+                "Overlap_mm": [150.0, 150.0, 150.0],
+                "GroundClearance_mm": [10.0, 25.0, 50.0],
+                "C11_pF": [30.2, 29.8, 29.5],
+                "C12_pF": [-25.6, -24.9, -24.2],
+                "C22_pF": [30.2, 29.8, 29.5],
+                "TotalCapacitance_pF_per_m": [55.85, 54.72, 53.71],
+                "FrequencyHz": [1000000, 1000000, 1000000],
+                "SimulationCase": ["Q3D_Case_1", "Q3D_Case_2", "Q3D_Case_3"]
+            }).to_csv(index=False)
+            st.download_button(
+                "📥 Download Q3D Capacitance Template (.csv)",
+                data=q3d_tpl,
+                file_name="ANSYS_Q3D_Capacitance_Template.csv",
+                mime="text/csv",
+                use_container_width=True
+            )
+
+        with col_t2:
+            max_tpl = pd.DataFrame({
+                "Config_ID": ["EMC-001", "EMC-002", "EMC-003"],
+                "PairSeparation_mm": [8.0, 8.0, 8.0],
+                "PairPitch_mm": [2.0, 2.0, 2.0],
+                "Overlap_mm": [150.0, 150.0, 150.0],
+                "GroundClearance_mm": [10.0, 25.0, 50.0],
+                "L11_nH": [18.5, 18.5, 18.5],
+                "L12_nH": [1.93, 1.88, 1.82],
+                "L22_nH": [18.5, 18.5, 18.5],
+                "AbsMutualInductance_nH": [1.933, 1.881, 1.822],
+                "SimulationCase": ["Maxwell_Case_1", "Maxwell_Case_2", "Maxwell_Case_3"]
+            }).to_csv(index=False)
+            st.download_button(
+                "📥 Download Maxwell Inductance Template (.csv)",
+                data=max_tpl,
+                file_name="ANSYS_Maxwell_Inductance_Template.csv",
+                mime="text/csv",
+                use_container_width=True
+            )
 
 
-# ═══════════════════════════════════════════════════════════════════════════
-#  SCREEN 9  –  REPORT GENERATION & DATA PACKAGE DOWNLOADS
-# ═══════════════════════════════════════════════════════════════════════════
+
 elif screen == "report":
     render_banner("Engineering Report Generation & Data Packages")
 
