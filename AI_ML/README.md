@@ -126,29 +126,3 @@ All Pareto optimal configurations share: `PairPitch_mm = 2.0mm`, `Overlap_mm = 1
 3. **No Safety Certification:** Predictions and candidate rankings do not constitute compliance with IEC, EN (e.g. EN 12015/12016) or KONE internal EMC standards.
 4. **Discrete Grid Boundaries:** Only the supported discrete parameter levels are permitted; no continuous extrapolation is performed.
 5. **Preservation of Core Assets:** Production models (`EMC_GUARD_Capacitance_ExtraTrees.joblib`, `EMC_GUARD_MutualInductance_ExtraTrees.joblib`, `Stage12A_Selected_Models_FROZEN.mat`) and the existing Streamlit dashboard remain completely untouched.
-
----
-
-## Supplementary Simulation Datasets (Visualisation & Engineering Analysis Only)
-
-The platform incorporates three supplementary simulation datasets stored under `AI_ML/dataset/supplementary/` for auxiliary engineering exploration and switching circuit characterisation:
-
-| Dataset File | Dimensions | Data Source | Simulation Status | Purpose |
-|---|---|---|---|---|
-| `emc_predict_SIMULATED.csv` | 105 rows × 21 cols | Switching Circuit Simulation | Complete (105 runs) | Electrical switching interference, victim coupling ($V_{pp}, V_{rms}$), and harmonic spectral analysis across frequencies, spacings, and shielding configurations. |
-| `rg_sweep_data_with_noise.csv` | 3 rows × 18 cols | LTspice Simulation (IRFH5302) | Complete (3 runs) | Exploratory gate resistance ($R_g \in \{10, 47, 100\}\,\Omega$) switching sweep comparing slew rate ($dV/dt$), rise time, overshoot, noise, and turn-off dissipation. |
-| `rg_sweep_template.csv` | 3 rows × 20 cols | LTspice Simulation Template | Incomplete (10/10 outputs pending) | Unpopulated simulation template tracking 30 pending measurement outputs (represented strictly as `NaN`, zero fabrication). |
-
-### Dashboard Location
-- **Screen:** Screen 9 – Engineering Report Generation & Data Packages
-- **Tab:** **Supplementary Simulation Analysis**
-  - *Tab 1 – Electrical Interference Analysis (105 Runs)*: Interactive filters, spatial attenuation boxplots, harmonic scatter charts, and shield/ground comparison.
-  - *Tab 2 – MOSFET Switching Sweep Analysis (Rg Sweep)*: Metric cards, dual-axis $dV/dt$ (EMI proxy) vs turn-off loss (thermal proxy) trade-off curves.
-  - *Tab 3 – Simulation Template (Awaiting Runs)*: Input vs pending output schema breakdown and status monitoring.
-
-### Scientific Safeguards
-1. **Strict Model Decoupling:** Supplementary datasets are **strictly decoupled** from the primary 216-configuration MATLAB analytical engine and ExtraTrees surrogates. They are NOT used for training, prediction, or validation scoring.
-2. **No Data Merging:** Supplementary datasets are kept isolated in `AI_ML/dataset/supplementary/` and are never combined with the core MATLAB dataset.
-3. **No Artificial Imputation:** Unpopulated cells in `rg_sweep_template.csv` are preserved as `NaN`; never zero-filled or fabricated.
-4. **Exploratory Status:** These datasets represent simulated numerical sweeps and preliminary exploratory runs; they do not establish certified regulatory compliance (IEC/EN) or real hoistway experimental validation.
-

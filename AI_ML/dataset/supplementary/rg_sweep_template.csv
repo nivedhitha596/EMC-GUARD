@@ -1,4 +1,0 @@
-run_id,data_source,mosfet,vbus_V,pwm_freq_kHz,duty_percent,load_L_uH,load_R_ohm,parasitics_added,gate_Rg_ohm,rise_time_ns,fall_time_ns,vds_peak_V,vds_overshoot_V,dvdt_V_per_ns,ringing_freq_MHz,switching_loss_uJ,noise_dBV_at_1MHz,noise_dBV_at_10MHz,noise_dBV_at_30MHz
-1,LTspice_simulation,IRFH5302,12,20,50,100,10,no,10,,,,,,,,,,
-2,LTspice_simulation,IRFH5302,12,20,50,100,10,no,47,,,,,,,,,,
-3,LTspice_simulation,IRFH5302,12,20,50,100,10,no,100,,,,,,,,,,

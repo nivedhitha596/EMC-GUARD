@@ -1,4 +1,0 @@
-Run_ID,Vbus_V,Pulse_Vhigh_V,Frequency_kHz,Duty_percent,L_uH,R_load_ohm,MOSFET,Rg_ohm,Rise_time_ns,Vds_peak_V,Overshoot_V,dv_dt_V_per_ns,Turn_off_loss_uJ,Noise_peak_20kHz_dB,Noise_peak_harmonic_dB,Parasitics,Data_source
-R1,12,10,20,50,100,10,IRFH5302,10,34.2,12.841,0.841,0.281,0.172,15.0,5.0,no,LTspice_simulation
-R2,12,10,20,50,100,10,IRFH5302,47,131.5,12.836,0.836,0.073,0.705,15.0,5.0,no,LTspice_simulation
-R3,12,10,20,50,100,10,IRFH5302,100,273.8,12.836,0.836,0.035,1.47,15.0,5.0,no,LTspice_simulation

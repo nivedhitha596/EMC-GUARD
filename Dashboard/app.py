@@ -15,7 +15,6 @@ from __future__ import annotations
 import logging
 import os
 import sys
-import textwrap
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
@@ -90,25 +89,6 @@ except Exception as _e:
 logging.basicConfig(level=logging.WARNING)
 
 # ─────────────────────────────────────────────────────────────────────────────
-
-# ---------------------------------------------------------------------------
-# SAFE HTML RENDERING HELPER
-# ---------------------------------------------------------------------------
-def render_html(html_str: str, sidebar: bool = False) -> None:
-    """
-    Safely render custom HTML/CSS in Streamlit.
-    Avoids CommonMark markdown parsing traps where 4-space indentation is mistakenly
-    parsed as preformatted <pre><code> blocks and blank lines break out of HTML.
-    Uses st.html() (Streamlit >= 1.34) or dedented st.markdown(..., unsafe_allow_html=True).
-    """
-    target = st.sidebar if sidebar else st
-    clean_html = textwrap.dedent(html_str).strip()
-    if hasattr(target, "html"):
-        target.html(clean_html)
-    else:
-        target.markdown(clean_html, unsafe_allow_html=True)
-
-
 # PAGE CONFIG
 # ─────────────────────────────────────────────────────────────────────────────
 st.set_page_config(
@@ -121,7 +101,7 @@ st.set_page_config(
 # ─────────────────────────────────────────────────────────────────────────────
 # GLOBAL CSS (dark industrial theme)
 # ─────────────────────────────────────────────────────────────────────────────
-render_html("""
+st.markdown("""
 <style>
 /* ── Base ── */
 html, body, [class*="css"] {
@@ -204,21 +184,21 @@ div[data-testid="metric-container"] {
     border: 1px solid #334155;
 }
 </style>
-""")
+""", unsafe_allow_html=True)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
 # SIDEBAR NAVIGATION (9 SCREENS PRESERVED)
 # ─────────────────────────────────────────────────────────────────────────────
 with st.sidebar:
-    render_html("""
+    st.markdown("""
     <div style='text-align:center; padding:8px 0 16px;'>
         <div style='color:#2563EB; font-size:1.8rem;'>⚡</div>
         <div style='color:#E2E8F0; font-weight:700; font-size:1.05rem;'>EMC-PREDICT</div>
         <div style='color:#94A3B8; font-size:0.8rem;'>+ EMC-GUARD AI/ML</div>
     </div>
     <hr style='border-color:#334155; margin:0 0 14px;'>
-    """)
+    """, unsafe_allow_html=True)
 
     SCREENS = {
         "1 · Executive Overview":          "overview",
@@ -234,8 +214,8 @@ with st.sidebar:
     selected = st.radio("Navigation", list(SCREENS.keys()), label_visibility="collapsed")
     screen = SCREENS[selected]
 
-    render_html("<hr style='border-color:#334155;'>", sidebar=True)
-    render_html("""
+    st.markdown("<hr style='border-color:#334155;'>", unsafe_allow_html=True)
+    st.markdown("""
     <div style='font-size:0.74rem; color:#475569; padding:0 4px;'>
         <b style='color:#64748B;'>Platform</b> KONE EMC-GUARD v2.0<br>
         <b style='color:#64748B;'>Primary Engine</b> Stage 12A MATLAB (Frozen)<br>
@@ -243,7 +223,7 @@ with st.sidebar:
         <b style='color:#64748B;'>Dataset</b> 216 Analytical Configurations<br>
         <b style='color:#64748B;'>Pareto Set</b> 6 Non-Dominated Candidates
     </div>
-    """, sidebar=True)
+    """, unsafe_allow_html=True)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -305,13 +285,13 @@ def config_inputs(key_prefix: str = "main") -> Tuple[float, float, float, float]
 
 
 def render_banner(subtitle: str = ""):
-    render_html(f"""
+    st.markdown(f"""
     <div class="banner">
         <h1>⚡ EMC-PREDICT + EMC-GUARD</h1>
         <p>Physics-Informed Configuration-Aware EMC Digital Twin for Elevator Cable Systems
         {'&nbsp;·&nbsp;' + subtitle if subtitle else ''}</p>
     </div>
-    """)
+    """, unsafe_allow_html=True)
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -330,67 +310,67 @@ if screen == "overview":
     # ── Primary Status Indicators ──────────────────────────────────────────
     c1, c2, c3, c4 = st.columns(4)
     with c1:
-        render_html(f"""<div class="metric-card">
+        st.markdown(f"""<div class="metric-card">
             <div class="label">Frozen MATLAB Engine</div>
             <div style='margin:8px 0'>{_badge(status['frozen_matlab']['ok'], status['frozen_matlab']['error'])}</div>
             <div class="unit">Stage 12A · Primary (Machine Precision)</div>
-        </div>""")
+        </div>""", unsafe_allow_html=True)
     with c2:
-        render_html(f"""<div class="metric-card">
+        st.markdown(f"""<div class="metric-card">
             <div class="label">ExtraTrees Surrogate</div>
             <div style='margin:8px 0'>{_badge(status['extratrees']['ok'], status['extratrees']['error'])}</div>
             <div class="unit">Stage 14A · R²=1.000 (In-Sample)</div>
-        </div>""")
+        </div>""", unsafe_allow_html=True)
     with c3:
         n = status['physics_dataset']['n_configs']
-        render_html(f"""<div class="metric-card">
+        st.markdown(f"""<div class="metric-card">
             <div class="label">Physics Dataset</div>
             <div class="value">{n}</div>
             <div class="unit">MATLAB Analytical Grid</div>
-        </div>""")
+        </div>""", unsafe_allow_html=True)
     with c4:
-        render_html("""<div class="metric-card">
+        st.markdown("""<div class="metric-card">
             <div class="label">Physical Validation</div>
             <div style='margin:8px 0'><span class="badge-pend">⋯ Simulation Only</span></div>
             <div class="unit">No empirical field data</div>
-        </div>""")
+        </div>""", unsafe_allow_html=True)
 
     # ── AI/ML Stage 2–4 Status Badges ──────────────────────────────────────
-    render_html("<div style='margin-top:14px'></div>")
+    st.markdown("<div style='margin-top:14px'></div>", unsafe_allow_html=True)
     s1, s2, s3, s4 = st.columns(4)
     with s1:
-        render_html("""<div class="metric-card">
+        st.markdown("""<div class="metric-card">
             <div class="label">LOLO Validation</div>
             <div style='margin:6px 0'><span class="badge-ok">✓ Complete</span></div>
             <div class="unit">Evaluated across all levels</div>
-        </div>""")
+        </div>""", unsafe_allow_html=True)
     with s2:
-        render_html("""<div class="metric-card">
+        st.markdown("""<div class="metric-card">
             <div class="label">XAI & Feature Importance</div>
             <div style='margin:6px 0'><span class="badge-ok">✓ Active</span></div>
             <div class="unit">MDI, PFI, ICE & PDP</div>
-        </div>""")
+        </div>""", unsafe_allow_html=True)
     with s3:
-        render_html("""<div class="metric-card">
+        st.markdown("""<div class="metric-card">
             <div class="label">Relative EMC Risk</div>
             <div style='margin:6px 0'><span class="badge-ok">✓ Operational</span></div>
             <div class="unit">Low / Mod / High Tiers</div>
-        </div>""")
+        </div>""", unsafe_allow_html=True)
     with s4:
-        render_html("""<div class="metric-card">
+        st.markdown("""<div class="metric-card">
             <div class="label">Pareto Optimisation</div>
             <div style='margin:6px 0'><span class="badge-ok">✓ 6 Candidates</span></div>
             <div class="unit">Non-dominated Frontier</div>
-        </div>""")
+        </div>""", unsafe_allow_html=True)
 
-    render_html("<div class='section-divider'></div>")
+    st.markdown("<div class='section-divider'></div>", unsafe_allow_html=True)
 
     # ── System Architecture ────────────────────────────────────────────────
     col_a, col_b = st.columns([1.1, 0.9])
 
     with col_a:
         st.subheader("System Architecture")
-        render_html("""
+        st.markdown("""
         ```
         ┌────────────────────────────────────────────────────────┐
         │            KONE EMC-GUARD PLATFORM v2.0                │
@@ -455,7 +435,7 @@ if screen == "overview":
     analytical field calculations. It does <b>not</b> predict victim terminal voltage, conducted emissions,
     or radiated emission compliance. <b>No physical elevator field measurements, regulatory certifications
     (e.g., EN 12015/12016), or safety guarantees have been established.</b>
-    </div>""")
+    </div>""", unsafe_allow_html=True)
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -478,15 +458,15 @@ elif screen == "config":
     if len(matched) == 1:
         row = matched.iloc[0]
         config_id = row["Config_ID"]
-        render_html(f"""<div class="notice">
+        st.markdown(f"""<div class="notice">
             ✓ <b>Valid configuration</b> &nbsp;·&nbsp; ID: <b>{config_id}</b>
             &nbsp;·&nbsp; Configuration index: {matched.index[0] + 1} of 216
-        </div>""")
+        </div>""", unsafe_allow_html=True)
     else:
         st.error("Configuration not found in the 216-point design grid.")
         config_id = "—"
 
-    render_html("<div class='section-divider'></div>")
+    st.markdown("<div class='section-divider'></div>", unsafe_allow_html=True)
 
     col1, col2 = st.columns(2)
     with col1:
@@ -529,7 +509,7 @@ elif screen == "config":
                 if risk_res.get("status") == "OK":
                     tier = risk_res["combined_assessment"]["combined_risk_tier"]
                     badge_class = "badge-ok" if "Low" in tier else ("badge-pend" if "Mod" in tier else "badge-err")
-                    render_html(f"""
+                    st.markdown(f"""
                     <div style='margin-top:14px; padding:10px 14px; background:#1E293B; border-radius:6px; border:1px solid #334155;'>
                         <b style='color:#94A3B8; font-size:0.8rem; text-transform:uppercase;'>Relative EMC Risk Tier</b><br>
                         <span class="{badge_class}">{tier}</span>
@@ -537,14 +517,14 @@ elif screen == "config":
                             (Score: {risk_res['combined_assessment']['combined_risk_indicator']:.4f})
                         </span>
                     </div>
-                    """)
+                    """, unsafe_allow_html=True)
         else:
             st.info("Select a valid configuration to see reference values.")
 
-    render_html("""<div class="notice">
+    st.markdown("""<div class="notice">
     <b>ℹ Domain policy:</b> Only the 216 discrete configurations from the MATLAB analytical dataset
     are supported. Interpolation and extrapolation outside this grid are strictly rejected.
-    </div>""")
+    </div>""", unsafe_allow_html=True)
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -568,7 +548,7 @@ elif screen == "predict":
             horizontal=True,
         )
     with col_btn:
-        render_html("<div style='height:26px'></div>")
+        st.markdown("<div style='height:26px'></div>", unsafe_allow_html=True)
         run_clicked = st.button("▶  Run Prediction", type="primary", use_container_width=True)
 
     if run_clicked:
@@ -578,7 +558,7 @@ elif screen == "predict":
         if result["status"] != "OK":
             st.error(f"Prediction failed: {result.get('error', 'Unknown error')}")
         else:
-            render_html("<div class='section-divider'></div>")
+            st.markdown("<div class='section-divider'></div>", unsafe_allow_html=True)
 
             config_id = result["config_id"]
             cap = result["predictions"]["TotalCapacitance_pF_per_m"]
@@ -588,23 +568,23 @@ elif screen == "predict":
             st.subheader("Predicted Outputs")
             mc1, mc2, mc3 = st.columns(3)
             with mc1:
-                render_html(f"""<div class="metric-card">
+                st.markdown(f"""<div class="metric-card">
                     <div class="label">Total Capacitance</div>
                     <div class="value">{cap['value']:.5g}</div>
                     <div class="unit">pF/m</div>
-                </div>""")
+                </div>""", unsafe_allow_html=True)
             with mc2:
-                render_html(f"""<div class="metric-card">
+                st.markdown(f"""<div class="metric-card">
                     <div class="label">Abs. Mutual Inductance</div>
                     <div class="value">{mut['value']:.5g}</div>
                     <div class="unit">nH</div>
-                </div>""")
+                </div>""", unsafe_allow_html=True)
             with mc3:
-                render_html(f"""<div class="metric-card">
+                st.markdown(f"""<div class="metric-card">
                     <div class="label">Configuration ID</div>
                     <div class="value" style='font-size:1.2rem'>{config_id}</div>
                     <div class="unit">{engine_choice}</div>
-                </div>""")
+                </div>""", unsafe_allow_html=True)
 
             # ── Detailed table ────────────────────────────────────────────
             st.subheader("Prediction Detail vs Analytical Reference")
@@ -630,27 +610,27 @@ elif screen == "predict":
                     rk1, rk2, rk3 = st.columns(3)
                     with rk1:
                         c_ind = risk_eval["predictions"]["TotalCapacitance_pF_per_m"]
-                        render_html(f"""<div class="metric-card">
+                        st.markdown(f"""<div class="metric-card">
                             <div class="label">Capacitance Relative Indicator</div>
                             <div class="value">{c_ind['relative_indicator']:.3f}</div>
                             <div class="unit">Percentile: {c_ind['percentile_in_dataset']:.1f}% · {c_ind['risk_tier']}</div>
-                        </div>""")
+                        </div>""", unsafe_allow_html=True)
                     with rk2:
                         m_ind = risk_eval["predictions"]["AbsMutualInductance_nH"]
-                        render_html(f"""<div class="metric-card">
+                        st.markdown(f"""<div class="metric-card">
                             <div class="label">Inductance Relative Indicator</div>
                             <div class="value">{m_ind['relative_indicator']:.3f}</div>
                             <div class="unit">Percentile: {m_ind['percentile_in_dataset']:.1f}% · {m_ind['risk_tier']}</div>
-                        </div>""")
+                        </div>""", unsafe_allow_html=True)
                     with rk3:
-                        render_html(f"""<div class="metric-card">
+                        st.markdown(f"""<div class="metric-card">
                             <div class="label">Combined Relative Tier</div>
                             <div style='margin:6px 0'><span class="{tier_badge}">{tier}</span></div>
                             <div class="unit">Combined Score: {comb['combined_risk_indicator']:.4f}</div>
-                        </div>""")
+                        </div>""", unsafe_allow_html=True)
 
                     with st.expander("🔍 Explainable AI (XAI) Parameter Rationale", expanded=True):
-                        render_html(f"**Engineering Rationale:** {risk_eval['explainable_attribution']['engineering_rationale']}")
+                        st.markdown(f"**Engineering Rationale:** {risk_eval['explainable_attribution']['engineering_rationale']}")
                         st.markdown("**Capacitive Driving Mechanisms:**")
                         for d in risk_eval["explainable_attribution"]["capacitance_drivers"]:
                             st.markdown(f"- {d}")
@@ -663,11 +643,11 @@ elif screen == "predict":
             st.markdown(f"""<div class="notice">
             <b>Model Metadata:</b> Engine: <b>{info['engine']}</b> · Domain: {info['domain']} ·
             Column Index: {info['column_index']} · Timestamp: {ts}
-            </div>""")
+            </div>""", unsafe_allow_html=True)
 
-            render_html(f"""<div class="warning-box">
+            st.markdown(f"""<div class="warning-box">
             ⚠ {result['validation_notice']}
-            </div>""")
+            </div>""", unsafe_allow_html=True)
 
             # Store in session state
             st.session_state["last_prediction"] = result
@@ -680,10 +660,10 @@ elif screen == "predict":
 elif screen == "geometry":
     render_banner("Digital Twin Geometry Visualisation")
 
-    render_html("""<div class="notice">
+    st.markdown("""<div class="notice">
     Interactive geometric visual representation of the cable bundle configuration updated
     in real time as parameters change. It is <b>not</b> a numerical electromagnetic field solver.
-    </div>""")
+    </div>""", unsafe_allow_html=True)
 
     sep, pitch, overlap, ground = config_inputs("geom")
 
@@ -695,7 +675,7 @@ elif screen == "geometry":
             fig3d.update_layout(paper_bgcolor="#0F172A", font=dict(color="#CBD5E1"))
         st.plotly_chart(fig3d, use_container_width=True)
 
-        render_html(f"""
+        st.markdown(f"""
         | Geometric Parameter | Configuration Value |
         |---|---|
         | **Source Cable** | Blue · Centre at (0, {ground} mm) |
@@ -713,7 +693,7 @@ elif screen == "geometry":
     st.markdown("""<div class="warning-box">
     ⚠ The cable cross-section geometry is a representative engineering rendering and has not been
     experimentally validated as an exact manufactured KONE cable harness.
-    </div>""")
+    </div>""", unsafe_allow_html=True)
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -728,10 +708,10 @@ elif screen == "guard":
     ])
 
     with tab_assess:
-        render_html("""<div class="notice">
+        st.markdown("""<div class="notice">
         EMC-GUARD ranks alternative cable configurations based on predicted electromagnetic coupling.
         <b>No compliance, safety, or certification determinations are made.</b>
-        </div>""")
+        </div>""", unsafe_allow_html=True)
 
         st.subheader("Reference Configuration")
         sep, pitch, overlap, ground = config_inputs("guard")
@@ -779,9 +759,9 @@ elif screen == "guard":
             if "error" in result:
                 st.error(result["error"])
             else:
-                render_html("<div class='section-divider'></div>")
+                st.markdown("<div class='section-divider'></div>", unsafe_allow_html=True)
                 st.subheader("Recommendation")
-                render_html(f"""<div class="notice">💡 {result['recommendation']}</div>""")
+                st.markdown(f"""<div class="notice">💡 {result['recommendation']}</div>""", unsafe_allow_html=True)
 
                 ref = result["reference"]
                 top = result["top_config"]
@@ -824,10 +804,10 @@ elif screen == "guard":
     # ── TAB 2: INTELLIGENT PARETO OPTIMISATION (STAGE 4) ────────────────────
     with tab_pareto:
         st.subheader("Multi-Objective Pareto Frontier Analysis")
-        render_html("""<div class="notice">
+        st.markdown("""<div class="notice">
         <b>Pareto Optimality Principle:</b> A configuration is Pareto-optimal if no other configuration
         in the 216-dataset can reduce mutual inductance without simultaneously increasing capacitance.
-        </div>""")
+        </div>""", unsafe_allow_html=True)
 
         if AIML_MODULES_AVAILABLE:
             all_pareto_df, pareto_front_df = _get_pareto_front_data()
@@ -840,25 +820,25 @@ elif screen == "guard":
                 best_bal = pareto_front_df.loc[pareto_front_df["Weighted_Tradeoff_Score"].idxmin()]
 
                 with p1:
-                    render_html(f"""<div class="metric-card">
+                    st.markdown(f"""<div class="metric-card">
                         <div class="label">Min. Capacitance Champion</div>
                         <div class="value">{min_c['TotalCapacitance_pF_per_m']:.2f} <span style='font-size:0.9rem'>pF/m</span></div>
                         <div class="unit">{min_c['Config_ID']} · Sep={min_c['PairSeparation_mm']:.0f}mm · Mut={min_c['AbsMutualInductance_nH']:.3f}nH</div>
-                    </div>""")
+                    </div>""", unsafe_allow_html=True)
                 with p2:
-                    render_html(f"""<div class="metric-card">
+                    st.markdown(f"""<div class="metric-card">
                         <div class="label">Min. Inductance Champion</div>
                         <div class="value">{min_m['AbsMutualInductance_nH']:.4f} <span style='font-size:0.9rem'>nH</span></div>
                         <div class="unit">{min_m['Config_ID']} · Sep={min_m['PairSeparation_mm']:.0f}mm · Cap={min_m['TotalCapacitance_pF_per_m']:.2f}pF/m</div>
-                    </div>""")
+                    </div>""", unsafe_allow_html=True)
                 with p3:
-                    render_html(f"""<div class="metric-card">
+                    st.markdown(f"""<div class="metric-card">
                         <div class="label">Recommended Balanced Design</div>
                         <div class="value">{best_bal['Config_ID']}</div>
                         <div class="unit">Sep={best_bal['PairSeparation_mm']:.0f}mm · Cap={best_bal['TotalCapacitance_pF_per_m']:.2f} · Mut={best_bal['AbsMutualInductance_nH']:.4f}</div>
-                    </div>""")
+                    </div>""", unsafe_allow_html=True)
 
-                render_html("<div style='margin-top:16px'></div>")
+                st.markdown("<div style='margin-top:16px'></div>", unsafe_allow_html=True)
 
                 # Interactive Plotly Pareto Front Chart
                 fig_pf = go.Figure()
@@ -992,10 +972,10 @@ elif screen == "compare":
                         "Config_ID": r["Config_ID"],
                     }
                     comp_eval = opt.compare_configurations(c_ref, c_cand, f"Config {ref_idx+1}", r["Config #"])
-                    render_html(f"**{r['Config #']} vs Config {ref_idx+1} ({ref_row['Config_ID']}):** {comp_eval['tradeoff_summary']}")
+                    st.markdown(f"**{r['Config #']} vs Config {ref_idx+1} ({ref_row['Config_ID']}):** {comp_eval['tradeoff_summary']}")
                     st.caption(comp_eval["dominance_relationship"])
 
-            st.markdown("<div class='section-divider'></div>")
+            st.markdown("<div class='section-divider'></div>", unsafe_allow_html=True)
 
             c_bar, m_bar = st.columns(2)
             with c_bar:
@@ -1035,10 +1015,10 @@ elif screen == "compare":
 elif screen == "validation":
     render_banner("Model Validation & Explainable AI (XAI)")
 
-    render_html("""<div class="notice">
+    st.markdown("""<div class="notice">
     Validation evidence from Stage 12A MATLAB analytical models, Stage 14A ExtraTrees surrogate models,
     and Stage 2 Explainable AI (XAI) feature attribution.
-    </div>""")
+    </div>""", unsafe_allow_html=True)
 
     try:
         pred_df = pd.read_csv(_DATA_DIR / "Stage12A_Selected_Model_Predictions.csv")
@@ -1127,7 +1107,7 @@ elif screen == "validation":
                     xaxis=dict(gridcolor="#334155"), yaxis=dict(gridcolor="#334155"),
                 )
                 st.plotly_chart(fig_rc, use_container_width=True)
-                render_html(f"RMSE: **{res_c.pow(2).mean()**0.5:.3e}** pF/m · MAE: **{res_c.abs().mean():.3e}** pF/m")
+                st.markdown(f"RMSE: **{res_c.pow(2).mean()**0.5:.3e}** pF/m · MAE: **{res_c.abs().mean():.3e}** pF/m")
 
             with r_c2:
                 res_m = pred_df["AbsMutualInductanceResidual_nH"]
@@ -1150,11 +1130,11 @@ elif screen == "validation":
             LOLO withholds all configurations at a specific factor level and evaluates predictions
             using a model trained exclusively on remaining data. This reveals interpolation versus
             boundary extrapolation limitations.
-            </div>""")
+            </div>""", unsafe_allow_html=True)
 
             for target in lolo_df["Target"].unique():
                 sub = lolo_df[lolo_df["Target"] == target]
-                render_html(f"**{target}**")
+                st.markdown(f"**{target}**")
                 st.dataframe(sub[[
                     "HeldOutFeature", "NumberOfLevels",
                     "Mean_AI_RMSE", "Mean_AI_R2", "Mean_RMSE_Improvement_Percent"
@@ -1171,13 +1151,13 @@ elif screen == "validation":
             Notice negative R² when withholding <code>GroundClearance_mm=10mm</code> (-8.67) and <code>PairPitch_mm=2</code> (-2.25).
             Decision trees predict flat piecewise step functions and cannot extrapolate steep asymptotic field increases
             beyond observed training bounds. This highlights why predictions are restricted strictly to the 216-grid.
-            </div>""")
+            </div>""", unsafe_allow_html=True)
 
         with tab_xai:
             st.subheader("Feature Importance & Physical Attribution (Stage 2)")
             fx1, fx2 = st.columns(2)
             with fx1:
-                render_html("**Total Capacitance Feature Importance**")
+                st.markdown("**Total Capacitance Feature Importance**")
                 cap_imp = pd.DataFrame({
                     "Feature": ["GroundClearance_mm", "PairSeparation_mm", "PairPitch_mm"],
                     "MDI Importance": ["92.8%", "6.3%", "0.9%"],
@@ -1213,19 +1193,19 @@ elif screen == "ansys":
     st.markdown("""<div class="notice">
     This module is prepared for future ANSYS Electronics Desktop numerical verification.
     Comparison functions are implemented and ready to activate once Maxwell / Q3D simulation data is provided.
-    </div>""")
+    </div>""", unsafe_allow_html=True)
 
-    render_html("""<div class="warning-box">
+    st.markdown("""<div class="warning-box">
     ⚠ <b>ANSYS integration: Pending simulation data.</b><br>
     No ANSYS Q3D, Maxwell or HFSS results are currently available in the project repository.
     The comparison interface below will automatically populate when simulation data is supplied.
-    </div>""")
+    </div>""", unsafe_allow_html=True)
 
     st.subheader("Expected Data Format")
     tab_q3d, tab_max, tab_comp = st.tabs(["Q3D Capacitance", "Maxwell Inductance", "Comparison Interface"])
 
     with tab_q3d:
-        render_html("**Expected Q3D capacitance matrix columns:**")
+        st.markdown("**Expected Q3D capacitance matrix columns:**")
         st.code("""
 Config_ID, PairSeparation_mm, PairPitch_mm, Overlap_mm, GroundClearance_mm,
 C11_pF, C12_pF, C22_pF, TotalCapacitance_pF_per_m, FrequencyHz, SimulationCase
@@ -1274,10 +1254,9 @@ L11_nH, L12_nH, L22_nH, AbsMutualInductance_nH, SimulationCase
 elif screen == "report":
     render_banner("Engineering Report Generation & Data Packages")
 
-    tab_pdf, tab_packages, tab_supp = st.tabs([
+    tab_pdf, tab_packages = st.tabs([
         "PDF Configuration Report",
-        "Stage 2–4 Technical Reports & Data Packages",
-        "Supplementary Simulation Analysis",
+        "Stage 2–4 Technical Reports & Data Packages"
     ])
 
     with tab_pdf:
@@ -1373,7 +1352,7 @@ elif screen == "report":
                     use_container_width=True,
                 )
 
-        st.markdown("<div style='margin-top:10px'></div>")
+        st.markdown("<div style='margin-top:10px'></div>", unsafe_allow_html=True)
 
         # ── CSV Datasets & Results ─────────────────────────────────────────
         st.markdown("#### Processed Datasets & Metric CSVs")
@@ -1415,10 +1394,3 @@ elif screen == "report":
                 mime="text/csv",
                 use_container_width=True,
             )
-
-    with tab_supp:
-        try:
-            from supplementary_data import render_supplementary_analysis_section
-            render_supplementary_analysis_section()
-        except Exception as exc:
-            st.error(f"Could not load Supplementary Simulation Analysis module: {exc}")
