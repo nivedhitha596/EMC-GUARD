@@ -13,3 +13,4 @@ enableXsrfProtection = false
 
 [browser]
 gatherUsageStats = false
+

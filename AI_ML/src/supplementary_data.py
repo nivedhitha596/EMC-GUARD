@@ -20,6 +20,7 @@ IMPORTANT SCIENTIFIC INTEGRITY RULES:
 from __future__ import annotations
 
 import logging
+import textwrap
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -265,6 +266,17 @@ def load_all_supplementary_datasets(base_dir: Optional[Path] = None) -> Dict[str
 
 
 # ---------------------------------------------------------------------------
+
+def _render_html(html_str: str) -> None:
+    """Safely render HTML/CSS bypassing CommonMark 4-space indent code block parsing."""
+    import streamlit as st
+    clean_html = textwrap.dedent(html_str).strip()
+    if hasattr(st, "html"):
+        st.html(clean_html)
+    else:
+        st.markdown(clean_html, unsafe_allow_html=True)
+
+
 # Streamlit UI Rendering Section
 # ---------------------------------------------------------------------------
 
@@ -281,14 +293,14 @@ def render_supplementary_analysis_section() -> None:
     import plotly.graph_objects as go
     from plotly.subplots import make_subplots
 
-    st.markdown("""
+    _render_html("""
     <div class="notice">
     <b>Supplementary Simulation Analysis Section</b><br>
     This section provides exploratory engineering visualisations for three supplementary simulation datasets.
     These datasets are auxiliary analytical resources; they are <b>strictly decoupled</b> from the primary
     MATLAB analytical prediction engine and do NOT establish certified regulatory EMC compliance or laboratory validation.
     </div>
-    """, unsafe_allow_html=True)
+    """)
 
     data_bundle = load_all_supplementary_datasets()
 
@@ -311,45 +323,45 @@ def render_supplementary_analysis_section() -> None:
             st.error(f"Cannot load `emc_predict_SIMULATED.csv`: {info_sim.get('status')}")
         else:
             # Scientific notice
-            st.markdown(f"""
+            _render_html(f"""
             <div class="warning-box">
             ⚠ <b>Scientific Disclaimer:</b> {info_sim['scientific_notice']}
             Data source: <code>{df_sim['data_source'].iloc[0] if 'data_source' in df_sim.columns else 'SIMULATED'}</code>
             · Dimensions: <b>{info_sim['rows']} rows × {info_sim['cols']} columns</b>.
             </div>
-            """, unsafe_allow_html=True)
+            """)
 
             # High-level summary metrics
             m1, m2, m3, m4 = st.columns(4)
             with m1:
-                st.markdown(f"""<div class="metric-card">
+                _render_html(f"""<div class="metric-card">
                     <div class="label">Total Simulation Runs</div>
                     <div class="value">{len(df_sim)}</div>
                     <div class="unit">records</div>
-                </div>""", unsafe_allow_html=True)
+                </div>""")
             with m2:
-                st.markdown(f"""<div class="metric-card">
+                _render_html(f"""<div class="metric-card">
                     <div class="label">Switching Frequencies</div>
                     <div class="value">{len(df_sim['freq_hz'].unique())}</div>
                     <div class="unit">{sorted(list(df_sim['freq_hz'].unique()))} Hz</div>
-                </div>""", unsafe_allow_html=True)
+                </div>""")
             with m3:
-                st.markdown(f"""<div class="metric-card">
+                _render_html(f"""<div class="metric-card">
                     <div class="label">Victim Vpp Range</div>
                     <div class="value">{df_sim['victim_vpp_mv'].min():.1f} – {df_sim['victim_vpp_mv'].max():.1f}</div>
                     <div class="unit">mV (peak-to-peak)</div>
-                </div>""", unsafe_allow_html=True)
+                </div>""")
             with m4:
-                st.markdown(f"""<div class="metric-card">
+                _render_html(f"""<div class="metric-card">
                     <div class="label">Victim Vrms Range</div>
                     <div class="value">{df_sim['victim_vrms_mv'].min():.1f} – {df_sim['victim_vrms_mv'].max():.1f}</div>
                     <div class="unit">mV (RMS)</div>
-                </div>""", unsafe_allow_html=True)
+                </div>""")
 
-            st.markdown("<div class='section-divider'></div>", unsafe_allow_html=True)
+            _render_html("<div class='section-divider'></div>")
 
             # Interactive Operating Condition Filters
-            st.markdown("#### Operating Condition Filters")
+            _render_html("#### Operating Condition Filters")
             fc1, fc2, fc3, fc4 = st.columns(4)
             with fc1:
                 freq_opts = sorted(list(df_sim["freq_hz"].unique()))
@@ -475,10 +487,10 @@ def render_supplementary_analysis_section() -> None:
             Target MOSFET: <b>IRFH5302</b> (N-Channel Power MOSFET) · Bus: <b>12 V</b> · PWM: <b>20 kHz</b>
             · Total populated runs: <b>3 records</b>.
             </div>
-            """, unsafe_allow_html=True)
+            """)
 
             # Three Gate Resistance Metric Columns
-            st.markdown("#### Three-Point Gate Resistance Sweep Comparison")
+            _render_html("#### Three-Point Gate Resistance Sweep Comparison")
             c1, c2, c3 = st.columns(3)
 
             for col_widget, (_, r) in zip([c1, c2, c3], df_rg.iterrows()):
@@ -498,12 +510,12 @@ def render_supplementary_analysis_section() -> None:
                             <tr><td style="padding: 3px 0;"><b>Noise Peak (20kHz):</b></td><td style="text-align: right;">{r['Noise_peak_20kHz_dB']:.1f} dB</td></tr>
                         </table>
                     </div>
-                    """, unsafe_allow_html=True)
+                    """)
 
-            st.markdown("<div class='section-divider'></div>", unsafe_allow_html=True)
+            _render_html("<div class='section-divider'></div>")
 
             # Dual-axis Trade-Off Plot: dV/dt (EMI proxy) vs Turn-off Loss (Thermal proxy)
-            st.markdown("#### Physical Trade-Off: Slew Rate (EMI Risk) vs Switching Dissipation (Thermal)")
+            _render_html("#### Physical Trade-Off: Slew Rate (EMI Risk) vs Switching Dissipation (Thermal)")
 
             fig_tradeoff = make_subplots(specs=[[{"secondary_y": True}]])
 
@@ -586,36 +598,36 @@ def render_supplementary_analysis_section() -> None:
             Missing output measurements are explicitly preserved as <code>NaN</code>.
             They are NOT zero-filled, imputed, or artificially synthesized.
             </div>
-            """, unsafe_allow_html=True)
+            """)
 
             # Metric overview
             tm1, tm2, tm3, tm4 = st.columns(4)
             with tm1:
-                st.markdown(f"""<div class="metric-card">
+                _render_html(f"""<div class="metric-card">
                     <div class="label">Configured Runs</div>
                     <div class="value">{info_tpl['rows']}</div>
                     <div class="unit">runs planned</div>
-                </div>""", unsafe_allow_html=True)
+                </div>""")
             with tm2:
-                st.markdown(f"""<div class="metric-card">
+                _render_html(f"""<div class="metric-card">
                     <div class="label">Defined Inputs</div>
                     <div class="value">{len(info_tpl['input_columns'])}</div>
                     <div class="unit">columns ready</div>
-                </div>""", unsafe_allow_html=True)
+                </div>""")
             with tm3:
-                st.markdown(f"""<div class="metric-card">
+                _render_html(f"""<div class="metric-card">
                     <div class="label">Pending Outputs</div>
                     <div class="value">{len(info_tpl['output_columns'])}</div>
                     <div class="unit">columns awaiting</div>
-                </div>""", unsafe_allow_html=True)
+                </div>""")
             with tm4:
-                st.markdown(f"""<div class="metric-card">
+                _render_html(f"""<div class="metric-card">
                     <div class="label">Missing Measurement Values</div>
                     <div class="value">{info_tpl['total_outputs_missing']} / {info_tpl['total_outputs_expected']}</div>
                     <div class="unit" style="color: #F87171;">{info_tpl['percent_outputs_missing']:.0f}% pending</div>
-                </div>""", unsafe_allow_html=True)
+                </div>""")
 
-            st.markdown("<div class='section-divider'></div>", unsafe_allow_html=True)
+            _render_html("<div class='section-divider'></div>")
 
             # Schema decomposition tables
             sc1, sc2 = st.columns(2)
