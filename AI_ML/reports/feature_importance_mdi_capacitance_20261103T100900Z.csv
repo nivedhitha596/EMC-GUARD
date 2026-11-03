@@ -1,0 +1,4 @@
+Feature,Importance,Method,Target,Unit,Rank,Importance_Pct
+GroundClearance_mm,0.9278112254450018,MDI (native ExtraTrees),TotalCapacitance_pF_per_m,pF/m,1,92.78112254450018
+PairSeparation_mm,0.06280471394976293,MDI (native ExtraTrees),TotalCapacitance_pF_per_m,pF/m,2,6.280471394976293
+PairPitch_mm,0.00938406060523526,MDI (native ExtraTrees),TotalCapacitance_pF_per_m,pF/m,3,0.938406060523526

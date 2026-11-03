@@ -1,0 +1,101 @@
+{
+  "generated_at": "20261103T102501Z",
+  "module": "optimise.py",
+  "engine": "frozen_matlab",
+  "total_configurations": 216,
+  "pareto_optimal_count": 6,
+  "common_pareto_fixed_parameters": {
+    "PairPitch_mm": 2.0,
+    "Overlap_mm": 150.0,
+    "GroundClearance_mm": 100.0,
+    "explanation": "Pitch=2mm maximizes twist cancellation; Overlap=150mm minimizes exposure length; GroundClearance=100mm minimizes image capacitance."
+  },
+  "pareto_candidates": [
+    {
+      "Config_ID": "EMC-010",
+      "PairSeparation_mm": 8,
+      "PairPitch_mm": 2,
+      "Overlap_mm": 150,
+      "GroundClearance_mm": 100,
+      "TotalCapacitance_pF_per_m": 29.4676479354132,
+      "AbsMutualInductance_nH": 1.93349470131636,
+      "Candidate_Role": "Minimum Capacitance Champion",
+      "Weighted_Tradeoff_Score": 0.5,
+      "Inclusion_Rationale": "Achieves lowest total capacitance (29.47 pF/m) in the entire dataset. Separation=8mm minimises inter-pair capacitance, at the cost of higher mutual inductance."
+    },
+    {
+      "Config_ID": "EMC-046",
+      "PairSeparation_mm": 12,
+      "PairPitch_mm": 2,
+      "Overlap_mm": 150,
+      "GroundClearance_mm": 100,
+      "TotalCapacitance_pF_per_m": 30.899701302871,
+      "AbsMutualInductance_nH": 0.842472431833656,
+      "Candidate_Role": "Recommended Balanced Design (Primary)",
+      "Weighted_Tradeoff_Score": 0.3397351982000516,
+      "Inclusion_Rationale": "Yields the lowest equal-weighted trade-off score (0.340). Reduces mutual inductance by 56.4% compared to 8mm champion while increasing capacitance by only 1.43 pF/m."
+    },
+    {
+      "Config_ID": "EMC-082",
+      "PairSeparation_mm": 16,
+      "PairPitch_mm": 2,
+      "Overlap_mm": 150,
+      "GroundClearance_mm": 100,
+      "TotalCapacitance_pF_per_m": 32.003498179387,
+      "AbsMutualInductance_nH": 0.4698066402703,
+      "Candidate_Role": "Balanced Design (Moderate Spacing)",
+      "Weighted_Tradeoff_Score": 0.34754850603575843,
+      "Inclusion_Rationale": "Reduces mutual inductance by 75.7% (to 0.4698 nH) with minimal capacitance increase (+8.6%). Strong compromise candidate for space-constrained elevator ducts."
+    },
+    {
+      "Config_ID": "EMC-118",
+      "PairSeparation_mm": 20,
+      "PairPitch_mm": 2,
+      "Overlap_mm": 150,
+      "GroundClearance_mm": 100,
+      "TotalCapacitance_pF_per_m": 32.9136564767856,
+      "AbsMutualInductance_nH": 0.298878499997721,
+      "Candidate_Role": "Inductance-Favouring Balanced Design",
+      "Weighted_Tradeoff_Score": 0.3922380600426041,
+      "Inclusion_Rationale": "Reduces mutual inductance by 84.5% (to 0.2989 nH) for high-sensitivity analog/encoder lines."
+    },
+    {
+      "Config_ID": "EMC-154",
+      "PairSeparation_mm": 24,
+      "PairPitch_mm": 2,
+      "Overlap_mm": 150,
+      "GroundClearance_mm": 100,
+      "TotalCapacitance_pF_per_m": 33.6940627658318,
+      "AbsMutualInductance_nH": 0.206443596544249,
+      "Candidate_Role": "Ultra-Low Inductive Coupling Candidate",
+      "Weighted_Tradeoff_Score": 0.4457380205945161,
+      "Inclusion_Rationale": "Near-minimum mutual inductance (0.2064 nH, -89.3% vs 8mm) while remaining non-dominated."
+    },
+    {
+      "Config_ID": "EMC-190",
+      "PairSeparation_mm": 28,
+      "PairPitch_mm": 2,
+      "Overlap_mm": 150,
+      "GroundClearance_mm": 100,
+      "TotalCapacitance_pF_per_m": 34.3804142273151,
+      "AbsMutualInductance_nH": 0.150854128163601,
+      "Candidate_Role": "Minimum Inductance Champion",
+      "Weighted_Tradeoff_Score": 0.5,
+      "Inclusion_Rationale": "Achieves lowest mutual inductance (0.1509 nH) in the entire dataset. Separation=28mm maximizes spatial magnetic decay (-92.2% vs 8mm), at slight capacitance cost (+16.7%)."
+    }
+  ],
+  "best_single_objective": {
+    "min_capacitance": {
+      "Config_ID": "EMC-010",
+      "PairSeparation_mm": 8,
+      "TotalCapacitance_pF_per_m": 29.4676479354132,
+      "AbsMutualInductance_nH": 1.93349470131636
+    },
+    "min_inductance": {
+      "Config_ID": "EMC-190",
+      "PairSeparation_mm": 28,
+      "TotalCapacitance_pF_per_m": 34.3804142273151,
+      "AbsMutualInductance_nH": 0.150854128163601
+    }
+  }
+}

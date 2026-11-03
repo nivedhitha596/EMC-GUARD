@@ -1,0 +1,290 @@
+{
+  "generated_at": "20261103T102339Z",
+  "module": "risk_assessment.py",
+  "engine": "frozen_matlab",
+  "summary": {
+    "total_configurations_assessed": 216,
+    "tier_distribution": {
+      "combined": {
+        "Low Relative Indicator": {
+          "count": 155,
+          "percentage": 71.75925925925925
+        },
+        "Moderate Relative Indicator": {
+          "count": 60,
+          "percentage": 27.77777777777778
+        },
+        "High Relative Indicator": {
+          "count": 1,
+          "percentage": 0.4629629629629629
+        }
+      },
+      "capacitance": {
+        "Low Relative Indicator": 120,
+        "Moderate Relative Indicator": 54,
+        "High Relative Indicator": 42
+      },
+      "mutual_inductance": {
+        "Low Relative Indicator": 196,
+        "Moderate Relative Indicator": 16,
+        "High Relative Indicator": 4
+      }
+    },
+    "parameter_extrema": {
+      "capacitance": {
+        "min_pF_per_m": 29.467647935413172,
+        "max_pF_per_m": 76.75886522834378,
+        "mean_pF_per_m": 47.30204281410605
+      },
+      "mutual_inductance": {
+        "min_nH": 0.15085412816358845,
+        "max_nH": 25.88783184274151,
+        "mean_nH": 3.303213896237637
+      }
+    },
+    "top_favourable_configurations": [
+      {
+        "Risk_Rank": 1,
+        "Config_ID": "EMC-046",
+        "PairSeparation_mm": 12.0,
+        "PairPitch_mm": 2.0,
+        "Overlap_mm": 150.0,
+        "GroundClearance_mm": 100.0,
+        "TotalCapacitance_pF_per_m": 30.899701302870955,
+        "AbsMutualInductance_nH": 0.8424724318336503,
+        "Combined_Risk_Indicator": 0.028577072829758063,
+        "Combined_Risk_Tier": "Low Relative Indicator"
+      },
+      {
+        "Risk_Rank": 2,
+        "Config_ID": "EMC-082",
+        "PairSeparation_mm": 16.0,
+        "PairPitch_mm": 2.0,
+        "Overlap_mm": 150.0,
+        "GroundClearance_mm": 100.0,
+        "TotalCapacitance_pF_per_m": 32.00349817938697,
+        "AbsMutualInductance_nH": 0.46980664027029534,
+        "Combined_Risk_Indicator": 0.03300739253867789,
+        "Combined_Risk_Tier": "Low Relative Indicator"
+      },
+      {
+        "Risk_Rank": 3,
+        "Config_ID": "EMC-010",
+        "PairSeparation_mm": 8.0,
+        "PairPitch_mm": 2.0,
+        "Overlap_mm": 150.0,
+        "GroundClearance_mm": 100.0,
+        "TotalCapacitance_pF_per_m": 29.467647935413186,
+        "AbsMutualInductance_nH": 1.9334947013163621,
+        "Combined_Risk_Indicator": 0.03463189409654459,
+        "Combined_Risk_Tier": "Low Relative Indicator"
+      },
+      {
+        "Risk_Rank": 4,
+        "Config_ID": "EMC-118",
+        "PairSeparation_mm": 20.0,
+        "PairPitch_mm": 2.0,
+        "Overlap_mm": 150.0,
+        "GroundClearance_mm": 100.0,
+        "TotalCapacitance_pF_per_m": 32.913656476785555,
+        "AbsMutualInductance_nH": 0.29887849999771343,
+        "Combined_Risk_Indicator": 0.039309630635769297,
+        "Combined_Risk_Tier": "Low Relative Indicator"
+      },
+      {
+        "Risk_Rank": 5,
+        "Config_ID": "EMC-083",
+        "PairSeparation_mm": 16.0,
+        "PairPitch_mm": 2.0,
+        "Overlap_mm": 300.0,
+        "GroundClearance_mm": 100.0,
+        "TotalCapacitance_pF_per_m": 32.00349817938696,
+        "AbsMutualInductance_nH": 0.9435709297764032,
+        "Combined_Risk_Indicator": 0.04221135375666019,
+        "Combined_Risk_Tier": "Low Relative Indicator"
+      },
+      {
+        "Risk_Rank": 6,
+        "Config_ID": "EMC-047",
+        "PairSeparation_mm": 12.0,
+        "PairPitch_mm": 2.0,
+        "Overlap_mm": 300.0,
+        "GroundClearance_mm": 100.0,
+        "TotalCapacitance_pF_per_m": 30.899701302870938,
+        "AbsMutualInductance_nH": 1.6889208898863708,
+        "Combined_Risk_Indicator": 0.0450212813813563,
+        "Combined_Risk_Tier": "Low Relative Indicator"
+      },
+      {
+        "Risk_Rank": 7,
+        "Config_ID": "EMC-119",
+        "PairSeparation_mm": 20.0,
+        "PairPitch_mm": 2.0,
+        "Overlap_mm": 300.0,
+        "GroundClearance_mm": 100.0,
+        "TotalCapacitance_pF_per_m": 32.91365647678554,
+        "AbsMutualInductance_nH": 0.6016912531682599,
+        "Combined_Risk_Indicator": 0.045192464986576156,
+        "Combined_Risk_Tier": "Low Relative Indicator"
+      },
+      {
+        "Risk_Rank": 8,
+        "Config_ID": "EMC-154",
+        "PairSeparation_mm": 24.0,
+        "PairPitch_mm": 2.0,
+        "Overlap_mm": 150.0,
+        "GroundClearance_mm": 100.0,
+        "TotalCapacitance_pF_per_m": 33.69406276583175,
+        "AbsMutualInductance_nH": 0.20644359654424377,
+        "Combined_Risk_Indicator": 0.04576493999514178,
+        "Combined_Risk_Tier": "Low Relative Indicator"
+      },
+      {
+        "Risk_Rank": 9,
+        "Config_ID": "EMC-155",
+        "PairSeparation_mm": 24.0,
+        "PairPitch_mm": 2.0,
+        "Overlap_mm": 300.0,
+        "GroundClearance_mm": 100.0,
+        "TotalCapacitance_pF_per_m": 33.69406276583174,
+        "AbsMutualInductance_nH": 0.41679319886252175,
+        "Combined_Risk_Indicator": 0.04985146492924707,
+        "Combined_Risk_Tier": "Low Relative Indicator"
+      },
+      {
+        "Risk_Rank": 10,
+        "Config_ID": "EMC-120",
+        "PairSeparation_mm": 20.0,
+        "PairPitch_mm": 2.0,
+        "Overlap_mm": 450.0,
+        "GroundClearance_mm": 100.0,
+        "TotalCapacitance_pF_per_m": 32.91365647678556,
+        "AbsMutualInductance_nH": 0.9036426548079672,
+        "Combined_Risk_Indicator": 0.05105856560235839,
+        "Combined_Risk_Tier": "Low Relative Indicator"
+      }
+    ],
+    "top_unfavourable_configurations": [
+      {
+        "Risk_Rank": 216,
+        "Config_ID": "EMC-027",
+        "PairSeparation_mm": 8.0,
+        "PairPitch_mm": 4.0,
+        "Overlap_mm": 450.0,
+        "GroundClearance_mm": 10.0,
+        "TotalCapacitance_pF_per_m": 60.023401993831484,
+        "AbsMutualInductance_nH": 25.88783184274151,
+        "Combined_Risk_Indicator": 0.8230595003417894,
+        "Combined_Risk_Tier": "High Relative Indicator"
+      },
+      {
+        "Risk_Rank": 215,
+        "Config_ID": "EMC-030",
+        "PairSeparation_mm": 8.0,
+        "PairPitch_mm": 4.0,
+        "Overlap_mm": 450.0,
+        "GroundClearance_mm": 25.0,
+        "TotalCapacitance_pF_per_m": 44.462468045203494,
+        "AbsMutualInductance_nH": 25.88783184274151,
+        "Combined_Risk_Indicator": 0.6585370494579322,
+        "Combined_Risk_Tier": "Moderate Relative Indicator"
+      },
+      {
+        "Risk_Rank": 214,
+        "Config_ID": "EMC-026",
+        "PairSeparation_mm": 8.0,
+        "PairPitch_mm": 4.0,
+        "Overlap_mm": 300.0,
+        "GroundClearance_mm": 10.0,
+        "TotalCapacitance_pF_per_m": 60.023401993831456,
+        "AbsMutualInductance_nH": 17.255593974624315,
+        "Combined_Risk_Indicator": 0.6553584212980806,
+        "Combined_Risk_Tier": "Moderate Relative Indicator"
+      },
+      {
+        "Risk_Rank": 213,
+        "Config_ID": "EMC-063",
+        "PairSeparation_mm": 12.0,
+        "PairPitch_mm": 4.0,
+        "Overlap_mm": 450.0,
+        "GroundClearance_mm": 10.0,
+        "TotalCapacitance_pF_per_m": 65.60007247173999,
+        "AbsMutualInductance_nH": 10.596919583683306,
+        "Combined_Risk_Indicator": 0.5849593059548651,
+        "Combined_Risk_Tier": "Moderate Relative Indicator"
+      },
+      {
+        "Risk_Rank": 212,
+        "Config_ID": "EMC-033",
+        "PairSeparation_mm": 8.0,
+        "PairPitch_mm": 4.0,
+        "Overlap_mm": 450.0,
+        "GroundClearance_mm": 50.0,
+        "TotalCapacitance_pF_per_m": 36.43102840381917,
+        "AbsMutualInductance_nH": 25.88783184274151,
+        "Combined_Risk_Indicator": 0.5736223432912873,
+        "Combined_Risk_Tier": "Moderate Relative Indicator"
+      },
+      {
+        "Risk_Rank": 211,
+        "Config_ID": "EMC-015",
+        "PairSeparation_mm": 8.0,
+        "PairPitch_mm": 3.0,
+        "Overlap_mm": 450.0,
+        "GroundClearance_mm": 10.0,
+        "TotalCapacitance_pF_per_m": 58.2953177981036,
+        "AbsMutualInductance_nH": 13.637491316490705,
+        "Combined_Risk_Indicator": 0.5667977864114704,
+        "Combined_Risk_Tier": "Moderate Relative Indicator"
+      },
+      {
+        "Risk_Rank": 210,
+        "Config_ID": "EMC-099",
+        "PairSeparation_mm": 16.0,
+        "PairPitch_mm": 4.0,
+        "Overlap_mm": 450.0,
+        "GroundClearance_mm": 10.0,
+        "TotalCapacitance_pF_per_m": 69.65939670912338,
+        "AbsMutualInductance_nH": 5.804914749365924,
+        "Combined_Risk_Indicator": 0.5347819613687025,
+        "Combined_Risk_Tier": "Moderate Relative Indicator"
+      },
+      {
+        "Risk_Rank": 209,
+        "Config_ID": "EMC-207",
+        "PairSeparation_mm": 28.0,
+        "PairPitch_mm": 4.0,
+        "Overlap_mm": 450.0,
+        "GroundClearance_mm": 10.0,
+        "TotalCapacitance_pF_per_m": 76.75886522834378,
+        "AbsMutualInductance_nH": 1.852190618214971,
+        "Combined_Risk_Indicator": 0.5330523752423291,
+        "Combined_Risk_Tier": "Moderate Relative Indicator"
+      },
+      {
+        "Risk_Rank": 208,
+        "Config_ID": "EMC-171",
+        "PairSeparation_mm": 24.0,
+        "PairPitch_mm": 4.0,
+        "Overlap_mm": 450.0,
+        "GroundClearance_mm": 10.0,
+        "TotalCapacitance_pF_per_m": 74.99916154047797,
+        "AbsMutualInductance_nH": 2.5318309733164863,
+        "Combined_Risk_Indicator": 0.5276509791645742,
+        "Combined_Risk_Tier": "Moderate Relative Indicator"
+      },
+      {
+        "Risk_Rank": 207,
+        "Config_ID": "EMC-135",
+        "PairSeparation_mm": 20.0,
+        "PairPitch_mm": 4.0,
+        "Overlap_mm": 450.0,
+        "GroundClearance_mm": 10.0,
+        "TotalCapacitance_pF_per_m": 72.69777526786879,
+        "AbsMutualInductance_nH": 3.670429244871765,
+        "Combined_Risk_Indicator": 0.5254388014828059,
+        "Combined_Risk_Tier": "Moderate Relative Indicator"
+      }
+    ]
+  }
+}

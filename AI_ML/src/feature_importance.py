@@ -1,349 +1,404 @@
 """
-EMC-GUARD: Physics-Informed Digital Twin for Elevator EMC Pre-Compliance
-=========================================================================
-MODULE 4 | Script 1: Feature Importance Analysis
-File   : feature_importance.py
-Author : EMC-GUARD Development Team
+feature_importance.py
+---------------------
+Feature Importance analysis for the KONE EMC-GUARD AI_ML system.
 
-Implements permutation importance using the INDEPENDENT TEST dataset.
+Analyses the Stage 14A Extra Trees models to identify the contribution
+of each input feature to the model's predictions.
 
-Key design decisions
---------------------
-1. Permutation is applied to RAW input feature columns (before encoding).
-   For each shuffle, the raw column is corrupted, the full preprocessing
-   pipeline is re-applied, and the model is re-scored.  This correctly
-   attributes importance to the ORIGINAL features (e.g. "Shield_Type")
-   rather than to individual one-hot columns.
+Methods used:
+  1. ExtraTrees native impurity-based feature importance (mean decrease impurity)
+  2. Permutation importance (sklearn) — more robust, model-agnostic measure
 
-2. Scoring metric: negative MAE (neg_mae).  Lower predicted MAE after
-   shuffling = larger importance.  We also compute neg_RMSE for reference.
+For capacitance:   PairSeparation_mm, PairPitch_mm, GroundClearance_mm
+For mutual ind.:   PairSeparation_mm, PairPitch_mm, Overlap_mm
 
-3. Importance is repeated n_repeats times per feature; mean and std are
-   reported.
+IMPORTANT: Feature importance describes model behaviour, NOT physical causation.
+Correlation between feature importance rank and physical influence is plausible
+but must not be stated as causal without physics-based justification.
 
-DISCLAIMER
-----------
-Permutation importance measures the degree to which a model's PREDICTIONS
-depend on each feature in the TEST dataset.  It does NOT imply physical
-causation.  Results are from SYNTHETIC DUMMY DATA and may differ
-substantially from those obtained on real MATLAB simulation data.
+DO NOT retrain or overwrite production models. This module is read-only.
 
-Usage
------
-    python src/feature_importance.py
-    -- or --
-    from feature_importance import calculate_feature_importance, plot_feature_importance
+Usage (from AI_ML/ directory):
+    py src/feature_importance.py
+
+Usage (from any directory):
+    py C:/path/to/kone/AI_ML/src/feature_importance.py
 """
 
-import os, sys, json, warnings
+from __future__ import annotations
+
+import json
+import logging
+import sys
+import warnings
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Dict, List, Optional, Tuple
+
 import numpy as np
 import pandas as pd
+from sklearn.inspection import permutation_importance
+
+# ---------------------------------------------------------------------------
+# Path setup
+# ---------------------------------------------------------------------------
+_SRC_DIR = Path(__file__).resolve().parent
+if str(_SRC_DIR) not in sys.path:
+    sys.path.insert(0, str(_SRC_DIR))
+
+from config import (
+    CAP_FEATURES,
+    CAP_JOBLIB_PATH,
+    MUT_FEATURES,
+    MUT_JOBLIB_PATH,
+    AIML_REPORTS_DIR,
+)
+from dataset import load_dataset
+
+warnings.filterwarnings("ignore", message="Trying to unpickle estimator.*", category=UserWarning)
+warnings.filterwarnings("ignore", message=".*InconsistentVersionWarning.*", category=UserWarning)
+
 import joblib
-import matplotlib
-matplotlib.use("Agg")
-import matplotlib.pyplot as plt
-import seaborn as sns
-from datetime import datetime
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import mean_absolute_error
 
-warnings.filterwarnings("ignore")
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s  %(levelname)-8s %(message)s",
+    datefmt="%H:%M:%S",
+)
+logger = logging.getLogger(__name__)
 
 # ---------------------------------------------------------------------------
-# PATHS
+# Constants
 # ---------------------------------------------------------------------------
-BASE_DIR    = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DATASET_CSV = os.path.join(BASE_DIR, "dataset", "EMC_GUARD_Physics_Dataset.csv")
-MODEL_PKL   = os.path.join(BASE_DIR, "models",  "emc_surrogate_model.pkl")
-PREPROC_PKL = os.path.join(BASE_DIR, "models",  "emc_preprocessor.pkl")
-META_JSON   = os.path.join(BASE_DIR, "models",  "target_model_metadata.json")
-REPORTS_DIR = os.path.join(BASE_DIR, "reports")
-VIS_DIR     = os.path.join(REPORTS_DIR, "visualisations", "feature_importance")
-FI_CSV      = os.path.join(REPORTS_DIR, "feature_importance.csv")
+CAP_TARGET = "TotalCapacitance_pF_per_m"
+MUT_TARGET = "AbsMutualInductance_nH"
+CAP_UNIT   = "pF/m"
+MUT_UNIT   = "nH"
 
-# ---------------------------------------------------------------------------
-# COLUMN DEFINITIONS  (must match train_model.py)
-# ---------------------------------------------------------------------------
-NUMERICAL_FEATURES   = [
-    "Separation_mm", "Overlap_mm", "Cable_Length_mm", "Frequency_Hz",
-    "Voltage_V", "Conductor_Radius_mm", "Dielectric_Constant",
-]
-CATEGORICAL_FEATURES = ["Shield_Type", "Cable_Configuration"]
-INPUT_FEATURES       = NUMERICAL_FEATURES + CATEGORICAL_FEATURES
-TARGET_COLS          = [
-    "MutualInductance_nH", "MutualCapacitance_pF",
-    "Victim_Voltage_V", "Victim_RMS_V", "Victim_PeakToPeak_V",
-]
-RANDOM_STATE = 42
-TEST_SIZE    = 0.20
-N_REPEATS    = 10   # shuffles per feature (10 gives stable estimates, runs fast)
-MAX_PERM_ROWS = 80  # subsample test set for permutation — speeds up 3-4x
-
-sns.set_theme(style="whitegrid", palette="muted", font_scale=1.05)
-SYNTH_NOTE = "\n[SYNTHETIC DATA — permutation importance, not physical causation]"
+PERM_IMPORTANCE_REPEATS = 30   # permutation repeats for stable estimates
+PERM_IMPORTANCE_SEED    = 42
 
 
 # ---------------------------------------------------------------------------
-# LOAD ARTEFACTS
+# Model loading
 # ---------------------------------------------------------------------------
 
-def _load_artefacts():
-    for path, lbl in [(MODEL_PKL, "emc_surrogate_model.pkl"),
-                      (PREPROC_PKL, "emc_preprocessor.pkl"),
-                      (META_JSON,  "target_model_metadata.json")]:
-        if not os.path.exists(path):
-            raise FileNotFoundError(f"{lbl} not found: {path}\n"
-                                    "Run train_model.py (Module 2) first.")
-    preprocessor     = joblib.load(PREPROC_PKL)
-    surrogate_bundle = joblib.load(MODEL_PKL)
-    with open(META_JSON) as f:
-        metadata = json.load(f)
-    return preprocessor, surrogate_bundle, metadata
-
-
-def _build_test_split(df: pd.DataFrame, target: str):
-    """Reconstruct the same 80/20 split used in Module 2."""
-    sub  = df.dropna(subset=[target])
-    X    = sub[INPUT_FEATURES].reset_index(drop=True)
-    y    = sub[target].reset_index(drop=True)
-    Xtr, Xte, ytr, yte = train_test_split(
-        X, y, test_size=TEST_SIZE, random_state=RANDOM_STATE
-    )
-    return Xte.reset_index(drop=True), yte.reset_index(drop=True)
+def _load_models() -> Tuple:
+    """Load both Extra Trees models (read-only — no retraining)."""
+    if not CAP_JOBLIB_PATH.exists():
+        raise FileNotFoundError(f"Capacitance model not found: {CAP_JOBLIB_PATH}")
+    if not MUT_JOBLIB_PATH.exists():
+        raise FileNotFoundError(f"Mutual inductance model not found: {MUT_JOBLIB_PATH}")
+    cap_model = joblib.load(CAP_JOBLIB_PATH)
+    mut_model = joblib.load(MUT_JOBLIB_PATH)
+    logger.info("Models loaded (read-only).")
+    return cap_model, mut_model
 
 
 # ---------------------------------------------------------------------------
-# PERMUTATION IMPORTANCE  (raw-feature space)
+# Model wrapper helper
 # ---------------------------------------------------------------------------
 
-def _get_tree_importance(model, features: list) -> dict:
+def _get_inner_regressor(model):
     """
-    Extract mean-impurity-decrease (MDI) feature importances from the
-    tree ensemble.  This is instantaneous — no prediction needed.
-    Only covers ENCODED columns, so we map OHE columns back to raw features.
-    Returns {raw_feature: mdi_importance} normalised to sum=1.
+    Unwrap TransformedTargetRegressor to access the inner ExtraTreesRegressor.
+    The wrapper's predict() works fine; feature_importances_ requires the inner.
     """
-    try:
-        importances = model.feature_importances_
-        # feature_names_in_ may not exist on older sklearn — use indices
-        feat_imp = dict(enumerate(importances))
-        return feat_imp
-    except Exception:
-        return {}
+    if hasattr(model, "regressor_"):
+        return model.regressor_
+    if hasattr(model, "estimator"):
+        return model.estimator
+    return model
 
 
-def _permutation_importance_raw(model, preprocessor,
-                                  X_test_raw: pd.DataFrame,
-                                  y_test: pd.Series,
-                                  features: list,
-                                  n_repeats: int = N_REPEATS,
-                                  random_state: int = RANDOM_STATE) -> pd.DataFrame:
+# ---------------------------------------------------------------------------
+# Native impurity-based importance
+# ---------------------------------------------------------------------------
+
+def native_feature_importance(
+    model,
+    feature_names: List[str],
+    target_name: str,
+    unit: str,
+) -> pd.DataFrame:
     """
-    Compute permutation importance by shuffling RAW columns then re-encoding.
+    Extract mean decrease in impurity (MDI) importance from ExtraTrees.
 
-    Speed optimisations applied:
-      - MAX_PERM_ROWS: subsample the test set so each transform+predict is fast.
-      - n_repeats=10: 10 shuffles per feature is sufficient for stable estimates.
+    Each value is the normalised fraction of total impurity reduction
+    attributable to that feature, averaged across all trees.
+    Range: [0, 1], sums to 1.
+
+    NOTE: MDI can overestimate importance of high-cardinality features.
+    Use permutation importance for a more robust estimate.
+    """
+    importances = _get_inner_regressor(model).feature_importances_
+
+    df_imp = pd.DataFrame({
+        "Feature":    feature_names,
+        "Importance": importances,
+        "Method":     "MDI (native ExtraTrees)",
+        "Target":     target_name,
+        "Unit":       unit,
+    }).sort_values("Importance", ascending=False).reset_index(drop=True)
+
+    df_imp["Rank"] = range(1, len(df_imp) + 1)
+    df_imp["Importance_Pct"] = df_imp["Importance"] * 100.0
+
+    logger.info("  Native MDI importance for %s:", target_name)
+    for _, row in df_imp.iterrows():
+        logger.info("    Rank %d: %-24s  %.4f  (%.1f%%)",
+                    row["Rank"], row["Feature"], row["Importance"], row["Importance_Pct"])
+
+    return df_imp
+
+
+# ---------------------------------------------------------------------------
+# Permutation importance
+# ---------------------------------------------------------------------------
+
+def compute_permutation_importance(
+    model,
+    X: np.ndarray,
+    y: np.ndarray,
+    feature_names: List[str],
+    target_name: str,
+    unit: str,
+    n_repeats: int = PERM_IMPORTANCE_REPEATS,
+    seed: int = PERM_IMPORTANCE_SEED,
+) -> pd.DataFrame:
+    """
+    Compute permutation feature importance (PFI).
 
     For each feature:
-      - Record baseline MAE on (subsampled) test set.
-      - n_repeats times: shuffle that column, transform, predict, measure MAE.
-      - Importance = mean(shuffled_MAE) - baseline_MAE
-        (positive = shuffling hurts performance = feature is important)
+      1. Randomly shuffle that feature column across all samples.
+      2. Measure the drop in R² score.
+      3. Average over n_repeats shuffles.
 
-    Returns DataFrame with columns:
-        feature, mean_importance, std_importance, baseline_mae
+    A large drop → the feature is important.
+    A near-zero drop → the model barely uses that feature.
+
+    NOTE: PFI on training data measures reliance (possible overfitting).
+    On a deterministic dataset with no hold-out set, this is the best
+    available approximation.
     """
-    rng = np.random.default_rng(random_state)
+    logger.info("  Computing permutation importance for %s (%d repeats) …",
+                target_name, n_repeats)
 
-    # ----- subsample test rows for speed -----
-    if len(X_test_raw) > MAX_PERM_ROWS:
-        sample_idx = rng.choice(len(X_test_raw), size=MAX_PERM_ROWS, replace=False)
-        X_sub = X_test_raw.iloc[sample_idx].reset_index(drop=True)
-        y_sub = y_test.iloc[sample_idx].reset_index(drop=True)
-    else:
-        X_sub = X_test_raw.reset_index(drop=True)
-        y_sub = y_test.reset_index(drop=True)
+    result = permutation_importance(
+        model, X, y,
+        n_repeats=n_repeats,
+        random_state=seed,
+        scoring="r2",
+        n_jobs=-1,
+    )
 
-    # Baseline — encode once
-    X_base_enc  = preprocessor.transform(X_sub)
-    y_base_pred = model.predict(X_base_enc)
-    baseline_mae = mean_absolute_error(y_sub, y_base_pred)
+    df_pfi = pd.DataFrame({
+        "Feature":              feature_names,
+        "Importance_Mean":      result.importances_mean,
+        "Importance_Std":       result.importances_std,
+        "Importance_Mean_Pct":  result.importances_mean / result.importances_mean.sum() * 100
+                                if result.importances_mean.sum() > 0 else np.zeros(len(feature_names)),
+        "Method":               "Permutation Importance (R²-drop)",
+        "Target":               target_name,
+        "Unit":                 unit,
+    }).sort_values("Importance_Mean", ascending=False).reset_index(drop=True)
 
-    records = []
-    for feat in features:
-        importances = []
-        for _ in range(n_repeats):
-            X_perm = X_sub.copy()
-            X_perm[feat] = rng.permutation(X_perm[feat].values)
-            X_enc  = preprocessor.transform(X_perm)
-            y_pred = model.predict(X_enc)
-            shuffled_mae = mean_absolute_error(y_sub, y_pred)
-            importances.append(shuffled_mae - baseline_mae)
+    df_pfi["Rank"] = range(1, len(df_pfi) + 1)
 
-        records.append({
-            "feature":          feat,
-            "mean_importance":  float(np.mean(importances)),
-            "std_importance":   float(np.std(importances)),
-            "baseline_mae":     round(baseline_mae, 6),
-        })
+    logger.info("  Permutation importance for %s:", target_name)
+    for _, row in df_pfi.iterrows():
+        logger.info("    Rank %d: %-24s  mean=%.6g ± %.6g",
+                    row["Rank"], row["Feature"],
+                    row["Importance_Mean"], row["Importance_Std"])
 
-    result_df = pd.DataFrame(records)
-    result_df = result_df.sort_values("mean_importance", ascending=False).reset_index(drop=True)
-    result_df["rank"] = result_df.index + 1
-    return result_df
+    return df_pfi
 
 
 # ---------------------------------------------------------------------------
-# PUBLIC API: calculate_feature_importance()
+# Full feature importance analysis
 # ---------------------------------------------------------------------------
 
-def calculate_feature_importance(n_repeats: int = N_REPEATS) -> dict:
+def analyse_feature_importance(
+    df: pd.DataFrame,
+    cap_model,
+    mut_model,
+) -> Dict:
     """
-    Calculate permutation importance for every available target.
+    Run both MDI and permutation importance for both targets.
 
-    Returns
-    -------
-    dict: {target: pd.DataFrame with columns
-               [feature, mean_importance, std_importance, baseline_mae, rank]}
+    Returns a dict with:
+      capacitance:
+        mdi_df, pfi_df, combined_df
+      mutual_inductance:
+        mdi_df, pfi_df, combined_df
     """
-    print("  Loading artefacts ...")
-    preprocessor, surrogate_bundle, metadata = _load_artefacts()
-
-    if not os.path.exists(DATASET_CSV):
-        raise FileNotFoundError(f"Dataset not found: {DATASET_CSV}")
-    df = pd.read_csv(DATASET_CSV)
+    logger.info("=" * 60)
+    logger.info("Feature Importance Analysis")
+    logger.info("=" * 60)
 
     results = {}
-    all_rows = []
 
-    for target in TARGET_COLS:
-        if target not in surrogate_bundle:
-            print(f"  [SKIP] {target} not in surrogate bundle.")
-            continue
+    for target_name, target_col, features, model, unit in [
+        (CAP_TARGET, CAP_TARGET, CAP_FEATURES, cap_model, CAP_UNIT),
+        (MUT_TARGET, MUT_TARGET, MUT_FEATURES, mut_model, MUT_UNIT),
+    ]:
+        target_key = "capacitance" if target_col == CAP_TARGET else "mutual_inductance"
+        logger.info("\nTarget: %s [%s]", target_col, unit)
 
-        model = surrogate_bundle[target]["model"]
-        algo  = surrogate_bundle[target]["algorithm"]
-        print(f"  [{target}]  ({algo})  permutation importance "
-              f"({n_repeats} repeats x {len(INPUT_FEATURES)} features, "
-              f"max {MAX_PERM_ROWS} test rows) ...")
+        X = df[features].values
+        y = df[target_col].values
 
-        X_test_raw, y_test = _build_test_split(df, target)
-        fi_df = _permutation_importance_raw(
-            model, preprocessor, X_test_raw, y_test,
-            INPUT_FEATURES, n_repeats=n_repeats
-        )
-        fi_df.insert(0, "target",    target)
-        fi_df.insert(1, "algorithm", algo)
-        results[target] = fi_df
-        all_rows.append(fi_df)
-        print(f"    Top feature: {fi_df.iloc[0]['feature']}  "
-              f"(mean_imp={fi_df.iloc[0]['mean_importance']:.4f}  "
-              f"std={fi_df.iloc[0]['std_importance']:.4f})")
+        # 1. Native MDI
+        mdi_df = native_feature_importance(model, features, target_name, unit)
 
-    # Save combined CSV
-    if all_rows:
-        combined = pd.concat(all_rows, ignore_index=True)
-        os.makedirs(REPORTS_DIR, exist_ok=True)
-        combined.to_csv(FI_CSV, index=False)
-        print(f"\n  Saved: reports/feature_importance.csv")
+        # 2. Permutation importance
+        pfi_df = compute_permutation_importance(model, X, y, features, target_name, unit)
+
+        # 3. Combined ranked table
+        combined = mdi_df[["Feature", "Importance", "Importance_Pct"]].copy()
+        combined.columns = ["Feature", "MDI_Importance", "MDI_Pct"]
+        pfi_sub = pfi_df[["Feature", "Importance_Mean", "Importance_Std", "Importance_Mean_Pct"]].copy()
+        pfi_sub.columns = ["Feature", "PFI_Mean", "PFI_Std", "PFI_Pct"]
+        combined = combined.merge(pfi_sub, on="Feature")
+        combined["MDI_Rank"] = combined["MDI_Importance"].rank(ascending=False).astype(int)
+        combined["PFI_Rank"] = combined["PFI_Mean"].rank(ascending=False).astype(int)
+        combined["Target"] = target_name
+        combined["Unit"]   = unit
+
+        results[target_key] = {
+            "target_name": target_name,
+            "features":    features,
+            "unit":        unit,
+            "mdi_df":      mdi_df,
+            "pfi_df":      pfi_df,
+            "combined_df": combined,
+        }
 
     return results
 
 
 # ---------------------------------------------------------------------------
-# PUBLIC API: plot_feature_importance()
+# Save results
 # ---------------------------------------------------------------------------
 
-def plot_feature_importance(fi_results: dict) -> None:
-    """
-    Generate a horizontal bar chart with error bars for each target.
-    Saves to reports/visualisations/feature_importance/
-    """
-    os.makedirs(VIS_DIR, exist_ok=True)
-    palette = sns.color_palette("muted", len(INPUT_FEATURES))
+def save_importance_results(
+    importance: Dict,
+    out_dir: Path,
+) -> Dict:
+    """Save feature importance tables to CSV and summary to JSON."""
+    out_dir.mkdir(parents=True, exist_ok=True)
+    timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    saved = {}
 
-    for target, fi_df in fi_results.items():
-        fig, ax = plt.subplots(figsize=(9, 5))
+    for target_key, data in importance.items():
+        # MDI
+        mdi_fname = out_dir / f"feature_importance_mdi_{target_key}_{timestamp}.csv"
+        data["mdi_df"].to_csv(mdi_fname, index=False)
+        saved[f"mdi_{target_key}"] = str(mdi_fname)
+        logger.info("  Saved: %s", mdi_fname.name)
 
-        # Sort ascending so most important is at the top of horizontal bars
-        plot_df = fi_df.sort_values("mean_importance", ascending=True)
+        # PFI
+        pfi_fname = out_dir / f"feature_importance_pfi_{target_key}_{timestamp}.csv"
+        data["pfi_df"].to_csv(pfi_fname, index=False)
+        saved[f"pfi_{target_key}"] = str(pfi_fname)
+        logger.info("  Saved: %s", pfi_fname.name)
 
-        colours = [palette[i % len(palette)] for i in range(len(plot_df))]
-        bars = ax.barh(
-            plot_df["feature"],
-            plot_df["mean_importance"],
-            xerr=plot_df["std_importance"],
-            color=colours,
-            edgecolor="black",
-            linewidth=0.5,
-            capsize=3,
-            error_kw={"elinewidth": 1.0, "capthick": 1.0},
-        )
+        # Combined
+        comb_fname = out_dir / f"feature_importance_combined_{target_key}_{timestamp}.csv"
+        data["combined_df"].to_csv(comb_fname, index=False)
+        saved[f"combined_{target_key}"] = str(comb_fname)
+        logger.info("  Saved: %s", comb_fname.name)
 
-        # Annotate bar values
-        for bar, val in zip(bars, plot_df["mean_importance"]):
-            ax.text(max(val + plot_df["std_importance"].max() * 0.05, 0.001),
-                    bar.get_y() + bar.get_height() / 2,
-                    f"{val:.4f}", va="center", ha="left", fontsize=7.5)
+    # JSON summary
+    summary = {
+        "generated_at": timestamp,
+        "module": "feature_importance.py",
+        "methods": {
+            "MDI": (
+                "Mean Decrease Impurity — native ExtraTrees importance. "
+                "Fast and consistent but can overestimate high-cardinality features."
+            ),
+            "PFI": (
+                "Permutation Feature Importance — R² score drop after column shuffle. "
+                "More robust; uses training set (no independent test set available)."
+            ),
+        },
+        "disclaimer": (
+            "Feature importance describes model behaviour, not physical causation. "
+            "Correlation between model importance rank and physical influence is plausible "
+            "but is not proven by these results alone."
+        ),
+        "results": {
+            tkey: {
+                "target": data["target_name"],
+                "unit": data["unit"],
+                "features": data["features"],
+                "mdi_ranking": data["mdi_df"][["Rank", "Feature", "Importance_Pct"]].to_dict(orient="records"),
+                "pfi_ranking": data["pfi_df"][["Rank", "Feature", "Importance_Mean", "Importance_Std", "Importance_Mean_Pct"]].to_dict(orient="records"),
+            }
+            for tkey, data in importance.items()
+        },
+        "files_saved": saved,
+    }
 
-        ax.axvline(0, color="grey", linewidth=0.8, linestyle="--")
-        ax.set_xlabel(
-            "Mean increase in MAE when feature is permuted\n"
-            "(larger = more important to model predictions)",
-            fontsize=9
-        )
-        ax.set_ylabel("Input Feature", fontsize=9)
-        ax.set_title(
-            f"Permutation Feature Importance — {target}"
-            + SYNTH_NOTE,
-            fontsize=10
-        )
-        fig.tight_layout()
-        safe_name = target.replace("/", "_").replace(" ", "_")
-        fig_path = os.path.join(VIS_DIR, f"fi_{safe_name}.png")
-        fig.savefig(fig_path, dpi=120, bbox_inches="tight")
-        plt.close(fig)
-        print(f"  Saved: reports/visualisations/feature_importance/fi_{safe_name}.png")
+    json_fname = out_dir / f"feature_importance_summary_{timestamp}.json"
+    with open(json_fname, "w", encoding="utf-8") as fh:
+        json.dump(summary, fh, indent=2, ensure_ascii=False)
+    saved["summary_json"] = str(json_fname)
+    logger.info("  Saved: %s", json_fname.name)
 
-    # Summary heatmap: all targets x all features
-    _plot_importance_heatmap(fi_results)
-
-
-def _plot_importance_heatmap(fi_results: dict) -> None:
-    """Heatmap of mean importance across all targets (features as rows)."""
-    if not fi_results:
-        return
-
-    targets  = list(fi_results.keys())
-    hmap     = pd.DataFrame(index=INPUT_FEATURES, columns=targets, dtype=float)
-    for tgt, fi_df in fi_results.items():
-        for _, row in fi_df.iterrows():
-            hmap.at[row["feature"], tgt] = row["mean_importance"]
-
-    fig, ax = plt.subplots(figsize=(max(8, len(targets) * 2), max(5, len(INPUT_FEATURES) * 0.7)))
-    sns.heatmap(hmap.astype(float), annot=True, fmt=".4f", cmap="YlOrRd",
-                linewidths=0.4, ax=ax, annot_kws={"size": 7},
-                cbar_kws={"label": "Mean MAE increase when permuted"})
-    ax.set_title("Feature Importance Heatmap (all targets)" + SYNTH_NOTE, fontsize=10)
-    ax.set_xlabel("Prediction Target")
-    ax.set_ylabel("Input Feature")
-    fig.tight_layout()
-    path = os.path.join(VIS_DIR, "fi_heatmap_all_targets.png")
-    fig.savefig(path, dpi=120, bbox_inches="tight")
-    plt.close(fig)
-    print(f"  Saved: reports/visualisations/feature_importance/fi_heatmap_all_targets.png")
+    return saved
 
 
 # ---------------------------------------------------------------------------
-# ENTRY POINT
+# Main entry point
 # ---------------------------------------------------------------------------
+
+def run_feature_importance(save_results: bool = True) -> Dict:
+    """Execute the full feature importance analysis pipeline."""
+    logger.info("KONE EMC-GUARD — Feature Importance Analysis")
+
+    df = load_dataset()
+    cap_model, mut_model = _load_models()
+    importance = analyse_feature_importance(df, cap_model, mut_model)
+
+    files_saved = {}
+    if save_results:
+        files_saved = save_importance_results(importance, AIML_REPORTS_DIR)
+
+    importance["files_saved"] = files_saved
+    return importance
+
 
 if __name__ == "__main__":
-    print("=" * 65)
-    print("EMC-GUARD  |  Module 4  |  Feature Importance Analysis")
-    print("=" * 65)
-    fi_results = calculate_feature_importance()
-    plot_feature_importance(fi_results)
-    print("\n[DONE] Feature importance analysis complete.")
+    import sys as _sys
+    if _sys.stdout.encoding and _sys.stdout.encoding.lower() != 'utf-8':
+        _sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+
+    results = run_feature_importance(save_results=True)
+
+    print("\n" + "=" * 60)
+    print("FEATURE IMPORTANCE SUMMARY")
+    print("=" * 60)
+
+    for tkey, label in [
+        ("capacitance",      "Capacitance (pF/m)"),
+        ("mutual_inductance", "Mutual Inductance (nH)"),
+    ]:
+        data = results[tkey]
+        print(f"\n{label}")
+        print(f"  Features: {data['features']}")
+        print("\n  MDI (Mean Decrease Impurity):")
+        for _, row in data["mdi_df"].iterrows():
+            bar = "#" * int(row["Importance_Pct"] / 2)
+            print(f"    [{row['Rank']}] {row['Feature']:<24}  {row['Importance_Pct']:5.1f}%  {bar}")
+        print("\n  Permutation Importance (R2-drop):")
+        for _, row in data["pfi_df"].iterrows():
+            print(f"    [{row['Rank']}] {row['Feature']:<24}  {row['Importance_Mean']:+.6f} +/- {row['Importance_Std']:.6f}  ({row['Importance_Mean_Pct']:.1f}%)")
+
+    if "files_saved" in results:
+        print("\nFiles saved:")
+        for k, v in results["files_saved"].items():
+            print(f"  {k}: {Path(v).name}")
 

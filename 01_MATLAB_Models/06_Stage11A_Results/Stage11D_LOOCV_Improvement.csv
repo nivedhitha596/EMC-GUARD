@@ -1,0 +1,13 @@
+Model,Output,LOOCV_RMSE,Improvement_Percent
+A_Base_TwoFactor,Capacitance,0.183944296860505,0
+B1_Add_SP_Overlap,Capacitance,0.211814644869674,-15.1515151515159
+B2_Add_SP_Ground,Capacitance,6.23212493187215e-14,99.9999999999661
+B3_Add_S_Overlap_Ground,Capacitance,0.229176501006531,-24.5901639344262
+B4_Add_P_Overlap_Ground,Capacitance,0.19971095087712,-8.57142857142876
+C_All_ThreeFactor,Capacitance,1.39351542791639e-13,99.9999999999242
+A_Base_TwoFactor,AbsMutualInductance,1.03276797205574,0
+B1_Add_SP_Overlap,AbsMutualInductance,1.09712816159506e-14,99.9999999999989
+B2_Add_SP_Ground,AbsMutualInductance,1.28672730944649,-24.5901639344262
+B3_Add_S_Overlap_Ground,AbsMutualInductance,1.28672730944649,-24.5901639344262
+B4_Add_P_Overlap_Ground,AbsMutualInductance,1.12129094108908,-8.57142857142854
+C_All_ThreeFactor,AbsMutualInductance,3.14497056788081e-14,99.9999999999969

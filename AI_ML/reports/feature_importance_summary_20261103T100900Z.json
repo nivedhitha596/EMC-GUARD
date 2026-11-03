@@ -1,0 +1,117 @@
+{
+  "generated_at": "20261103T100900Z",
+  "module": "feature_importance.py",
+  "methods": {
+    "MDI": "Mean Decrease Impurity — native ExtraTrees importance. Fast and consistent but can overestimate high-cardinality features.",
+    "PFI": "Permutation Feature Importance — R² score drop after column shuffle. More robust; uses training set (no independent test set available)."
+  },
+  "disclaimer": "Feature importance describes model behaviour, not physical causation. Correlation between model importance rank and physical influence is plausible but is not proven by these results alone.",
+  "results": {
+    "capacitance": {
+      "target": "TotalCapacitance_pF_per_m",
+      "unit": "pF/m",
+      "features": [
+        "PairSeparation_mm",
+        "PairPitch_mm",
+        "GroundClearance_mm"
+      ],
+      "mdi_ranking": [
+        {
+          "Rank": 1,
+          "Feature": "GroundClearance_mm",
+          "Importance_Pct": 92.78112254450018
+        },
+        {
+          "Rank": 2,
+          "Feature": "PairSeparation_mm",
+          "Importance_Pct": 6.280471394976293
+        },
+        {
+          "Rank": 3,
+          "Feature": "PairPitch_mm",
+          "Importance_Pct": 0.938406060523526
+        }
+      ],
+      "pfi_ranking": [
+        {
+          "Rank": 1,
+          "Feature": "GroundClearance_mm",
+          "Importance_Mean": 1.875521807358365,
+          "Importance_Std": 0.14904629765961858,
+          "Importance_Mean_Pct": 92.02009464131197
+        },
+        {
+          "Rank": 2,
+          "Feature": "PairSeparation_mm",
+          "Importance_Mean": 0.13863966006573863,
+          "Importance_Std": 0.011104137576744806,
+          "Importance_Mean_Pct": 6.8021787804522855
+        },
+        {
+          "Rank": 3,
+          "Feature": "PairPitch_mm",
+          "Importance_Mean": 0.024004016613943132,
+          "Importance_Std": 0.002779595664736271,
+          "Importance_Mean_Pct": 1.177726578235737
+        }
+      ]
+    },
+    "mutual_inductance": {
+      "target": "AbsMutualInductance_nH",
+      "unit": "nH",
+      "features": [
+        "PairSeparation_mm",
+        "PairPitch_mm",
+        "Overlap_mm"
+      ],
+      "mdi_ranking": [
+        {
+          "Rank": 1,
+          "Feature": "PairSeparation_mm",
+          "Importance_Pct": 58.38174384546242
+        },
+        {
+          "Rank": 2,
+          "Feature": "PairPitch_mm",
+          "Importance_Pct": 25.79075521727771
+        },
+        {
+          "Rank": 3,
+          "Feature": "Overlap_mm",
+          "Importance_Pct": 15.827500937259883
+        }
+      ],
+      "pfi_ranking": [
+        {
+          "Rank": 1,
+          "Feature": "PairSeparation_mm",
+          "Importance_Mean": 1.4633073605765727,
+          "Importance_Std": 0.185652258070366,
+          "Importance_Mean_Pct": 55.82156159527779
+        },
+        {
+          "Rank": 2,
+          "Feature": "PairPitch_mm",
+          "Importance_Mean": 0.7071704714212227,
+          "Importance_Std": 0.08548653700814804,
+          "Importance_Mean_Pct": 26.976806850235025
+        },
+        {
+          "Rank": 3,
+          "Feature": "Overlap_mm",
+          "Importance_Mean": 0.4509238607494758,
+          "Importance_Std": 0.08275219055105484,
+          "Importance_Mean_Pct": 17.201631554487186
+        }
+      ]
+    }
+  },
+  "files_saved": {
+    "mdi_capacitance": "C:\\Users\\nived\\OneDrive\\Desktop\\kone\\AI_ML\\reports\\feature_importance_mdi_capacitance_20261103T100900Z.csv",
+    "pfi_capacitance": "C:\\Users\\nived\\OneDrive\\Desktop\\kone\\AI_ML\\reports\\feature_importance_pfi_capacitance_20261103T100900Z.csv",
+    "combined_capacitance": "C:\\Users\\nived\\OneDrive\\Desktop\\kone\\AI_ML\\reports\\feature_importance_combined_capacitance_20261103T100900Z.csv",
+    "mdi_mutual_inductance": "C:\\Users\\nived\\OneDrive\\Desktop\\kone\\AI_ML\\reports\\feature_importance_mdi_mutual_inductance_20261103T100900Z.csv",
+    "pfi_mutual_inductance": "C:\\Users\\nived\\OneDrive\\Desktop\\kone\\AI_ML\\reports\\feature_importance_pfi_mutual_inductance_20261103T100900Z.csv",
+    "combined_mutual_inductance": "C:\\Users\\nived\\OneDrive\\Desktop\\kone\\AI_ML\\reports\\feature_importance_combined_mutual_inductance_20261103T100900Z.csv"
+  }
+}

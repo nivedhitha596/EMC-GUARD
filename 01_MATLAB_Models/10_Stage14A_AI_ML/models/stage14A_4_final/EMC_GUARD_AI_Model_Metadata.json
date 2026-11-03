@@ -1,0 +1,1418 @@
+{
+    "project": "EMC-GUARD",
+    "stage": "14A-4",
+    "status": "Final surrogate models trained",
+    "dataset": "EMC_GUARD_Physics_Dataset.csv",
+    "dataset_rows": 216,
+    "unique_configurations": 216,
+    "model_directory": "D:\\Downloads\\kone\\01_MATLAB_Models\\10_Stage14A_AI_ML\\models\\stage14A_4_final",
+    "geometry_levels": {
+        "PairSeparation_mm": [
+            8.0,
+            12.0,
+            16.0,
+            20.0,
+            24.0,
+            28.0
+        ],
+        "PairPitch_mm": [
+            2.0,
+            3.0,
+            4.0
+        ],
+        "Overlap_mm": [
+            150.0,
+            300.0,
+            450.0
+        ],
+        "GroundClearance_mm": [
+            10.0,
+            25.0,
+            50.0,
+            100.0
+        ]
+    },
+    "supported_configurations": [
+        {
+            "PairSeparation_mm": 8.0,
+            "PairPitch_mm": 2.0,
+            "Overlap_mm": 150.0,
+            "GroundClearance_mm": 10.0
+        },
+        {
+            "PairSeparation_mm": 8.0,
+            "PairPitch_mm": 2.0,
+            "Overlap_mm": 300.0,
+            "GroundClearance_mm": 10.0
+        },
+        {
+            "PairSeparation_mm": 8.0,
+            "PairPitch_mm": 2.0,
+            "Overlap_mm": 450.0,
+            "GroundClearance_mm": 10.0
+        },
+        {
+            "PairSeparation_mm": 8.0,
+            "PairPitch_mm": 2.0,
+            "Overlap_mm": 150.0,
+            "GroundClearance_mm": 25.0
+        },
+        {
+            "PairSeparation_mm": 8.0,
+            "PairPitch_mm": 2.0,
+            "Overlap_mm": 300.0,
+            "GroundClearance_mm": 25.0
+        },
+        {
+            "PairSeparation_mm": 8.0,
+            "PairPitch_mm": 2.0,
+            "Overlap_mm": 450.0,
+            "GroundClearance_mm": 25.0
+        },
+        {
+            "PairSeparation_mm": 8.0,
+            "PairPitch_mm": 2.0,
+            "Overlap_mm": 150.0,
+            "GroundClearance_mm": 50.0
+        },
+        {
+            "PairSeparation_mm": 8.0,
+            "PairPitch_mm": 2.0,
+            "Overlap_mm": 300.0,
+            "GroundClearance_mm": 50.0
+        },
+        {
+            "PairSeparation_mm": 8.0,
+            "PairPitch_mm": 2.0,
+            "Overlap_mm": 450.0,
+            "GroundClearance_mm": 50.0
+        },
+        {
+            "PairSeparation_mm": 8.0,
+            "PairPitch_mm": 2.0,
+            "Overlap_mm": 150.0,
+            "GroundClearance_mm": 100.0
+        },
+        {
+            "PairSeparation_mm": 8.0,
+            "PairPitch_mm": 2.0,
+            "Overlap_mm": 300.0,
+            "GroundClearance_mm": 100.0
+        },
+        {
+            "PairSeparation_mm": 8.0,
+            "PairPitch_mm": 2.0,
+            "Overlap_mm": 450.0,
+            "GroundClearance_mm": 100.0
+        },
+        {
+            "PairSeparation_mm": 8.0,
+            "PairPitch_mm": 3.0,
+            "Overlap_mm": 150.0,
+            "GroundClearance_mm": 10.0
+        },
+        {
+            "PairSeparation_mm": 8.0,
+            "PairPitch_mm": 3.0,
+            "Overlap_mm": 300.0,
+            "GroundClearance_mm": 10.0
+        },
+        {
+            "PairSeparation_mm": 8.0,
+            "PairPitch_mm": 3.0,
+            "Overlap_mm": 450.0,
+            "GroundClearance_mm": 10.0
+        },
+        {
+            "PairSeparation_mm": 8.0,
+            "PairPitch_mm": 3.0,
+            "Overlap_mm": 150.0,
+            "GroundClearance_mm": 25.0
+        },
+        {
+            "PairSeparation_mm": 8.0,
+            "PairPitch_mm": 3.0,
+            "Overlap_mm": 300.0,
+            "GroundClearance_mm": 25.0
+        },
+        {
+            "PairSeparation_mm": 8.0,
+            "PairPitch_mm": 3.0,
+            "Overlap_mm": 450.0,
+            "GroundClearance_mm": 25.0
+        },
+        {
+            "PairSeparation_mm": 8.0,
+            "PairPitch_mm": 3.0,
+            "Overlap_mm": 150.0,
+            "GroundClearance_mm": 50.0
+        },
+        {
+            "PairSeparation_mm": 8.0,
+            "PairPitch_mm": 3.0,
+            "Overlap_mm": 300.0,
+            "GroundClearance_mm": 50.0
+        },
+        {
+            "PairSeparation_mm": 8.0,
+            "PairPitch_mm": 3.0,
+            "Overlap_mm": 450.0,
+            "GroundClearance_mm": 50.0
+        },
+        {
+            "PairSeparation_mm": 8.0,
+            "PairPitch_mm": 3.0,
+            "Overlap_mm": 150.0,
+            "GroundClearance_mm": 100.0
+        },
+        {
+            "PairSeparation_mm": 8.0,
+            "PairPitch_mm": 3.0,
+            "Overlap_mm": 300.0,
+            "GroundClearance_mm": 100.0
+        },
+        {
+            "PairSeparation_mm": 8.0,
+            "PairPitch_mm": 3.0,
+            "Overlap_mm": 450.0,
+            "GroundClearance_mm": 100.0
+        },
+        {
+            "PairSeparation_mm": 8.0,
+            "PairPitch_mm": 4.0,
+            "Overlap_mm": 150.0,
+            "GroundClearance_mm": 10.0
+        },
+        {
+            "PairSeparation_mm": 8.0,
+            "PairPitch_mm": 4.0,
+            "Overlap_mm": 300.0,
+            "GroundClearance_mm": 10.0
+        },
+        {
+            "PairSeparation_mm": 8.0,
+            "PairPitch_mm": 4.0,
+            "Overlap_mm": 450.0,
+            "GroundClearance_mm": 10.0
+        },
+        {
+            "PairSeparation_mm": 8.0,
+            "PairPitch_mm": 4.0,
+            "Overlap_mm": 150.0,
+            "GroundClearance_mm": 25.0
+        },
+        {
+            "PairSeparation_mm": 8.0,
+            "PairPitch_mm": 4.0,
+            "Overlap_mm": 300.0,
+            "GroundClearance_mm": 25.0
+        },
+        {
+            "PairSeparation_mm": 8.0,
+            "PairPitch_mm": 4.0,
+            "Overlap_mm": 450.0,
+            "GroundClearance_mm": 25.0
+        },
+        {
+            "PairSeparation_mm": 8.0,
+            "PairPitch_mm": 4.0,
+            "Overlap_mm": 150.0,
+            "GroundClearance_mm": 50.0
+        },
+        {
+            "PairSeparation_mm": 8.0,
+            "PairPitch_mm": 4.0,
+            "Overlap_mm": 300.0,
+            "GroundClearance_mm": 50.0
+        },
+        {
+            "PairSeparation_mm": 8.0,
+            "PairPitch_mm": 4.0,
+            "Overlap_mm": 450.0,
+            "GroundClearance_mm": 50.0
+        },
+        {
+            "PairSeparation_mm": 8.0,
+            "PairPitch_mm": 4.0,
+            "Overlap_mm": 150.0,
+            "GroundClearance_mm": 100.0
+        },
+        {
+            "PairSeparation_mm": 8.0,
+            "PairPitch_mm": 4.0,
+            "Overlap_mm": 300.0,
+            "GroundClearance_mm": 100.0
+        },
+        {
+            "PairSeparation_mm": 8.0,
+            "PairPitch_mm": 4.0,
+            "Overlap_mm": 450.0,
+            "GroundClearance_mm": 100.0
+        },
+        {
+            "PairSeparation_mm": 12.0,
+            "PairPitch_mm": 2.0,
+            "Overlap_mm": 150.0,
+            "GroundClearance_mm": 10.0
+        },
+        {
+            "PairSeparation_mm": 12.0,
+            "PairPitch_mm": 2.0,
+            "Overlap_mm": 300.0,
+            "GroundClearance_mm": 10.0
+        },
+        {
+            "PairSeparation_mm": 12.0,
+            "PairPitch_mm": 2.0,
+            "Overlap_mm": 450.0,
+            "GroundClearance_mm": 10.0
+        },
+        {
+            "PairSeparation_mm": 12.0,
+            "PairPitch_mm": 2.0,
+            "Overlap_mm": 150.0,
+            "GroundClearance_mm": 25.0
+        },
+        {
+            "PairSeparation_mm": 12.0,
+            "PairPitch_mm": 2.0,
+            "Overlap_mm": 300.0,
+            "GroundClearance_mm": 25.0
+        },
+        {
+            "PairSeparation_mm": 12.0,
+            "PairPitch_mm": 2.0,
+            "Overlap_mm": 450.0,
+            "GroundClearance_mm": 25.0
+        },
+        {
+            "PairSeparation_mm": 12.0,
+            "PairPitch_mm": 2.0,
+            "Overlap_mm": 150.0,
+            "GroundClearance_mm": 50.0
+        },
+        {
+            "PairSeparation_mm": 12.0,
+            "PairPitch_mm": 2.0,
+            "Overlap_mm": 300.0,
+            "GroundClearance_mm": 50.0
+        },
+        {
+            "PairSeparation_mm": 12.0,
+            "PairPitch_mm": 2.0,
+            "Overlap_mm": 450.0,
+            "GroundClearance_mm": 50.0
+        },
+        {
+            "PairSeparation_mm": 12.0,
+            "PairPitch_mm": 2.0,
+            "Overlap_mm": 150.0,
+            "GroundClearance_mm": 100.0
+        },
+        {
+            "PairSeparation_mm": 12.0,
+            "PairPitch_mm": 2.0,
+            "Overlap_mm": 300.0,
+            "GroundClearance_mm": 100.0
+        },
+        {
+            "PairSeparation_mm": 12.0,
+            "PairPitch_mm": 2.0,
+            "Overlap_mm": 450.0,
+            "GroundClearance_mm": 100.0
+        },
+        {
+            "PairSeparation_mm": 12.0,
+            "PairPitch_mm": 3.0,
+            "Overlap_mm": 150.0,
+            "GroundClearance_mm": 10.0
+        },
+        {
+            "PairSeparation_mm": 12.0,
+            "PairPitch_mm": 3.0,
+            "Overlap_mm": 300.0,
+            "GroundClearance_mm": 10.0
+        },
+        {
+            "PairSeparation_mm": 12.0,
+            "PairPitch_mm": 3.0,
+            "Overlap_mm": 450.0,
+            "GroundClearance_mm": 10.0
+        },
+        {
+            "PairSeparation_mm": 12.0,
+            "PairPitch_mm": 3.0,
+            "Overlap_mm": 150.0,
+            "GroundClearance_mm": 25.0
+        },
+        {
+            "PairSeparation_mm": 12.0,
+            "PairPitch_mm": 3.0,
+            "Overlap_mm": 300.0,
+            "GroundClearance_mm": 25.0
+        },
+        {
+            "PairSeparation_mm": 12.0,
+            "PairPitch_mm": 3.0,
+            "Overlap_mm": 450.0,
+            "GroundClearance_mm": 25.0
+        },
+        {
+            "PairSeparation_mm": 12.0,
+            "PairPitch_mm": 3.0,
+            "Overlap_mm": 150.0,
+            "GroundClearance_mm": 50.0
+        },
+        {
+            "PairSeparation_mm": 12.0,
+            "PairPitch_mm": 3.0,
+            "Overlap_mm": 300.0,
+            "GroundClearance_mm": 50.0
+        },
+        {
+            "PairSeparation_mm": 12.0,
+            "PairPitch_mm": 3.0,
+            "Overlap_mm": 450.0,
+            "GroundClearance_mm": 50.0
+        },
+        {
+            "PairSeparation_mm": 12.0,
+            "PairPitch_mm": 3.0,
+            "Overlap_mm": 150.0,
+            "GroundClearance_mm": 100.0
+        },
+        {
+            "PairSeparation_mm": 12.0,
+            "PairPitch_mm": 3.0,
+            "Overlap_mm": 300.0,
+            "GroundClearance_mm": 100.0
+        },
+        {
+            "PairSeparation_mm": 12.0,
+            "PairPitch_mm": 3.0,
+            "Overlap_mm": 450.0,
+            "GroundClearance_mm": 100.0
+        },
+        {
+            "PairSeparation_mm": 12.0,
+            "PairPitch_mm": 4.0,
+            "Overlap_mm": 150.0,
+            "GroundClearance_mm": 10.0
+        },
+        {
+            "PairSeparation_mm": 12.0,
+            "PairPitch_mm": 4.0,
+            "Overlap_mm": 300.0,
+            "GroundClearance_mm": 10.0
+        },
+        {
+            "PairSeparation_mm": 12.0,
+            "PairPitch_mm": 4.0,
+            "Overlap_mm": 450.0,
+            "GroundClearance_mm": 10.0
+        },
+        {
+            "PairSeparation_mm": 12.0,
+            "PairPitch_mm": 4.0,
+            "Overlap_mm": 150.0,
+            "GroundClearance_mm": 25.0
+        },
+        {
+            "PairSeparation_mm": 12.0,
+            "PairPitch_mm": 4.0,
+            "Overlap_mm": 300.0,
+            "GroundClearance_mm": 25.0
+        },
+        {
+            "PairSeparation_mm": 12.0,
+            "PairPitch_mm": 4.0,
+            "Overlap_mm": 450.0,
+            "GroundClearance_mm": 25.0
+        },
+        {
+            "PairSeparation_mm": 12.0,
+            "PairPitch_mm": 4.0,
+            "Overlap_mm": 150.0,
+            "GroundClearance_mm": 50.0
+        },
+        {
+            "PairSeparation_mm": 12.0,
+            "PairPitch_mm": 4.0,
+            "Overlap_mm": 300.0,
+            "GroundClearance_mm": 50.0
+        },
+        {
+            "PairSeparation_mm": 12.0,
+            "PairPitch_mm": 4.0,
+            "Overlap_mm": 450.0,
+            "GroundClearance_mm": 50.0
+        },
+        {
+            "PairSeparation_mm": 12.0,
+            "PairPitch_mm": 4.0,
+            "Overlap_mm": 150.0,
+            "GroundClearance_mm": 100.0
+        },
+        {
+            "PairSeparation_mm": 12.0,
+            "PairPitch_mm": 4.0,
+            "Overlap_mm": 300.0,
+            "GroundClearance_mm": 100.0
+        },
+        {
+            "PairSeparation_mm": 12.0,
+            "PairPitch_mm": 4.0,
+            "Overlap_mm": 450.0,
+            "GroundClearance_mm": 100.0
+        },
+        {
+            "PairSeparation_mm": 16.0,
+            "PairPitch_mm": 2.0,
+            "Overlap_mm": 150.0,
+            "GroundClearance_mm": 10.0
+        },
+        {
+            "PairSeparation_mm": 16.0,
+            "PairPitch_mm": 2.0,
+            "Overlap_mm": 300.0,
+            "GroundClearance_mm": 10.0
+        },
+        {
+            "PairSeparation_mm": 16.0,
+            "PairPitch_mm": 2.0,
+            "Overlap_mm": 450.0,
+            "GroundClearance_mm": 10.0
+        },
+        {
+            "PairSeparation_mm": 16.0,
+            "PairPitch_mm": 2.0,
+            "Overlap_mm": 150.0,
+            "GroundClearance_mm": 25.0
+        },
+        {
+            "PairSeparation_mm": 16.0,
+            "PairPitch_mm": 2.0,
+            "Overlap_mm": 300.0,
+            "GroundClearance_mm": 25.0
+        },
+        {
+            "PairSeparation_mm": 16.0,
+            "PairPitch_mm": 2.0,
+            "Overlap_mm": 450.0,
+            "GroundClearance_mm": 25.0
+        },
+        {
+            "PairSeparation_mm": 16.0,
+            "PairPitch_mm": 2.0,
+            "Overlap_mm": 150.0,
+            "GroundClearance_mm": 50.0
+        },
+        {
+            "PairSeparation_mm": 16.0,
+            "PairPitch_mm": 2.0,
+            "Overlap_mm": 300.0,
+            "GroundClearance_mm": 50.0
+        },
+        {
+            "PairSeparation_mm": 16.0,
+            "PairPitch_mm": 2.0,
+            "Overlap_mm": 450.0,
+            "GroundClearance_mm": 50.0
+        },
+        {
+            "PairSeparation_mm": 16.0,
+            "PairPitch_mm": 2.0,
+            "Overlap_mm": 150.0,
+            "GroundClearance_mm": 100.0
+        },
+        {
+            "PairSeparation_mm": 16.0,
+            "PairPitch_mm": 2.0,
+            "Overlap_mm": 300.0,
+            "GroundClearance_mm": 100.0
+        },
+        {
+            "PairSeparation_mm": 16.0,
+            "PairPitch_mm": 2.0,
+            "Overlap_mm": 450.0,
+            "GroundClearance_mm": 100.0
+        },
+        {
+            "PairSeparation_mm": 16.0,
+            "PairPitch_mm": 3.0,
+            "Overlap_mm": 150.0,
+            "GroundClearance_mm": 10.0
+        },
+        {
+            "PairSeparation_mm": 16.0,
+            "PairPitch_mm": 3.0,
+            "Overlap_mm": 300.0,
+            "GroundClearance_mm": 10.0
+        },
+        {
+            "PairSeparation_mm": 16.0,
+            "PairPitch_mm": 3.0,
+            "Overlap_mm": 450.0,
+            "GroundClearance_mm": 10.0
+        },
+        {
+            "PairSeparation_mm": 16.0,
+            "PairPitch_mm": 3.0,
+            "Overlap_mm": 150.0,
+            "GroundClearance_mm": 25.0
+        },
+        {
+            "PairSeparation_mm": 16.0,
+            "PairPitch_mm": 3.0,
+            "Overlap_mm": 300.0,
+            "GroundClearance_mm": 25.0
+        },
+        {
+            "PairSeparation_mm": 16.0,
+            "PairPitch_mm": 3.0,
+            "Overlap_mm": 450.0,
+            "GroundClearance_mm": 25.0
+        },
+        {
+            "PairSeparation_mm": 16.0,
+            "PairPitch_mm": 3.0,
+            "Overlap_mm": 150.0,
+            "GroundClearance_mm": 50.0
+        },
+        {
+            "PairSeparation_mm": 16.0,
+            "PairPitch_mm": 3.0,
+            "Overlap_mm": 300.0,
+            "GroundClearance_mm": 50.0
+        },
+        {
+            "PairSeparation_mm": 16.0,
+            "PairPitch_mm": 3.0,
+            "Overlap_mm": 450.0,
+            "GroundClearance_mm": 50.0
+        },
+        {
+            "PairSeparation_mm": 16.0,
+            "PairPitch_mm": 3.0,
+            "Overlap_mm": 150.0,
+            "GroundClearance_mm": 100.0
+        },
+        {
+            "PairSeparation_mm": 16.0,
+            "PairPitch_mm": 3.0,
+            "Overlap_mm": 300.0,
+            "GroundClearance_mm": 100.0
+        },
+        {
+            "PairSeparation_mm": 16.0,
+            "PairPitch_mm": 3.0,
+            "Overlap_mm": 450.0,
+            "GroundClearance_mm": 100.0
+        },
+        {
+            "PairSeparation_mm": 16.0,
+            "PairPitch_mm": 4.0,
+            "Overlap_mm": 150.0,
+            "GroundClearance_mm": 10.0
+        },
+        {
+            "PairSeparation_mm": 16.0,
+            "PairPitch_mm": 4.0,
+            "Overlap_mm": 300.0,
+            "GroundClearance_mm": 10.0
+        },
+        {
+            "PairSeparation_mm": 16.0,
+            "PairPitch_mm": 4.0,
+            "Overlap_mm": 450.0,
+            "GroundClearance_mm": 10.0
+        },
+        {
+            "PairSeparation_mm": 16.0,
+            "PairPitch_mm": 4.0,
+            "Overlap_mm": 150.0,
+            "GroundClearance_mm": 25.0
+        },
+        {
+            "PairSeparation_mm": 16.0,
+            "PairPitch_mm": 4.0,
+            "Overlap_mm": 300.0,
+            "GroundClearance_mm": 25.0
+        },
+        {
+            "PairSeparation_mm": 16.0,
+            "PairPitch_mm": 4.0,
+            "Overlap_mm": 450.0,
+            "GroundClearance_mm": 25.0
+        },
+        {
+            "PairSeparation_mm": 16.0,
+            "PairPitch_mm": 4.0,
+            "Overlap_mm": 150.0,
+            "GroundClearance_mm": 50.0
+        },
+        {
+            "PairSeparation_mm": 16.0,
+            "PairPitch_mm": 4.0,
+            "Overlap_mm": 300.0,
+            "GroundClearance_mm": 50.0
+        },
+        {
+            "PairSeparation_mm": 16.0,
+            "PairPitch_mm": 4.0,
+            "Overlap_mm": 450.0,
+            "GroundClearance_mm": 50.0
+        },
+        {
+            "PairSeparation_mm": 16.0,
+            "PairPitch_mm": 4.0,
+            "Overlap_mm": 150.0,
+            "GroundClearance_mm": 100.0
+        },
+        {
+            "PairSeparation_mm": 16.0,
+            "PairPitch_mm": 4.0,
+            "Overlap_mm": 300.0,
+            "GroundClearance_mm": 100.0
+        },
+        {
+            "PairSeparation_mm": 16.0,
+            "PairPitch_mm": 4.0,
+            "Overlap_mm": 450.0,
+            "GroundClearance_mm": 100.0
+        },
+        {
+            "PairSeparation_mm": 20.0,
+            "PairPitch_mm": 2.0,
+            "Overlap_mm": 150.0,
+            "GroundClearance_mm": 10.0
+        },
+        {
+            "PairSeparation_mm": 20.0,
+            "PairPitch_mm": 2.0,
+            "Overlap_mm": 300.0,
+            "GroundClearance_mm": 10.0
+        },
+        {
+            "PairSeparation_mm": 20.0,
+            "PairPitch_mm": 2.0,
+            "Overlap_mm": 450.0,
+            "GroundClearance_mm": 10.0
+        },
+        {
+            "PairSeparation_mm": 20.0,
+            "PairPitch_mm": 2.0,
+            "Overlap_mm": 150.0,
+            "GroundClearance_mm": 25.0
+        },
+        {
+            "PairSeparation_mm": 20.0,
+            "PairPitch_mm": 2.0,
+            "Overlap_mm": 300.0,
+            "GroundClearance_mm": 25.0
+        },
+        {
+            "PairSeparation_mm": 20.0,
+            "PairPitch_mm": 2.0,
+            "Overlap_mm": 450.0,
+            "GroundClearance_mm": 25.0
+        },
+        {
+            "PairSeparation_mm": 20.0,
+            "PairPitch_mm": 2.0,
+            "Overlap_mm": 150.0,
+            "GroundClearance_mm": 50.0
+        },
+        {
+            "PairSeparation_mm": 20.0,
+            "PairPitch_mm": 2.0,
+            "Overlap_mm": 300.0,
+            "GroundClearance_mm": 50.0
+        },
+        {
+            "PairSeparation_mm": 20.0,
+            "PairPitch_mm": 2.0,
+            "Overlap_mm": 450.0,
+            "GroundClearance_mm": 50.0
+        },
+        {
+            "PairSeparation_mm": 20.0,
+            "PairPitch_mm": 2.0,
+            "Overlap_mm": 150.0,
+            "GroundClearance_mm": 100.0
+        },
+        {
+            "PairSeparation_mm": 20.0,
+            "PairPitch_mm": 2.0,
+            "Overlap_mm": 300.0,
+            "GroundClearance_mm": 100.0
+        },
+        {
+            "PairSeparation_mm": 20.0,
+            "PairPitch_mm": 2.0,
+            "Overlap_mm": 450.0,
+            "GroundClearance_mm": 100.0
+        },
+        {
+            "PairSeparation_mm": 20.0,
+            "PairPitch_mm": 3.0,
+            "Overlap_mm": 150.0,
+            "GroundClearance_mm": 10.0
+        },
+        {
+            "PairSeparation_mm": 20.0,
+            "PairPitch_mm": 3.0,
+            "Overlap_mm": 300.0,
+            "GroundClearance_mm": 10.0
+        },
+        {
+            "PairSeparation_mm": 20.0,
+            "PairPitch_mm": 3.0,
+            "Overlap_mm": 450.0,
+            "GroundClearance_mm": 10.0
+        },
+        {
+            "PairSeparation_mm": 20.0,
+            "PairPitch_mm": 3.0,
+            "Overlap_mm": 150.0,
+            "GroundClearance_mm": 25.0
+        },
+        {
+            "PairSeparation_mm": 20.0,
+            "PairPitch_mm": 3.0,
+            "Overlap_mm": 300.0,
+            "GroundClearance_mm": 25.0
+        },
+        {
+            "PairSeparation_mm": 20.0,
+            "PairPitch_mm": 3.0,
+            "Overlap_mm": 450.0,
+            "GroundClearance_mm": 25.0
+        },
+        {
+            "PairSeparation_mm": 20.0,
+            "PairPitch_mm": 3.0,
+            "Overlap_mm": 150.0,
+            "GroundClearance_mm": 50.0
+        },
+        {
+            "PairSeparation_mm": 20.0,
+            "PairPitch_mm": 3.0,
+            "Overlap_mm": 300.0,
+            "GroundClearance_mm": 50.0
+        },
+        {
+            "PairSeparation_mm": 20.0,
+            "PairPitch_mm": 3.0,
+            "Overlap_mm": 450.0,
+            "GroundClearance_mm": 50.0
+        },
+        {
+            "PairSeparation_mm": 20.0,
+            "PairPitch_mm": 3.0,
+            "Overlap_mm": 150.0,
+            "GroundClearance_mm": 100.0
+        },
+        {
+            "PairSeparation_mm": 20.0,
+            "PairPitch_mm": 3.0,
+            "Overlap_mm": 300.0,
+            "GroundClearance_mm": 100.0
+        },
+        {
+            "PairSeparation_mm": 20.0,
+            "PairPitch_mm": 3.0,
+            "Overlap_mm": 450.0,
+            "GroundClearance_mm": 100.0
+        },
+        {
+            "PairSeparation_mm": 20.0,
+            "PairPitch_mm": 4.0,
+            "Overlap_mm": 150.0,
+            "GroundClearance_mm": 10.0
+        },
+        {
+            "PairSeparation_mm": 20.0,
+            "PairPitch_mm": 4.0,
+            "Overlap_mm": 300.0,
+            "GroundClearance_mm": 10.0
+        },
+        {
+            "PairSeparation_mm": 20.0,
+            "PairPitch_mm": 4.0,
+            "Overlap_mm": 450.0,
+            "GroundClearance_mm": 10.0
+        },
+        {
+            "PairSeparation_mm": 20.0,
+            "PairPitch_mm": 4.0,
+            "Overlap_mm": 150.0,
+            "GroundClearance_mm": 25.0
+        },
+        {
+            "PairSeparation_mm": 20.0,
+            "PairPitch_mm": 4.0,
+            "Overlap_mm": 300.0,
+            "GroundClearance_mm": 25.0
+        },
+        {
+            "PairSeparation_mm": 20.0,
+            "PairPitch_mm": 4.0,
+            "Overlap_mm": 450.0,
+            "GroundClearance_mm": 25.0
+        },
+        {
+            "PairSeparation_mm": 20.0,
+            "PairPitch_mm": 4.0,
+            "Overlap_mm": 150.0,
+            "GroundClearance_mm": 50.0
+        },
+        {
+            "PairSeparation_mm": 20.0,
+            "PairPitch_mm": 4.0,
+            "Overlap_mm": 300.0,
+            "GroundClearance_mm": 50.0
+        },
+        {
+            "PairSeparation_mm": 20.0,
+            "PairPitch_mm": 4.0,
+            "Overlap_mm": 450.0,
+            "GroundClearance_mm": 50.0
+        },
+        {
+            "PairSeparation_mm": 20.0,
+            "PairPitch_mm": 4.0,
+            "Overlap_mm": 150.0,
+            "GroundClearance_mm": 100.0
+        },
+        {
+            "PairSeparation_mm": 20.0,
+            "PairPitch_mm": 4.0,
+            "Overlap_mm": 300.0,
+            "GroundClearance_mm": 100.0
+        },
+        {
+            "PairSeparation_mm": 20.0,
+            "PairPitch_mm": 4.0,
+            "Overlap_mm": 450.0,
+            "GroundClearance_mm": 100.0
+        },
+        {
+            "PairSeparation_mm": 24.0,
+            "PairPitch_mm": 2.0,
+            "Overlap_mm": 150.0,
+            "GroundClearance_mm": 10.0
+        },
+        {
+            "PairSeparation_mm": 24.0,
+            "PairPitch_mm": 2.0,
+            "Overlap_mm": 300.0,
+            "GroundClearance_mm": 10.0
+        },
+        {
+            "PairSeparation_mm": 24.0,
+            "PairPitch_mm": 2.0,
+            "Overlap_mm": 450.0,
+            "GroundClearance_mm": 10.0
+        },
+        {
+            "PairSeparation_mm": 24.0,
+            "PairPitch_mm": 2.0,
+            "Overlap_mm": 150.0,
+            "GroundClearance_mm": 25.0
+        },
+        {
+            "PairSeparation_mm": 24.0,
+            "PairPitch_mm": 2.0,
+            "Overlap_mm": 300.0,
+            "GroundClearance_mm": 25.0
+        },
+        {
+            "PairSeparation_mm": 24.0,
+            "PairPitch_mm": 2.0,
+            "Overlap_mm": 450.0,
+            "GroundClearance_mm": 25.0
+        },
+        {
+            "PairSeparation_mm": 24.0,
+            "PairPitch_mm": 2.0,
+            "Overlap_mm": 150.0,
+            "GroundClearance_mm": 50.0
+        },
+        {
+            "PairSeparation_mm": 24.0,
+            "PairPitch_mm": 2.0,
+            "Overlap_mm": 300.0,
+            "GroundClearance_mm": 50.0
+        },
+        {
+            "PairSeparation_mm": 24.0,
+            "PairPitch_mm": 2.0,
+            "Overlap_mm": 450.0,
+            "GroundClearance_mm": 50.0
+        },
+        {
+            "PairSeparation_mm": 24.0,
+            "PairPitch_mm": 2.0,
+            "Overlap_mm": 150.0,
+            "GroundClearance_mm": 100.0
+        },
+        {
+            "PairSeparation_mm": 24.0,
+            "PairPitch_mm": 2.0,
+            "Overlap_mm": 300.0,
+            "GroundClearance_mm": 100.0
+        },
+        {
+            "PairSeparation_mm": 24.0,
+            "PairPitch_mm": 2.0,
+            "Overlap_mm": 450.0,
+            "GroundClearance_mm": 100.0
+        },
+        {
+            "PairSeparation_mm": 24.0,
+            "PairPitch_mm": 3.0,
+            "Overlap_mm": 150.0,
+            "GroundClearance_mm": 10.0
+        },
+        {
+            "PairSeparation_mm": 24.0,
+            "PairPitch_mm": 3.0,
+            "Overlap_mm": 300.0,
+            "GroundClearance_mm": 10.0
+        },
+        {
+            "PairSeparation_mm": 24.0,
+            "PairPitch_mm": 3.0,
+            "Overlap_mm": 450.0,
+            "GroundClearance_mm": 10.0
+        },
+        {
+            "PairSeparation_mm": 24.0,
+            "PairPitch_mm": 3.0,
+            "Overlap_mm": 150.0,
+            "GroundClearance_mm": 25.0
+        },
+        {
+            "PairSeparation_mm": 24.0,
+            "PairPitch_mm": 3.0,
+            "Overlap_mm": 300.0,
+            "GroundClearance_mm": 25.0
+        },
+        {
+            "PairSeparation_mm": 24.0,
+            "PairPitch_mm": 3.0,
+            "Overlap_mm": 450.0,
+            "GroundClearance_mm": 25.0
+        },
+        {
+            "PairSeparation_mm": 24.0,
+            "PairPitch_mm": 3.0,
+            "Overlap_mm": 150.0,
+            "GroundClearance_mm": 50.0
+        },
+        {
+            "PairSeparation_mm": 24.0,
+            "PairPitch_mm": 3.0,
+            "Overlap_mm": 300.0,
+            "GroundClearance_mm": 50.0
+        },
+        {
+            "PairSeparation_mm": 24.0,
+            "PairPitch_mm": 3.0,
+            "Overlap_mm": 450.0,
+            "GroundClearance_mm": 50.0
+        },
+        {
+            "PairSeparation_mm": 24.0,
+            "PairPitch_mm": 3.0,
+            "Overlap_mm": 150.0,
+            "GroundClearance_mm": 100.0
+        },
+        {
+            "PairSeparation_mm": 24.0,
+            "PairPitch_mm": 3.0,
+            "Overlap_mm": 300.0,
+            "GroundClearance_mm": 100.0
+        },
+        {
+            "PairSeparation_mm": 24.0,
+            "PairPitch_mm": 3.0,
+            "Overlap_mm": 450.0,
+            "GroundClearance_mm": 100.0
+        },
+        {
+            "PairSeparation_mm": 24.0,
+            "PairPitch_mm": 4.0,
+            "Overlap_mm": 150.0,
+            "GroundClearance_mm": 10.0
+        },
+        {
+            "PairSeparation_mm": 24.0,
+            "PairPitch_mm": 4.0,
+            "Overlap_mm": 300.0,
+            "GroundClearance_mm": 10.0
+        },
+        {
+            "PairSeparation_mm": 24.0,
+            "PairPitch_mm": 4.0,
+            "Overlap_mm": 450.0,
+            "GroundClearance_mm": 10.0
+        },
+        {
+            "PairSeparation_mm": 24.0,
+            "PairPitch_mm": 4.0,
+            "Overlap_mm": 150.0,
+            "GroundClearance_mm": 25.0
+        },
+        {
+            "PairSeparation_mm": 24.0,
+            "PairPitch_mm": 4.0,
+            "Overlap_mm": 300.0,
+            "GroundClearance_mm": 25.0
+        },
+        {
+            "PairSeparation_mm": 24.0,
+            "PairPitch_mm": 4.0,
+            "Overlap_mm": 450.0,
+            "GroundClearance_mm": 25.0
+        },
+        {
+            "PairSeparation_mm": 24.0,
+            "PairPitch_mm": 4.0,
+            "Overlap_mm": 150.0,
+            "GroundClearance_mm": 50.0
+        },
+        {
+            "PairSeparation_mm": 24.0,
+            "PairPitch_mm": 4.0,
+            "Overlap_mm": 300.0,
+            "GroundClearance_mm": 50.0
+        },
+        {
+            "PairSeparation_mm": 24.0,
+            "PairPitch_mm": 4.0,
+            "Overlap_mm": 450.0,
+            "GroundClearance_mm": 50.0
+        },
+        {
+            "PairSeparation_mm": 24.0,
+            "PairPitch_mm": 4.0,
+            "Overlap_mm": 150.0,
+            "GroundClearance_mm": 100.0
+        },
+        {
+            "PairSeparation_mm": 24.0,
+            "PairPitch_mm": 4.0,
+            "Overlap_mm": 300.0,
+            "GroundClearance_mm": 100.0
+        },
+        {
+            "PairSeparation_mm": 24.0,
+            "PairPitch_mm": 4.0,
+            "Overlap_mm": 450.0,
+            "GroundClearance_mm": 100.0
+        },
+        {
+            "PairSeparation_mm": 28.0,
+            "PairPitch_mm": 2.0,
+            "Overlap_mm": 150.0,
+            "GroundClearance_mm": 10.0
+        },
+        {
+            "PairSeparation_mm": 28.0,
+            "PairPitch_mm": 2.0,
+            "Overlap_mm": 300.0,
+            "GroundClearance_mm": 10.0
+        },
+        {
+            "PairSeparation_mm": 28.0,
+            "PairPitch_mm": 2.0,
+            "Overlap_mm": 450.0,
+            "GroundClearance_mm": 10.0
+        },
+        {
+            "PairSeparation_mm": 28.0,
+            "PairPitch_mm": 2.0,
+            "Overlap_mm": 150.0,
+            "GroundClearance_mm": 25.0
+        },
+        {
+            "PairSeparation_mm": 28.0,
+            "PairPitch_mm": 2.0,
+            "Overlap_mm": 300.0,
+            "GroundClearance_mm": 25.0
+        },
+        {
+            "PairSeparation_mm": 28.0,
+            "PairPitch_mm": 2.0,
+            "Overlap_mm": 450.0,
+            "GroundClearance_mm": 25.0
+        },
+        {
+            "PairSeparation_mm": 28.0,
+            "PairPitch_mm": 2.0,
+            "Overlap_mm": 150.0,
+            "GroundClearance_mm": 50.0
+        },
+        {
+            "PairSeparation_mm": 28.0,
+            "PairPitch_mm": 2.0,
+            "Overlap_mm": 300.0,
+            "GroundClearance_mm": 50.0
+        },
+        {
+            "PairSeparation_mm": 28.0,
+            "PairPitch_mm": 2.0,
+            "Overlap_mm": 450.0,
+            "GroundClearance_mm": 50.0
+        },
+        {
+            "PairSeparation_mm": 28.0,
+            "PairPitch_mm": 2.0,
+            "Overlap_mm": 150.0,
+            "GroundClearance_mm": 100.0
+        },
+        {
+            "PairSeparation_mm": 28.0,
+            "PairPitch_mm": 2.0,
+            "Overlap_mm": 300.0,
+            "GroundClearance_mm": 100.0
+        },
+        {
+            "PairSeparation_mm": 28.0,
+            "PairPitch_mm": 2.0,
+            "Overlap_mm": 450.0,
+            "GroundClearance_mm": 100.0
+        },
+        {
+            "PairSeparation_mm": 28.0,
+            "PairPitch_mm": 3.0,
+            "Overlap_mm": 150.0,
+            "GroundClearance_mm": 10.0
+        },
+        {
+            "PairSeparation_mm": 28.0,
+            "PairPitch_mm": 3.0,
+            "Overlap_mm": 300.0,
+            "GroundClearance_mm": 10.0
+        },
+        {
+            "PairSeparation_mm": 28.0,
+            "PairPitch_mm": 3.0,
+            "Overlap_mm": 450.0,
+            "GroundClearance_mm": 10.0
+        },
+        {
+            "PairSeparation_mm": 28.0,
+            "PairPitch_mm": 3.0,
+            "Overlap_mm": 150.0,
+            "GroundClearance_mm": 25.0
+        },
+        {
+            "PairSeparation_mm": 28.0,
+            "PairPitch_mm": 3.0,
+            "Overlap_mm": 300.0,
+            "GroundClearance_mm": 25.0
+        },
+        {
+            "PairSeparation_mm": 28.0,
+            "PairPitch_mm": 3.0,
+            "Overlap_mm": 450.0,
+            "GroundClearance_mm": 25.0
+        },
+        {
+            "PairSeparation_mm": 28.0,
+            "PairPitch_mm": 3.0,
+            "Overlap_mm": 150.0,
+            "GroundClearance_mm": 50.0
+        },
+        {
+            "PairSeparation_mm": 28.0,
+            "PairPitch_mm": 3.0,
+            "Overlap_mm": 300.0,
+            "GroundClearance_mm": 50.0
+        },
+        {
+            "PairSeparation_mm": 28.0,
+            "PairPitch_mm": 3.0,
+            "Overlap_mm": 450.0,
+            "GroundClearance_mm": 50.0
+        },
+        {
+            "PairSeparation_mm": 28.0,
+            "PairPitch_mm": 3.0,
+            "Overlap_mm": 150.0,
+            "GroundClearance_mm": 100.0
+        },
+        {
+            "PairSeparation_mm": 28.0,
+            "PairPitch_mm": 3.0,
+            "Overlap_mm": 300.0,
+            "GroundClearance_mm": 100.0
+        },
+        {
+            "PairSeparation_mm": 28.0,
+            "PairPitch_mm": 3.0,
+            "Overlap_mm": 450.0,
+            "GroundClearance_mm": 100.0
+        },
+        {
+            "PairSeparation_mm": 28.0,
+            "PairPitch_mm": 4.0,
+            "Overlap_mm": 150.0,
+            "GroundClearance_mm": 10.0
+        },
+        {
+            "PairSeparation_mm": 28.0,
+            "PairPitch_mm": 4.0,
+            "Overlap_mm": 300.0,
+            "GroundClearance_mm": 10.0
+        },
+        {
+            "PairSeparation_mm": 28.0,
+            "PairPitch_mm": 4.0,
+            "Overlap_mm": 450.0,
+            "GroundClearance_mm": 10.0
+        },
+        {
+            "PairSeparation_mm": 28.0,
+            "PairPitch_mm": 4.0,
+            "Overlap_mm": 150.0,
+            "GroundClearance_mm": 25.0
+        },
+        {
+            "PairSeparation_mm": 28.0,
+            "PairPitch_mm": 4.0,
+            "Overlap_mm": 300.0,
+            "GroundClearance_mm": 25.0
+        },
+        {
+            "PairSeparation_mm": 28.0,
+            "PairPitch_mm": 4.0,
+            "Overlap_mm": 450.0,
+            "GroundClearance_mm": 25.0
+        },
+        {
+            "PairSeparation_mm": 28.0,
+            "PairPitch_mm": 4.0,
+            "Overlap_mm": 150.0,
+            "GroundClearance_mm": 50.0
+        },
+        {
+            "PairSeparation_mm": 28.0,
+            "PairPitch_mm": 4.0,
+            "Overlap_mm": 300.0,
+            "GroundClearance_mm": 50.0
+        },
+        {
+            "PairSeparation_mm": 28.0,
+            "PairPitch_mm": 4.0,
+            "Overlap_mm": 450.0,
+            "GroundClearance_mm": 50.0
+        },
+        {
+            "PairSeparation_mm": 28.0,
+            "PairPitch_mm": 4.0,
+            "Overlap_mm": 150.0,
+            "GroundClearance_mm": 100.0
+        },
+        {
+            "PairSeparation_mm": 28.0,
+            "PairPitch_mm": 4.0,
+            "Overlap_mm": 300.0,
+            "GroundClearance_mm": 100.0
+        },
+        {
+            "PairSeparation_mm": 28.0,
+            "PairPitch_mm": 4.0,
+            "Overlap_mm": 450.0,
+            "GroundClearance_mm": 100.0
+        }
+    ],
+    "targets": {
+        "TotalCapacitance_pF_per_m": {
+            "model_file": "EMC_GUARD_Capacitance_ExtraTrees.joblib",
+            "features": [
+                "PairSeparation_mm",
+                "PairPitch_mm",
+                "GroundClearance_mm"
+            ],
+            "unit": "pF/m",
+            "algorithm": "ExtraTreesRegressor",
+            "estimators": 400,
+            "target_transform": "natural_log",
+            "training_rows": 216,
+            "training_reproduction": {
+                "RMSE": 1.0910404980925353e-12,
+                "MAE": 9.27159583675853e-13,
+                "R2": 1.0,
+                "interpretation": "In-sample reproduction only; not independent validation."
+            },
+            "LOLO_validation": {
+                "GroundClearance_mm": {
+                    "Pooled_RMSE": 10.17602803222197,
+                    "Pooled_MAE": 8.387615276643217,
+                    "Pooled_R2": 0.4232454243140061
+                },
+                "PairPitch_mm": {
+                    "Pooled_RMSE": 1.5113794777635206,
+                    "Pooled_MAE": 1.1515555834100013,
+                    "Pooled_R2": 0.9872772351290694
+                },
+                "PairSeparation_mm": {
+                    "Pooled_RMSE": 1.4501026450875902,
+                    "Pooled_MAE": 0.8584764897344856,
+                    "Pooled_R2": 0.9882879761310108
+                }
+            }
+        },
+        "AbsMutualInductance_nH": {
+            "model_file": "EMC_GUARD_MutualInductance_ExtraTrees.joblib",
+            "features": [
+                "PairSeparation_mm",
+                "PairPitch_mm",
+                "Overlap_mm"
+            ],
+            "unit": "nH",
+            "algorithm": "ExtraTreesRegressor",
+            "estimators": 400,
+            "target_transform": "natural_log",
+            "training_rows": 216,
+            "training_reproduction": {
+                "RMSE": 4.606396214395679e-14,
+                "MAE": 2.1125076996339783e-14,
+                "R2": 1.0,
+                "interpretation": "In-sample reproduction only; not independent validation."
+            },
+            "LOLO_validation": {
+                "Overlap_mm": {
+                    "Pooled_RMSE": 2.185376126666021,
+                    "Pooled_MAE": 1.2457313959196752,
+                    "Pooled_R2": 0.7763092238132749
+                },
+                "PairPitch_mm": {
+                    "Pooled_RMSE": 2.7470165104983635,
+                    "Pooled_MAE": 1.4723795483760045,
+                    "Pooled_R2": 0.6465579423422771
+                },
+                "PairSeparation_mm": {
+                    "Pooled_RMSE": 2.980796102548368,
+                    "Pooled_MAE": 1.1457326146880495,
+                    "Pooled_R2": 0.5838401034119778
+                }
+            }
+        }
+    },
+    "deployment_policy": {
+        "accept_only_exact_dataset_configurations": true,
+        "allow_extrapolation": false,
+        "allow_unverified_intermediate_geometry": false
+    },
+    "limitations": [
+        "Models reproduce a deterministic MATLAB-generated dataset.",
+        "LOLO validation is not physical validation.",
+        "The model geometry is not a verified KONE cable cross-section.",
+        "No real elevator EMC compliance claim is established."
+    ]
+}

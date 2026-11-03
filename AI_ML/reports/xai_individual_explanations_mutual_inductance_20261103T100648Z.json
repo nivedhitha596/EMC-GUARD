@@ -1,0 +1,76 @@
+{
+  "highest_predicted": {
+    "target": "AbsMutualInductance_nH",
+    "unit": "nH",
+    "feature_values": {
+      "PairSeparation_mm": 8.0,
+      "PairPitch_mm": 4.0,
+      "Overlap_mm": 450.0
+    },
+    "baseline_pred": 3.3032138962376325,
+    "query_pred": 25.887831842741644,
+    "total_delta": 22.58461794650401,
+    "attributions": {
+      "PairSeparation_mm": {
+        "value": 8.0,
+        "contribution": 4.807533759764782,
+        "direction": "increases",
+        "magnitude": 4.807533759764782,
+        "physical_note": "Wire-to-wire centre distance. Larger separation reduces mutual inductive coupling (decreasing M) and reduces inter-wire capacitance (decreasing C). Dominant control parameter for both EMC properties."
+      },
+      "PairPitch_mm": {
+        "value": 4.0,
+        "contribution": 0.8266988883562432,
+        "direction": "increases",
+        "magnitude": 0.8266988883562432,
+        "physical_note": "Twist pitch of the pair. Shorter pitch improves field cancellation, reducing effective mutual inductance. Has moderate effect on capacitance through wire spacing geometry."
+      },
+      "Overlap_mm": {
+        "value": 450.0,
+        "contribution": 1.9510575070597356,
+        "direction": "increases",
+        "magnitude": 1.9510575070597356,
+        "physical_note": "Length of parallel run between pairs. Mutual inductance scales nearly linearly with overlap (more parallel conductor = more flux linkage). No significant effect on per-metre capacitance (hence excluded from cap model)."
+      }
+    },
+    "method_note": "Simplified marginal contribution approximation. Not equivalent to exact SHAP values but provides directional attribution. Describes model behaviour, not physical causation.",
+    "config_id": "EMC-027"
+  },
+  "lowest_predicted": {
+    "target": "AbsMutualInductance_nH",
+    "unit": "nH",
+    "feature_values": {
+      "PairSeparation_mm": 28.0,
+      "PairPitch_mm": 2.0,
+      "Overlap_mm": 150.0
+    },
+    "baseline_pred": 3.3032138962376325,
+    "query_pred": 0.15085412816360072,
+    "total_delta": -3.1523597680740316,
+    "attributions": {
+      "PairSeparation_mm": {
+        "value": 28.0,
+        "contribution": -3.91114572355375,
+        "direction": "decreases",
+        "magnitude": 3.91114572355375,
+        "physical_note": "Wire-to-wire centre distance. Larger separation reduces mutual inductive coupling (decreasing M) and reduces inter-wire capacitance (decreasing C). Dominant control parameter for both EMC properties."
+      },
+      "PairPitch_mm": {
+        "value": 2.0,
+        "contribution": -2.5932645977091067,
+        "direction": "decreases",
+        "magnitude": 2.5932645977091067,
+        "physical_note": "Twist pitch of the pair. Shorter pitch improves field cancellation, reducing effective mutual inductance. Has moderate effect on capacitance through wire spacing geometry."
+      },
+      "Overlap_mm": {
+        "value": 150.0,
+        "contribution": -1.6296925158292932,
+        "direction": "decreases",
+        "magnitude": 1.6296925158292932,
+        "physical_note": "Length of parallel run between pairs. Mutual inductance scales nearly linearly with overlap (more parallel conductor = more flux linkage). No significant effect on per-metre capacitance (hence excluded from cap model)."
+      }
+    },
+    "method_note": "Simplified marginal contribution approximation. Not equivalent to exact SHAP values but provides directional attribution. Describes model behaviour, not physical causation.",
+    "config_id": "EMC-181"
+  }
+}

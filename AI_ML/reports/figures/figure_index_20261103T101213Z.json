@@ -1,0 +1,27 @@
+{
+  "generated_at": "20261103T101213Z",
+  "figures": {
+    "avp_capacitance": "C:\\Users\\nived\\OneDrive\\Desktop\\kone\\AI_ML\\reports\\figures\\actual_vs_predicted_capacitance.html",
+    "residuals_capacitance": "C:\\Users\\nived\\OneDrive\\Desktop\\kone\\AI_ML\\reports\\figures\\residuals_capacitance.html",
+    "error_dist_capacitance": "C:\\Users\\nived\\OneDrive\\Desktop\\kone\\AI_ML\\reports\\figures\\error_distribution_capacitance.html",
+    "avp_by_sep_capacitance": "C:\\Users\\nived\\OneDrive\\Desktop\\kone\\AI_ML\\reports\\figures\\avp_by_pairseparation_mm_capacitance.html",
+    "avp_mutual_inductance": "C:\\Users\\nived\\OneDrive\\Desktop\\kone\\AI_ML\\reports\\figures\\actual_vs_predicted_mutual_inductance.html",
+    "residuals_mutual_inductance": "C:\\Users\\nived\\OneDrive\\Desktop\\kone\\AI_ML\\reports\\figures\\residuals_mutual_inductance.html",
+    "error_dist_mutual_inductance": "C:\\Users\\nived\\OneDrive\\Desktop\\kone\\AI_ML\\reports\\figures\\error_distribution_mutual_inductance.html",
+    "avp_by_sep_mutual_inductance": "C:\\Users\\nived\\OneDrive\\Desktop\\kone\\AI_ML\\reports\\figures\\avp_by_pairseparation_mm_mutual inductan.html",
+    "lolo_r2_capacitance": "C:\\Users\\nived\\OneDrive\\Desktop\\kone\\AI_ML\\reports\\figures\\lolo_r2_totalcapacitance_pf_per_m.html",
+    "lolo_r2_mutual_inductance": "C:\\Users\\nived\\OneDrive\\Desktop\\kone\\AI_ML\\reports\\figures\\lolo_r2_absmutualinductance_nh.html",
+    "lolo_rmse_improvement": "C:\\Users\\nived\\OneDrive\\Desktop\\kone\\AI_ML\\reports\\figures\\lolo_rmse_improvement.html",
+    "error_dist_lolo_capacitance": "C:\\Users\\nived\\OneDrive\\Desktop\\kone\\AI_ML\\reports\\figures\\error_distribution_capacitance_lolo.html",
+    "error_dist_lolo_mutual_inductance": "C:\\Users\\nived\\OneDrive\\Desktop\\kone\\AI_ML\\reports\\figures\\error_distribution_mutual_inductance_lolo.html",
+    "fi_mdi_capacitance": "C:\\Users\\nived\\OneDrive\\Desktop\\kone\\AI_ML\\reports\\figures\\fi_mdi_capacitance.html",
+    "fi_pfi_capacitance": "C:\\Users\\nived\\OneDrive\\Desktop\\kone\\AI_ML\\reports\\figures\\fi_pfi_capacitance.html",
+    "fi_mdi_mutual_inductance": "C:\\Users\\nived\\OneDrive\\Desktop\\kone\\AI_ML\\reports\\figures\\fi_mdi_mutual_inductance.html",
+    "fi_pfi_mutual_inductance": "C:\\Users\\nived\\OneDrive\\Desktop\\kone\\AI_ML\\reports\\figures\\fi_pfi_mutual_inductance.html",
+    "xai_global_importance": "C:\\Users\\nived\\OneDrive\\Desktop\\kone\\AI_ML\\reports\\figures\\xai_global_permutation_importance.html",
+    "sensitivity_capacitance": "C:\\Users\\nived\\OneDrive\\Desktop\\kone\\AI_ML\\reports\\figures\\sensitivity_totalcapacitance_pf_.html",
+    "pdp_capacitance": "C:\\Users\\nived\\OneDrive\\Desktop\\kone\\AI_ML\\reports\\figures\\pdp_totalcapacitance_pf_.html",
+    "sensitivity_mutual_inductance": "C:\\Users\\nived\\OneDrive\\Desktop\\kone\\AI_ML\\reports\\figures\\sensitivity_absmutualinductance_.html",
+    "pdp_mutual_inductance": "C:\\Users\\nived\\OneDrive\\Desktop\\kone\\AI_ML\\reports\\figures\\pdp_absmutualinductance_.html"
+  }
+}

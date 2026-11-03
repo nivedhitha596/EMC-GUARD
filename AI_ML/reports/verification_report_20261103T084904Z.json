@@ -1,0 +1,396 @@
+{
+  "project": "KONE EMC-GUARD",
+  "module": "AI_ML Integration Verification",
+  "generated_at": "2026-11-03T08:49:04.551626+00:00",
+  "sklearn_note": "Models serialized with scikit-learn 1.8.0; loaded under 1.9.1. Version mismatch is cosmetic \u2014 predictions verified correct (see batch stats).",
+  "dataset_verification": {
+    "integrity": {
+      "source_exists": true,
+      "copy_exists": true,
+      "byte_identical": true,
+      "source_rows": 216,
+      "copy_rows": 216,
+      "columns_match": true,
+      "data_identical": true
+    },
+    "summary": {
+      "n_configurations": 216,
+      "n_columns": 7,
+      "columns": [
+        "Config_ID",
+        "PairSeparation_mm",
+        "PairPitch_mm",
+        "Overlap_mm",
+        "GroundClearance_mm",
+        "TotalCapacitance_pF_per_m",
+        "AbsMutualInductance_nH"
+      ],
+      "feature_columns": [
+        "PairSeparation_mm",
+        "PairPitch_mm",
+        "Overlap_mm",
+        "GroundClearance_mm"
+      ],
+      "target_columns": [
+        "TotalCapacitance_pF_per_m",
+        "AbsMutualInductance_nH"
+      ],
+      "domain": {
+        "PairSeparation_mm": [
+          8,
+          12,
+          16,
+          20,
+          24,
+          28
+        ],
+        "PairPitch_mm": [
+          2,
+          3,
+          4
+        ],
+        "Overlap_mm": [
+          150,
+          300,
+          450
+        ],
+        "GroundClearance_mm": [
+          10,
+          25,
+          50,
+          100
+        ]
+      },
+      "target_stats": {
+        "TotalCapacitance_pF_per_m": {
+          "min": 29.4676479354132,
+          "mean": 47.30204281410607,
+          "max": 76.7588652283438,
+          "unit": "pF/m"
+        },
+        "AbsMutualInductance_nH": {
+          "min": 0.150854128163601,
+          "mean": 3.3032138962376347,
+          "max": 25.8878318427415,
+          "unit": "nH"
+        }
+      },
+      "source_file": "EMC_GUARD_Physics_Dataset_MATLAB.csv"
+    },
+    "status": "PASS"
+  },
+  "spot_check_results": [
+    {
+      "config_id": "EMC-001",
+      "description": "Minimum separation, minimum clearance",
+      "geometry": {
+        "PairSeparation_mm": 8,
+        "PairPitch_mm": 2,
+        "Overlap_mm": 150,
+        "GroundClearance_mm": 10
+      },
+      "matlab_reference": {
+        "TotalCapacitance_pF_per_m": 55.84780063358,
+        "AbsMutualInductance_nH": 1.93349470131636
+      },
+      "frozen_matlab": {
+        "TotalCapacitance_pF_per_m": 55.847800633579936,
+        "AbsMutualInductance_nH": 1.9334947013163606,
+        "Cap_AbsError": 6.394884621840902e-14,
+        "Mut_AbsError": 6.661338147750939e-16
+      },
+      "extratrees": {
+        "TotalCapacitance_pF_per_m": 55.847800633581414,
+        "AbsMutualInductance_nH": 1.9334947013163517,
+        "Cap_AbsError": 1.4139800441625994e-12,
+        "Mut_AbsError": 8.215650382226158e-15
+      },
+      "engine_agreement_cap_pct": 2.6463511071416546e-12,
+      "engine_agreement_mut_pct": 4.593642894885807e-13,
+      "status": "OK"
+    },
+    {
+      "config_id": "EMC-190",
+      "description": "Maximum separation, maximum clearance",
+      "geometry": {
+        "PairSeparation_mm": 28,
+        "PairPitch_mm": 2,
+        "Overlap_mm": 150,
+        "GroundClearance_mm": 100
+      },
+      "matlab_reference": {
+        "TotalCapacitance_pF_per_m": 34.3804142273151,
+        "AbsMutualInductance_nH": 0.150854128163601
+      },
+      "frozen_matlab": {
+        "TotalCapacitance_pF_per_m": 34.38041422731507,
+        "AbsMutualInductance_nH": 0.1508541281635909,
+        "Cap_AbsError": 2.842170943040401e-14,
+        "Mut_AbsError": 1.0103029524088925e-14
+      },
+      "extratrees": {
+        "TotalCapacitance_pF_per_m": 34.3804142273159,
+        "AbsMutualInductance_nH": 0.15085412816360072,
+        "Cap_AbsError": 8.029132914089132e-13,
+        "Mut_AbsError": 2.7755575615628914e-16
+      },
+      "engine_agreement_cap_pct": 2.4180482391594483e-12,
+      "engine_agreement_mut_pct": 6.513228300439302e-12,
+      "status": "OK"
+    },
+    {
+      "config_id": "EMC-046",
+      "description": "Reference config from MODEL_INTERFACE.md",
+      "geometry": {
+        "PairSeparation_mm": 12,
+        "PairPitch_mm": 2,
+        "Overlap_mm": 150,
+        "GroundClearance_mm": 100
+      },
+      "matlab_reference": {
+        "TotalCapacitance_pF_per_m": 30.899701302871,
+        "AbsMutualInductance_nH": 0.842472431833656
+      },
+      "frozen_matlab": {
+        "TotalCapacitance_pF_per_m": 30.899701302870955,
+        "AbsMutualInductance_nH": 0.8424724318336503,
+        "Cap_AbsError": 4.618527782440651e-14,
+        "Mut_AbsError": 5.773159728050814e-15
+      },
+      "extratrees": {
+        "TotalCapacitance_pF_per_m": 30.899701302871144,
+        "AbsMutualInductance_nH": 0.8424724318336558,
+        "Cap_AbsError": 1.4210854715202004e-13,
+        "Mut_AbsError": 2.220446049250313e-16
+      },
+      "engine_agreement_cap_pct": 6.093710199034561e-13,
+      "engine_agreement_mut_pct": 6.589076287094264e-13,
+      "status": "OK"
+    },
+    {
+      "config_id": "EMC-092",
+      "description": "Mid-range configuration",
+      "geometry": {
+        "PairSeparation_mm": 16,
+        "PairPitch_mm": 3,
+        "Overlap_mm": 300,
+        "GroundClearance_mm": 50
+      },
+      "matlab_reference": {
+        "TotalCapacitance_pF_per_m": 39.5357736572241,
+        "AbsMutualInductance_nH": 2.14435289293115
+      },
+      "frozen_matlab": {
+        "TotalCapacitance_pF_per_m": 39.53577365722408,
+        "AbsMutualInductance_nH": 2.1443528929311584,
+        "Cap_AbsError": 2.1316282072803006e-14,
+        "Mut_AbsError": 8.43769498715119e-15
+      },
+      "extratrees": {
+        "TotalCapacitance_pF_per_m": 39.53577365722518,
+        "AbsMutualInductance_nH": 2.1443528929311433,
+        "Cap_AbsError": 1.0800249583553523e-12,
+        "Mut_AbsError": 6.661338147750939e-15
+      },
+      "engine_agreement_cap_pct": 2.7856827843481816e-12,
+      "engine_agreement_mut_pct": 7.041300517594854e-13,
+      "status": "OK"
+    },
+    {
+      "config_id": "EMC-138",
+      "description": "High overlap, large pitch",
+      "geometry": {
+        "PairSeparation_mm": 20,
+        "PairPitch_mm": 4,
+        "Overlap_mm": 450,
+        "GroundClearance_mm": 25
+      },
+      "matlab_reference": {
+        "TotalCapacitance_pF_per_m": 52.4408936067964,
+        "AbsMutualInductance_nH": 3.67042924487177
+      },
+      "frozen_matlab": {
+        "TotalCapacitance_pF_per_m": 52.440893606796394,
+        "AbsMutualInductance_nH": 3.6704292448717624,
+        "Cap_AbsError": 7.105427357601002e-15,
+        "Mut_AbsError": 7.549516567451064e-15
+      },
+      "extratrees": {
+        "TotalCapacitance_pF_per_m": 52.44089360679515,
+        "AbsMutualInductance_nH": 3.6704292448717344,
+        "Cap_AbsError": 1.2505552149377763e-12,
+        "Mut_AbsError": 3.552713678800501e-14
+      },
+      "engine_agreement_cap_pct": 2.371145306759271e-12,
+      "engine_agreement_mut_pct": 7.622438236520582e-13,
+      "status": "OK"
+    },
+    {
+      "config_id": "EMC-146",
+      "description": "Low clearance, medium separation",
+      "geometry": {
+        "PairSeparation_mm": 24,
+        "PairPitch_mm": 2,
+        "Overlap_mm": 300,
+        "GroundClearance_mm": 10
+      },
+      "matlab_reference": {
+        "TotalCapacitance_pF_per_m": 68.2428198995014,
+        "AbsMutualInductance_nH": 0.416793198862517
+      },
+      "frozen_matlab": {
+        "TotalCapacitance_pF_per_m": 68.24281989950136,
+        "AbsMutualInductance_nH": 0.41679319886251687,
+        "Cap_AbsError": 4.263256414560601e-14,
+        "Mut_AbsError": 1.1102230246251565e-16
+      },
+      "extratrees": {
+        "TotalCapacitance_pF_per_m": 68.2428198995003,
+        "AbsMutualInductance_nH": 0.4167931988625164,
+        "Cap_AbsError": 1.0942358130705543e-12,
+        "Mut_AbsError": 5.551115123125783e-16
+      },
+      "engine_agreement_cap_pct": 1.5409727359942106e-12,
+      "engine_agreement_mut_pct": 1.0654905383822e-13,
+      "status": "OK"
+    },
+    {
+      "config_id": "EMC-216",
+      "description": "Maximum all dimensions",
+      "geometry": {
+        "PairSeparation_mm": 28,
+        "PairPitch_mm": 4,
+        "Overlap_mm": 450,
+        "GroundClearance_mm": 100
+      },
+      "matlab_reference": {
+        "TotalCapacitance_pF_per_m": 36.0530958517488,
+        "AbsMutualInductance_nH": 1.85219061821497
+      },
+      "frozen_matlab": {
+        "TotalCapacitance_pF_per_m": 36.05309585174877,
+        "AbsMutualInductance_nH": 1.8521906182149692,
+        "Cap_AbsError": 2.842170943040401e-14,
+        "Mut_AbsError": 8.881784197001252e-16
+      },
+      "extratrees": {
+        "TotalCapacitance_pF_per_m": 36.053095851747706,
+        "AbsMutualInductance_nH": 1.8521906182149743,
+        "Cap_AbsError": 1.0942358130705543e-12,
+        "Mut_AbsError": 4.218847493575595e-15
+      },
+      "engine_agreement_cap_pct": 2.9562346269036193e-12,
+      "engine_agreement_mut_pct": 2.7572895916067024e-13,
+      "status": "OK"
+    }
+  ],
+  "batch_error_statistics": {
+    "frozen_matlab": {
+      "TotalCapacitance_pF_per_m": {
+        "MAE": 2.904672387389669e-14,
+        "RMSE": 3.325368681359221e-14,
+        "MaxAbsError": 7.815970093361102e-14,
+        "R2": 1.0,
+        "unit": "pF/m",
+        "n_predictions": 216
+      },
+      "AbsMutualInductance_nH": {
+        "MAE": 5.587223071033152e-15,
+        "RMSE": 6.753666887822932e-15,
+        "MaxAbsError": 1.9095836023552692e-14,
+        "R2": 1.0,
+        "unit": "nH",
+        "n_predictions": 216
+      }
+    },
+    "extratrees": {
+      "TotalCapacitance_pF_per_m": {
+        "MAE": 9.27159583675853e-13,
+        "RMSE": 1.0910404980925353e-12,
+        "MaxAbsError": 3.112177182629239e-12,
+        "R2": 1.0,
+        "unit": "pF/m",
+        "n_predictions": 216
+      },
+      "AbsMutualInductance_nH": {
+        "MAE": 2.1125076996339783e-14,
+        "RMSE": 4.606396214395679e-14,
+        "MaxAbsError": 2.220446049250313e-13,
+        "R2": 1.0,
+        "unit": "nH",
+        "n_predictions": 216
+      }
+    }
+  },
+  "domain_rejection_test": {
+    "results": [
+      {
+        "config": [
+          10,
+          2,
+          150,
+          10
+        ],
+        "description": "sep=10 (not in {8,12,16,20,24,28})",
+        "rejected": true,
+        "status": "ERROR"
+      },
+      {
+        "config": [
+          12,
+          5,
+          150,
+          10
+        ],
+        "description": "pitch=5 (not in {2,3,4})",
+        "rejected": true,
+        "status": "ERROR"
+      },
+      {
+        "config": [
+          12,
+          2,
+          200,
+          10
+        ],
+        "description": "overlap=200 (not in {150,300,450})",
+        "rejected": true,
+        "status": "ERROR"
+      },
+      {
+        "config": [
+          12,
+          2,
+          150,
+          30
+        ],
+        "description": "ground=30 (not in {10,25,50,100})",
+        "rejected": true,
+        "status": "ERROR"
+      },
+      {
+        "config": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "description": "all zeros",
+        "rejected": true,
+        "status": "ERROR"
+      },
+      {
+        "config": [
+          100,
+          10,
+          1000,
+          500
+        ],
+        "description": "far out-of-range values",
+        "rejected": true,
+        "status": "ERROR"
+      }
+    ],
+    "status": "PASS"
+  }
+}

@@ -1,0 +1,3 @@
+Response,SelectedModel,Units,NumTerms,MatrixRank,ConditionNumber,TrainingRMSE,TrainingMAE,MaximumAbsoluteTrainingError,TrainingR2,PooledCV_RMSE_from_Stage11E,ValidCVFolds
+Total capacitance,B2_SP_Ground,pF/m,94,94,135.642945887147,3.51999648929816e-14,3.05270212400636e-14,7.8159700933611e-14,1,5.4606e-14,100
+Absolute mutual inductance,B1_SP_Overlap,nH,84,84,103.785940147082,6.7046720986365e-15,5.51706314378253e-15,1.90958360235527e-14,1,1.0659e-14,100

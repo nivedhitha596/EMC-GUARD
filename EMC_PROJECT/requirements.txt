@@ -1,0 +1,10 @@
+streamlit
+plotly
+numpy
+pandas
+scipy
+scikit-learn
+joblib
+h5py
+reportlab
+

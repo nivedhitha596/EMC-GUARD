@@ -1,0 +1,57 @@
+
+EMC-GUARD
+STAGE14B-5: MATLAB–AI INTEGRATION VALIDATION REPORT
+===================================================
+
+Generated: 2026-11-01T20:28:45
+
+1. DATASET INTEGRITY
+--------------------
+Configurations processed: 216
+Unique configuration IDs: 216
+Exact-grid accepted: 216
+Missing required values: 0
+
+2. NUMERICAL COMPARISON
+-----------------------
+Capacitance maximum absolute difference:
+3.112177182629e-12 pF/m
+
+Capacitance computational tolerance:
+1.000000000000e-09 pF/m
+
+Capacitance tolerance check: PASS
+
+Mutual inductance maximum absolute difference:
+2.220446049250e-13 nH
+
+Mutual inductance computational tolerance:
+1.000000000000e-10 nH
+
+Mutual inductance tolerance check: PASS
+
+3. INTEGRATION RESULT
+---------------------
+Overall computational integration result:
+PASS
+
+4. VALIDATION SCOPE
+-------------------
+The AI surrogate was compared against the MATLAB reference
+for the original 216-point geometry dataset.
+
+The result demonstrates computational agreement between
+the two implementations within the defined numerical
+tolerances.
+
+5. IMPORTANT LIMITATIONS
+------------------------
+- The AI surrogate reproduces MATLAB-generated outputs.
+- The comparison is not independent physical validation.
+- No real elevator cable accuracy is established.
+- No EMC standards compliance is established.
+- Predictions are restricted to the original 216-point grid.
+- Physical experimental validation remains a separate task.
+
+===================================================
+END OF REPORT

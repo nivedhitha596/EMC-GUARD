@@ -1,0 +1,4 @@
+Feature,Importance,Method,Target,Unit,Rank,Importance_Pct
+PairSeparation_mm,0.5838174384546242,MDI (native ExtraTrees),AbsMutualInductance_nH,nH,1,58.38174384546242
+PairPitch_mm,0.2579075521727771,MDI (native ExtraTrees),AbsMutualInductance_nH,nH,2,25.79075521727771
+Overlap_mm,0.15827500937259883,MDI (native ExtraTrees),AbsMutualInductance_nH,nH,3,15.827500937259883

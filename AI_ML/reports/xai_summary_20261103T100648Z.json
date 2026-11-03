@@ -1,0 +1,99 @@
+{
+  "generated_at": "20261103T100648Z",
+  "module": "explainability.py",
+  "xai_methods": {
+    "global_permutation_importance": "Measures R² drop when each feature is shuffled. Global view of feature reliance. Analogous to mean |SHAP| value.",
+    "ICE_PDP": "Individual Conditional Expectation: model output vs feature level for each sample. Average = Partial Dependence Plot.",
+    "sensitivity_OAT": "One-at-a-time sweep: varies one feature while fixing others at their median grid level.",
+    "individual_explanation": "Marginal contribution approximation: isolates each feature's contribution to a specific prediction relative to the dataset baseline."
+  },
+  "shap_status": "SHAP library not available in this environment. The above methods provide equivalent global and local XAI coverage using only scikit-learn and numpy.",
+  "limitations": [
+    "All results describe model behaviour on MATLAB deterministic data.",
+    "Physical causation is noted where consistent with EMC physics but is not proven.",
+    "No experimental measurements — no real-world validation implied.",
+    "No safety certification or KONE field accuracy claim."
+  ],
+  "results_summary": {
+    "capacitance": {
+      "target": "TotalCapacitance_pF_per_m",
+      "unit": "pF/m",
+      "global_importance_ranking": [
+        {
+          "Rank": 1,
+          "Feature": "GroundClearance_mm",
+          "R2_Drop_Mean": 1.875521807358365
+        },
+        {
+          "Rank": 2,
+          "Feature": "PairSeparation_mm",
+          "R2_Drop_Mean": 0.13863966006573863
+        },
+        {
+          "Rank": 3,
+          "Feature": "PairPitch_mm",
+          "R2_Drop_Mean": 0.024004016613943132
+        }
+      ],
+      "sensitivity_ranges": {
+        "PairSeparation_mm": {
+          "range": 7.363558286375202,
+          "range_pct": 18.000791430390006
+        },
+        "PairPitch_mm": {
+          "range": 2.227910222416604,
+          "range_pct": 5.4462999652708435
+        },
+        "GroundClearance_mm": {
+          "range": 36.17092041917895,
+          "range_pct": 88.42263060721822
+        }
+      }
+    },
+    "mutual_inductance": {
+      "target": "AbsMutualInductance_nH",
+      "unit": "nH",
+      "global_importance_ranking": [
+        {
+          "Rank": 1,
+          "Feature": "PairSeparation_mm",
+          "R2_Drop_Mean": 1.4633073605765727
+        },
+        {
+          "Rank": 2,
+          "Feature": "PairPitch_mm",
+          "R2_Drop_Mean": 0.7071704714212227
+        },
+        {
+          "Rank": 3,
+          "Feature": "Overlap_mm",
+          "R2_Drop_Mean": 0.4509238607494758
+        }
+      ],
+      "sensitivity_ranges": {
+        "PairSeparation_mm": {
+          "range": 8.400216569535619,
+          "range_pct": 616.5616827810192
+        },
+        "PairPitch_mm": {
+          "range": 1.842312912806448,
+          "range_pct": 135.22265055029877
+        },
+        "Overlap_mm": {
+          "range": 1.3693430891830927,
+          "range_pct": 100.50746577572589
+        }
+      }
+    }
+  },
+  "files_saved": {
+    "global_importance_capacitance": "C:\\Users\\nived\\OneDrive\\Desktop\\kone\\AI_ML\\reports\\xai_global_importance_capacitance_20261103T100648Z.csv",
+    "sensitivity_capacitance": "C:\\Users\\nived\\OneDrive\\Desktop\\kone\\AI_ML\\reports\\xai_sensitivity_capacitance_20261103T100648Z.csv",
+    "pdp_capacitance": "C:\\Users\\nived\\OneDrive\\Desktop\\kone\\AI_ML\\reports\\xai_pdp_capacitance_20261103T100648Z.csv",
+    "individual_explanations_capacitance": "C:\\Users\\nived\\OneDrive\\Desktop\\kone\\AI_ML\\reports\\xai_individual_explanations_capacitance_20261103T100648Z.json",
+    "global_importance_mutual_inductance": "C:\\Users\\nived\\OneDrive\\Desktop\\kone\\AI_ML\\reports\\xai_global_importance_mutual_inductance_20261103T100648Z.csv",
+    "sensitivity_mutual_inductance": "C:\\Users\\nived\\OneDrive\\Desktop\\kone\\AI_ML\\reports\\xai_sensitivity_mutual_inductance_20261103T100648Z.csv",
+    "pdp_mutual_inductance": "C:\\Users\\nived\\OneDrive\\Desktop\\kone\\AI_ML\\reports\\xai_pdp_mutual_inductance_20261103T100648Z.csv",
+    "individual_explanations_mutual_inductance": "C:\\Users\\nived\\OneDrive\\Desktop\\kone\\AI_ML\\reports\\xai_individual_explanations_mutual_inductance_20261103T100648Z.json"
+  }
+}

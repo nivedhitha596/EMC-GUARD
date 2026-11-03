@@ -1,0 +1,4 @@
+Case,PairSeparation_mm,PairPitch_mm,Overlap_mm,GroundClearance_mm,MinimumCopperSpacing_mm,TotalCapacitance_pF_per_m,MutualInductance_nH,AbsMutualInductance_nH,MutualRatio,MinEigen_C_pF_per_m,MinEigen_L_nH,GeometryValid,C_PositiveDefinite,L_PositiveDefinite
+Maximum capacitance,28,4,150,10,4,76.7588652283438,-0.608183644734212,0.608183644734212,0.000135993997242928,19.1811989598122,1999.99995376408,1,1,1
+Maximum absolute mutual inductance,8,4,450,10,4,60.0234019938315,-25.8878318427415,25.8878318427415,0.00578869517904535,14.7533297572018,1999.91622839752,1,1,1
+Maximum mutual ratio,8,4,450,10,4,60.0234019938315,-25.8878318427415,25.8878318427415,0.00578869517904535,14.7533297572018,1999.91622839752,1,1,1

@@ -1,0 +1,61 @@
+{
+    "Stage": "14A-3",
+    "Project": "EMC-GUARD",
+    "Validation": "Leave-One-Feature-Level-Out",
+    "TargetConfigurations": {
+        "TotalCapacitance_pF_per_m": {
+            "features": [
+                "PairSeparation_mm",
+                "PairPitch_mm",
+                "GroundClearance_mm"
+            ],
+            "validation_axes": [
+                "PairSeparation_mm",
+                "PairPitch_mm",
+                "GroundClearance_mm"
+            ]
+        },
+        "AbsMutualInductance_nH": {
+            "features": [
+                "PairSeparation_mm",
+                "PairPitch_mm",
+                "Overlap_mm"
+            ],
+            "validation_axes": [
+                "PairSeparation_mm",
+                "PairPitch_mm",
+                "Overlap_mm"
+            ]
+        }
+    },
+    "ModelCandidates": [
+        "ExtraTrees",
+        "RandomForest",
+        "GradientBoosting",
+        "PolynomialRidge_Degree2",
+        "PolynomialRidge_Degree3",
+        "RBF_SVR"
+    ],
+    "TargetTransformation": "Natural logarithm during fitting",
+    "DatasetRows": 216,
+    "PredictionRows": 7776,
+    "BestCandidates": {
+        "TotalCapacitance_pF_per_m": {
+            "SelectedModel": "ExtraTrees",
+            "Pooled_MAE": 3.465882449929235,
+            "Pooled_RMSE": 5.998294538718542,
+            "Pooled_R2": 0.7996035451913621,
+            "RMSE_Improvement_Percent": 59.97265156549271,
+            "SelectionBasis": "Lowest pooled LOLO RMSE"
+        },
+        "AbsMutualInductance_nH": {
+            "SelectedModel": "ExtraTrees",
+            "Pooled_MAE": 1.2879478529945767,
+            "Pooled_RMSE": 2.658766250783743,
+            "Pooled_R2": 0.6689024231891766,
+            "RMSE_Improvement_Percent": 46.75918762354367,
+            "SelectionBasis": "Lowest pooled LOLO RMSE"
+        }
+    },
+    "ImportantLimitation": "Validation is against the deterministic MATLAB dataset. It does not establish independent physical validation, manufacturer cable accuracy, or performance outside the tested geometry domain."
+}

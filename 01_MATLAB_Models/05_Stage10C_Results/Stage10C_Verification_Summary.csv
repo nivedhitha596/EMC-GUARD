@@ -1,0 +1,7 @@
+CheckName,Passed
+Separation reduces absolute mutual inductance,1
+Overlap increases absolute mutual inductance,1
+Ground clearance reduces total capacitance,1
+All geometries pass,1
+All C matrices positive definite,1
+All L matrices positive definite,1

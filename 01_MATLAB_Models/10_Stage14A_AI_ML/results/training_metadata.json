@@ -1,0 +1,21 @@
+{
+    "project": "EMC-GUARD",
+    "stage": "14A",
+    "dataset_rows": 216,
+    "training_rows": 172,
+    "test_rows": 44,
+    "random_state": 42,
+    "cross_validation": "5-fold KFold on training partition",
+    "features": [
+        "PairSeparation_mm",
+        "PairPitch_mm",
+        "Overlap_mm",
+        "GroundClearance_mm"
+    ],
+    "targets": [
+        "TotalCapacitance_pF_per_m",
+        "AbsMutualInductance_nH"
+    ],
+    "model_selection": "Lowest mean cross-validation RMSE",
+    "physical_validation": false
+}

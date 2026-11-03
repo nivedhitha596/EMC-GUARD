@@ -1,0 +1,22 @@
+{
+    "Stage": "Stage14B-5",
+    "Project": "EMC-GUARD",
+    "Generated_At": "2026-11-01T20:28:45",
+    "Configurations": 216,
+    "Unique_Configuration_IDs": 216,
+    "Exact_Grid_Accepted": 216,
+    "Missing_Required_Values": 0,
+    "Capacitance_Max_Absolute_Difference_pF_per_m": 3.112177182629239e-12,
+    "Capacitance_Absolute_Tolerance_pF_per_m": 1e-09,
+    "Capacitance_Tolerance_Check": true,
+    "MutualInductance_Max_Absolute_Difference_nH": 2.220446049250313e-13,
+    "MutualInductance_Absolute_Tolerance_nH": 1e-10,
+    "MutualInductance_Tolerance_Check": true,
+    "Exact_Grid_Check": true,
+    "Row_Count_Check": true,
+    "Unique_ID_Check": true,
+    "Missing_Value_Check": true,
+    "Overall_Computational_Integration_Result": "PASS",
+    "Validation_Scope": "Computational agreement between AI surrogate and MATLAB reference on the original 216-point dataset only.",
+    "Limitations": "This does not establish independent physical validation, real elevator cable accuracy, or EMC standards compliance."
+}

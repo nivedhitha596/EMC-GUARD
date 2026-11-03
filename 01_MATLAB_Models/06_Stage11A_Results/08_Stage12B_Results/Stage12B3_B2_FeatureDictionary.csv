@@ -1,0 +1,95 @@
+FeatureIndex,FeatureDefinition
+1,Intercept
+2,Separation = 12 mm
+3,Separation = 16 mm
+4,Separation = 20 mm
+5,Separation = 24 mm
+6,Separation = 28 mm
+7,Pitch = 3 mm
+8,Pitch = 4 mm
+9,Overlap = 300 mm
+10,Overlap = 450 mm
+11,Ground = 25 mm
+12,Ground = 50 mm
+13,Ground = 100 mm
+14,Separation = 12 AND Pitch = 3
+15,Separation = 12 AND Pitch = 4
+16,Separation = 16 AND Pitch = 3
+17,Separation = 16 AND Pitch = 4
+18,Separation = 20 AND Pitch = 3
+19,Separation = 20 AND Pitch = 4
+20,Separation = 24 AND Pitch = 3
+21,Separation = 24 AND Pitch = 4
+22,Separation = 28 AND Pitch = 3
+23,Separation = 28 AND Pitch = 4
+24,Separation = 12 AND Overlap = 300
+25,Separation = 12 AND Overlap = 450
+26,Separation = 16 AND Overlap = 300
+27,Separation = 16 AND Overlap = 450
+28,Separation = 20 AND Overlap = 300
+29,Separation = 20 AND Overlap = 450
+30,Separation = 24 AND Overlap = 300
+31,Separation = 24 AND Overlap = 450
+32,Separation = 28 AND Overlap = 300
+33,Separation = 28 AND Overlap = 450
+34,Separation = 12 AND Ground = 25
+35,Separation = 12 AND Ground = 50
+36,Separation = 12 AND Ground = 100
+37,Separation = 16 AND Ground = 25
+38,Separation = 16 AND Ground = 50
+39,Separation = 16 AND Ground = 100
+40,Separation = 20 AND Ground = 25
+41,Separation = 20 AND Ground = 50
+42,Separation = 20 AND Ground = 100
+43,Separation = 24 AND Ground = 25
+44,Separation = 24 AND Ground = 50
+45,Separation = 24 AND Ground = 100
+46,Separation = 28 AND Ground = 25
+47,Separation = 28 AND Ground = 50
+48,Separation = 28 AND Ground = 100
+49,Pitch = 3 AND Overlap = 300
+50,Pitch = 3 AND Overlap = 450
+51,Pitch = 4 AND Overlap = 300
+52,Pitch = 4 AND Overlap = 450
+53,Pitch = 3 AND Ground = 25
+54,Pitch = 3 AND Ground = 50
+55,Pitch = 3 AND Ground = 100
+56,Pitch = 4 AND Ground = 25
+57,Pitch = 4 AND Ground = 50
+58,Pitch = 4 AND Ground = 100
+59,Overlap = 300 AND Ground = 25
+60,Overlap = 300 AND Ground = 50
+61,Overlap = 300 AND Ground = 100
+62,Overlap = 450 AND Ground = 25
+63,Overlap = 450 AND Ground = 50
+64,Overlap = 450 AND Ground = 100
+65,Separation = 12 AND Pitch = 3 AND Ground = 25
+66,Separation = 12 AND Pitch = 3 AND Ground = 50
+67,Separation = 12 AND Pitch = 3 AND Ground = 100
+68,Separation = 12 AND Pitch = 4 AND Ground = 25
+69,Separation = 12 AND Pitch = 4 AND Ground = 50
+70,Separation = 12 AND Pitch = 4 AND Ground = 100
+71,Separation = 16 AND Pitch = 3 AND Ground = 25
+72,Separation = 16 AND Pitch = 3 AND Ground = 50
+73,Separation = 16 AND Pitch = 3 AND Ground = 100
+74,Separation = 16 AND Pitch = 4 AND Ground = 25
+75,Separation = 16 AND Pitch = 4 AND Ground = 50
+76,Separation = 16 AND Pitch = 4 AND Ground = 100
+77,Separation = 20 AND Pitch = 3 AND Ground = 25
+78,Separation = 20 AND Pitch = 3 AND Ground = 50
+79,Separation = 20 AND Pitch = 3 AND Ground = 100
+80,Separation = 20 AND Pitch = 4 AND Ground = 25
+81,Separation = 20 AND Pitch = 4 AND Ground = 50
+82,Separation = 20 AND Pitch = 4 AND Ground = 100
+83,Separation = 24 AND Pitch = 3 AND Ground = 25
+84,Separation = 24 AND Pitch = 3 AND Ground = 50
+85,Separation = 24 AND Pitch = 3 AND Ground = 100
+86,Separation = 24 AND Pitch = 4 AND Ground = 25
+87,Separation = 24 AND Pitch = 4 AND Ground = 50
+88,Separation = 24 AND Pitch = 4 AND Ground = 100
+89,Separation = 28 AND Pitch = 3 AND Ground = 25
+90,Separation = 28 AND Pitch = 3 AND Ground = 50
+91,Separation = 28 AND Pitch = 3 AND Ground = 100
+92,Separation = 28 AND Pitch = 4 AND Ground = 25
+93,Separation = 28 AND Pitch = 4 AND Ground = 50
+94,Separation = 28 AND Pitch = 4 AND Ground = 100

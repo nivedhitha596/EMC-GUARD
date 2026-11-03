@@ -1,0 +1,76 @@
+{
+  "highest_predicted": {
+    "target": "TotalCapacitance_pF_per_m",
+    "unit": "pF/m",
+    "feature_values": {
+      "PairSeparation_mm": 28.0,
+      "PairPitch_mm": 4.0,
+      "GroundClearance_mm": 10.0
+    },
+    "baseline_pred": 47.302042814106024,
+    "query_pred": 76.75886522834504,
+    "total_delta": 29.45682241423902,
+    "attributions": {
+      "PairSeparation_mm": {
+        "value": 28.0,
+        "contribution": 2.1609655688256595,
+        "direction": "increases",
+        "magnitude": 2.1609655688256595,
+        "physical_note": "Wire-to-wire centre distance. Larger separation reduces mutual inductive coupling (decreasing M) and reduces inter-wire capacitance (decreasing C). Dominant control parameter for both EMC properties."
+      },
+      "PairPitch_mm": {
+        "value": 4.0,
+        "contribution": 2.5860924413426574,
+        "direction": "increases",
+        "magnitude": 2.5860924413426574,
+        "physical_note": "Twist pitch of the pair. Shorter pitch improves field cancellation, reducing effective mutual inductance. Has moderate effect on capacitance through wire spacing geometry."
+      },
+      "GroundClearance_mm": {
+        "value": 10.0,
+        "contribution": 22.20845905071961,
+        "direction": "increases",
+        "magnitude": 22.20845905071961,
+        "physical_note": "Distance from pair to ground plane. Larger clearance reduces image-charge effect, decreasing total capacitance. No significant effect on mutual inductance (hence excluded from mut model)."
+      }
+    },
+    "method_note": "Simplified marginal contribution approximation. Not equivalent to exact SHAP values but provides directional attribution. Describes model behaviour, not physical causation.",
+    "config_id": "EMC-205"
+  },
+  "lowest_predicted": {
+    "target": "TotalCapacitance_pF_per_m",
+    "unit": "pF/m",
+    "feature_values": {
+      "PairSeparation_mm": 8.0,
+      "PairPitch_mm": 2.0,
+      "GroundClearance_mm": 100.0
+    },
+    "baseline_pred": 47.302042814106024,
+    "query_pred": 29.467647935413737,
+    "total_delta": -17.834394878692287,
+    "attributions": {
+      "PairSeparation_mm": {
+        "value": 8.0,
+        "contribution": -6.8957351259054676,
+        "direction": "decreases",
+        "magnitude": 6.8957351259054676,
+        "physical_note": "Wire-to-wire centre distance. Larger separation reduces mutual inductive coupling (decreasing M) and reduces inter-wire capacitance (decreasing C). Dominant control parameter for both EMC properties."
+      },
+      "PairPitch_mm": {
+        "value": 2.0,
+        "contribution": -0.803500224652268,
+        "direction": "decreases",
+        "magnitude": 0.803500224652268,
+        "physical_note": "Twist pitch of the pair. Shorter pitch improves field cancellation, reducing effective mutual inductance. Has moderate effect on capacitance through wire spacing geometry."
+      },
+      "GroundClearance_mm": {
+        "value": 100.0,
+        "contribution": -11.933005564302228,
+        "direction": "decreases",
+        "magnitude": 11.933005564302228,
+        "physical_note": "Distance from pair to ground plane. Larger clearance reduces image-charge effect, decreasing total capacitance. No significant effect on mutual inductance (hence excluded from mut model)."
+      }
+    },
+    "method_note": "Simplified marginal contribution approximation. Not equivalent to exact SHAP values but provides directional attribution. Describes model behaviour, not physical causation.",
+    "config_id": "EMC-010"
+  }
+}

@@ -1,0 +1,9 @@
+Target,Model,Feature,Importance
+TotalCapacitance_pF_per_m,ExtraTrees,PairSeparation_mm,0.07386771329276776
+TotalCapacitance_pF_per_m,ExtraTrees,PairPitch_mm,0.011792822831943415
+TotalCapacitance_pF_per_m,ExtraTrees,Overlap_mm,5.709829450303865e-06
+TotalCapacitance_pF_per_m,ExtraTrees,GroundClearance_mm,0.9143337540458386
+AbsMutualInductance_nH,ExtraTrees,PairSeparation_mm,0.5455267382805283
+AbsMutualInductance_nH,ExtraTrees,PairPitch_mm,0.27015417167062494
+AbsMutualInductance_nH,ExtraTrees,Overlap_mm,0.18431898431397445
+AbsMutualInductance_nH,ExtraTrees,GroundClearance_mm,1.0573487240384207e-07

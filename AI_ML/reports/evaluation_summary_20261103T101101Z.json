@@ -1,0 +1,94 @@
+{
+  "generated_at": "20261103T101101Z",
+  "module": "evaluate.py",
+  "dataset_source": "MATLAB 216-configuration physics dataset (Stage 13A)",
+  "warning": "All results are based on deterministic MATLAB analytical data. In-sample R²≈1.0 is expected. LOLO results reveal generalisation. No experimental validation, real-world field accuracy, or safety certification is implied.",
+  "in_sample": {
+    "capacitance": {
+      "label": "Cap in-sample",
+      "n": 216,
+      "MAE": 9.27159583675853e-13,
+      "MSE": 1.1903693684780074e-24,
+      "RMSE": 1.0910404980925353e-12,
+      "R2": 1.0,
+      "unit": "pF/m"
+    },
+    "mutual_inductance": {
+      "label": "Mut in-sample",
+      "n": 216,
+      "MAE": 2.1125076996339783e-14,
+      "MSE": 2.1218886083998842e-27,
+      "RMSE": 4.606396214395679e-14,
+      "R2": 1.0,
+      "unit": "nH"
+    }
+  },
+  "lolo_aggregate": [
+    {
+      "Target": "TotalCapacitance_pF_per_m",
+      "Unit": "pF/m",
+      "HeldOutFeature": "PairSeparation_mm",
+      "N_Levels": 6,
+      "Mean_MAE": 0.8267053628301388,
+      "Mean_RMSE": 0.9260934892361427,
+      "Mean_R2": 0.9824730848383929,
+      "Mean_RMSE_Imp_%": 92.94830175978211
+    },
+    {
+      "Target": "TotalCapacitance_pF_per_m",
+      "Unit": "pF/m",
+      "HeldOutFeature": "PairPitch_mm",
+      "N_Levels": 3,
+      "Mean_MAE": 1.1251998126443359,
+      "Mean_RMSE": 1.2876179566286454,
+      "Mean_R2": 0.98650468894339,
+      "Mean_RMSE_Imp_%": 90.33520266192927
+    },
+    {
+      "Target": "TotalCapacitance_pF_per_m",
+      "Unit": "pF/m",
+      "HeldOutFeature": "GroundClearance_mm",
+      "N_Levels": 4,
+      "Mean_MAE": 9.066957114800555,
+      "Mean_RMSE": 9.126259564421698,
+      "Mean_R2": -6.389294400142042,
+      "Mean_RMSE_Imp_%": 23.662299313621126
+    },
+    {
+      "Target": "AbsMutualInductance_nH",
+      "Unit": "nH",
+      "HeldOutFeature": "PairSeparation_mm",
+      "N_Levels": 6,
+      "Mean_MAE": 1.4663774152046642,
+      "Mean_RMSE": 1.8107117349272273,
+      "Mean_R2": 0.622832151824729,
+      "Mean_RMSE_Imp_%": 67.17994622535942
+    },
+    {
+      "Target": "AbsMutualInductance_nH",
+      "Unit": "nH",
+      "HeldOutFeature": "PairPitch_mm",
+      "N_Levels": 3,
+      "Mean_MAE": 1.6415122230085422,
+      "Mean_RMSE": 2.5374828119235318,
+      "Mean_R2": -0.24184764018232108,
+      "Mean_RMSE_Imp_%": 45.66104601575256
+    },
+    {
+      "Target": "AbsMutualInductance_nH",
+      "Unit": "nH",
+      "HeldOutFeature": "Overlap_mm",
+      "N_Levels": 3,
+      "Mean_MAE": 1.1288527487456999,
+      "Mean_RMSE": 1.7922335109776562,
+      "Mean_R2": 0.3854859047358464,
+      "Mean_RMSE_Imp_%": 58.55245404085887
+    }
+  ],
+  "files_saved": {
+    "insample_capacitance": "C:\\Users\\nived\\OneDrive\\Desktop\\kone\\AI_ML\\reports\\insample_capacitance_20261103T101101Z.csv",
+    "insample_mutual_inductance": "C:\\Users\\nived\\OneDrive\\Desktop\\kone\\AI_ML\\reports\\insample_mutual_inductance_20261103T101101Z.csv",
+    "lolo_validation": "C:\\Users\\nived\\OneDrive\\Desktop\\kone\\AI_ML\\reports\\lolo_validation_20261103T101101Z.csv",
+    "lolo_aggregate": "C:\\Users\\nived\\OneDrive\\Desktop\\kone\\AI_ML\\reports\\lolo_aggregate_20261103T101101Z.csv"
+  }
+}

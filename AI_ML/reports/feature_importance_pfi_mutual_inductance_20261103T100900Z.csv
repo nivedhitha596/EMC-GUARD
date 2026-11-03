@@ -1,0 +1,4 @@
+Feature,Importance_Mean,Importance_Std,Importance_Mean_Pct,Method,Target,Unit,Rank
+PairSeparation_mm,1.4633073605765727,0.185652258070366,55.82156159527779,Permutation Importance (R²-drop),AbsMutualInductance_nH,nH,1
+PairPitch_mm,0.7071704714212227,0.08548653700814804,26.976806850235025,Permutation Importance (R²-drop),AbsMutualInductance_nH,nH,2
+Overlap_mm,0.4509238607494758,0.08275219055105484,17.201631554487186,Permutation Importance (R²-drop),AbsMutualInductance_nH,nH,3

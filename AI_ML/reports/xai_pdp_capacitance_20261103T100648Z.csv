@@ -1,0 +1,14 @@
+Target,Feature,Level,PDP_Mean,PDP_Std
+TotalCapacitance_pF_per_m,PairSeparation_mm,8,38.966955395201865,9.026147672138897
+TotalCapacitance_pF_per_m,PairSeparation_mm,12,41.562164962508874,10.17863061676029
+TotalCapacitance_pF_per_m,PairSeparation_mm,16,43.53316416896351,10.999855711350365
+TotalCapacitance_pF_per_m,PairSeparation_mm,20,45.11351866183195,11.58726765582719
+TotalCapacitance_pF_per_m,PairSeparation_mm,24,46.420135454776066,12.003412631206624
+TotalCapacitance_pF_per_m,PairSeparation_mm,28,47.523551650481714,12.293708206552408
+TotalCapacitance_pF_per_m,PairPitch_mm,2,42.92435937058046,11.890721985040036
+TotalCapacitance_pF_per_m,PairPitch_mm,3,44.53889099140913,12.87806033359773
+TotalCapacitance_pF_per_m,PairPitch_mm,4,45.74525216333827,13.645592009945505
+TotalCapacitance_pF_per_m,GroundClearance_mm,10,68.5567919148576,6.417804252373451
+TotalCapacitance_pF_per_m,GroundClearance_mm,25,50.247571728584084,4.224454197096727
+TotalCapacitance_pF_per_m,GroundClearance_mm,50,40.435520099547354,2.9100452678138544
+TotalCapacitance_pF_per_m,GroundClearance_mm,100,33.45368381967622,2.040959393795978
