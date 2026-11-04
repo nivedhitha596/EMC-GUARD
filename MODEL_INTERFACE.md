@@ -122,72 +122,25 @@ For runtime scenarios where HDF5 reading is bypassed or testing surrogate robust
 
 ---
 
-## 8. ANSYS Electronics Desktop Integration Interface (Screen 8)
+## 8. System Architecture & Technology Stack
 
-### 8.1 Purpose and Workflow
-The ANSYS Integration Interface provides numerical FEA/PEEC verification for the Stage 12A analytical baseline and Stage 14A surrogate models. It supports importing exported simulation results from **ANSYS Q3D Extractor** (quasi-static capacitance matrix) and **ANSYS Maxwell 3D** (magnetostatic mutual inductance).
+The KONE EMC-GUARD platform is organized into six functional layers across eight production screens:
 
-### 8.2 Input File Format Requirements
-Uploaded simulation results must be comma-separated values (`.csv`) matching either configuration ID or geometric dimensions:
-
-#### Q3D Capacitance Import (`.csv`):
-- Required columns:
-  - `Config_ID` (e.g. `CFG_001` to `CFG_216`) **OR** geometric parameter columns:
-    - `PairSeparation_mm` (or `s_mm`), `PairPitch_mm` (or `p_mm`), `GroundClearance_mm` (or `h_mm`, `g_mm`).
-  - Target value: `Q3D_Capacitance_pF_m` (or `Capacitance_pF_m`, `C_tot_pF_m`, `C_pF_m`).
-
-#### Maxwell Inductance Import (`.csv`):
-- Required columns:
-  - `Config_ID` (e.g. `CFG_001` to `CFG_216`) **OR** geometric parameter columns:
-    - `PairSeparation_mm` (or `s_mm`), `PairPitch_mm` (or `p_mm`), `Overlap_mm` (or `o_mm`).
-  - Target value: `Maxwell_Inductance_nH` (or `Mutual_Inductance_nH`, `M12_nH`, `M_nH`, `Abs_M12_nH`).
-
-### 8.3 Matching Logic
-The verification engine correlates imported numerical results against the 216-point analytical MATLAB dataset:
-1. **Direct Configuration Key Matching:** If `Config_ID` exists in the uploaded CSV, exact uppercase string matching `CFG_xxx` links the simulation row to the corresponding benchmark configuration.
-2. **Geometric Nearest-Key Matching:** If `Config_ID` is omitted, numerical coordinates $(s, p, o, h)$ are mapped to discrete design lattice points using nearest Euclidean distance with a tolerance $\epsilon = 0.5\text{ mm}$.
-3. **Multi-Physics Synthesis:** When both Q3D and Maxwell files are imported, configurations sharing identical `Config_ID` are synthesized into a unified verification table.
-
-### 8.4 Error Quantification Formulas
-For each matched configuration $i$:
-- **Absolute Error:**
-  $$\Delta_{\text{abs}} = |y_{\text{ANSYS}, i} - y_{\text{MATLAB}, i}|$$
-- **Percentage Error (%):**
-  $$\text{Error}_{\%} = \frac{|y_{\text{ANSYS}, i} - y_{\text{MATLAB}, i}|}{y_{\text{MATLAB}, i}} \times 100\%$$
-- **Verification Thresholds:**
-  - $\text{Error} \le 5.0\%$: High Agreement (FEA matches analytical formulation).
-  - $5.0\% < \text{Error} \le 10.0\%$: Acceptable Discrepancy (within mesh and boundary approximation limits).
-  - $\text{Error} > 10.0\%$: Significant Deviation (requires mesh refinement or boundary review).
-
-### 8.5 Export Specifications
-Matched and verified datasets can be exported directly from the interface as CSV containing:
-- Geometry parameters: `Config_ID`, `PairSeparation_mm`, `PairPitch_mm`, `Overlap_mm`, `GroundClearance_mm`.
-- Analytical baseline: `MATLAB_Cap_pF_m`, `MATLAB_Mut_nH`.
-- Numerical FEA results: `ANSYS_Cap_pF_m`, `ANSYS_Mut_nH`.
-- Discrepancy analysis: `Cap_Abs_Error`, `Cap_Pct_Error`, `Mut_Abs_Error`, `Mut_Pct_Error`.
-
----
-
-## 9. System Architecture & Technology Stack
-
-The KONE EMC-GUARD platform is organized into six functional layers:
-
-1. **Input & Configuration Layer:**
-   - Parameter inputs: $s \in [8, 28]\text{ mm}$, $p \in [2, 4]\text{ mm}$, $o \in [150, 450]\text{ mm}$, $h \in [10, 100]\text{ mm}$.
-   - Data stores: 216-run analytical MATLAB baseline (`EMC_216_RUN_DATASET.csv`).
-2. **Physics Prediction Layer:**
-   - Stage 12A Frozen MATLAB model (`Stage12A_Selected_Models_FROZEN.mat` via `h5py`).
-   - Basis expansions: 94-term $B_2$ for Capacitance ($C_{tot}$), 84-term $B_1$ for Mutual Inductance ($|M_{12}|$).
-3. **AI/ML & Explainability Layer:**
-   - Stage 14A ExtraTrees surrogate regressors (`scikit-learn` / `joblib`).
-   - Model validation: Leave-One-Layout-Out (LOLO) cross-validation ($R^2 > 0.99$).
+1. **Input & Configuration Layer (Screen 2: Configuration Manager):**
+   - Parameter inputs:  \in [8, 28]\text{ mm}$,  \in [2, 4]\text{ mm}$,  \in [150, 450]\text{ mm}$,  \in [10, 100]\text{ mm}$.
+   - Authoritative data store: 216-run analytical MATLAB baseline (EMC_GUARD_Physics_Dataset_MATLAB.csv).
+2. **Physics Prediction Layer (Screen 3: EMC-PREDICT Engine):**
+   - Stage 12A Frozen MATLAB model (Stage12A_Selected_Models_FROZEN.mat via h5py).
+   - Basis expansions: 94-term $ for Capacitance ({tot}$), 84-term $ for Mutual Inductance ($|M_{12}|$).
+3. **AI/ML & Explainability Layer (Screen 7: Model Validation):**
+   - Stage 14A ExtraTrees surrogate regressors (scikit-learn / joblib).
+   - Model validation: Leave-One-Layout-Out (LOLO) cross-validation (^2 > 0.99$).
    - Interpretability: MDI feature importances, Permutation Feature Importance (PFI), Individual Conditional Expectation (ICE), Partial Dependence Plots (PDP), One-At-A-Time (OAT) sensitivity sweeps.
-4. **EMC Risk & Optimization Layer:**
+4. **EMC Risk & Optimization Layer (Screen 5 & 6: EMC-GUARD Assessment & Comparison):**
    - Relative EMC coupling scores: Capacitive index, Inductive index, Combined composite risk score.
-   - Multi-objective Pareto optimization: Non-dominated sorting across capacitance minimization, mutual inductance minimization, and spatial footprint.
-5. **Digital Twin & Engineering Verification Layer:**
-   - 3D interactive cable geometry visualization (`plotly.graph_objects`).
-   - ANSYS Electronics Desktop (Q3D Extractor & Maxwell 3D) CSV numerical verification workflow.
-6. **Reporting & Regulatory Export Layer:**
+   - Multi-objective Pareto optimization: Non-dominated sorting across capacitance minimization, mutual inductance minimization, and spatial footprint (identifying 6 non-dominated candidates).
+5. **Digital Twin Geometry Layer (Screen 4: Digital Twin Geometry):**
+   - 3D interactive cable geometry visualization (plotly.graph_objects) and 2D cross-section spatial rendering.
+6. **Reporting & Technical Export Layer (Screen 8: Report Generation):**
    - Complete technical configuration summary and risk report generation.
    - Comprehensive CSV / PDF specification exports with reproducible timestamps and parameter tracking.

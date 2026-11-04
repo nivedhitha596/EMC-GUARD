@@ -95,8 +95,7 @@ Secondary: Stage 14A ExtraTrees surrogates (400 estimators, natural-log target t
    - *Tab 2 (Intelligent Pareto Optimisation)*: Interactive multi-objective Pareto front scatter plot, 6 non-dominated candidate cards, recommended champions (Balanced, Min Capacitance, Min Mutual Inductance), and Pareto dataset CSV export.
 6. **Configuration Comparison** — Multi-configuration comparison with automated Pareto trade-off and dominance evaluation.
 7. **Model Validation & Explainable AI** — Actual MATLAB validation evidence (P-vs-A, residual histograms, LOLO CV with physical boundary explanations) plus XAI Feature Importance (MDI & PFI) and OAT dynamic sensitivity ranges.
-8. **ANSYS Integration** — Prepared numerical verification interface (pending Maxwell / Q3D simulation data; no fabricated connections).
-9. **Report Generation & Data Packages** — Downloadable PDF engineering summary, direct technical report downloads (Stage 2 XAI, Stage 3 Risk, Stage 4 Optimisation), and exported CSV dataset packages.
+8. **Report Generation & Data Packages** — Downloadable PDF engineering summary, direct technical report downloads (Stage 2 XAI, Stage 3 Risk, Stage 4 Optimisation), and exported CSV dataset packages.
 
 ---
 
